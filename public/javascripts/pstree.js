@@ -102,6 +102,8 @@ function updateProcess(psItem, fname, indent) {
 }
 
 var resizeWindow = function () {
+    var doResize = false;
+
     // Resize the layout to the size of the window.
     $("#layout")
         .width($(window).width())
@@ -109,12 +111,24 @@ var resizeWindow = function () {
 
     // Change the size properties of the grid so that it fits inside the layout.
     var jqGrid = $("#grid");
-    $(w2ui.layout.el("main")).append(jqGrid);
-    jqGrid
-        .width($(w2ui.layout.el("main")).width())
-        .height($(w2ui.layout.el("main")).height());
-    grid.resizeCanvas();
-    grid.autosizeColumns();
+
+    if (!jqGrid.parent().is($(w2ui.layout.el("main"))))
+        $(w2ui.layout.el("main")).append(jqGrid);
+
+    if (jqGrid.width() != $(w2ui.layout.el("main")).width()) {
+        jqGrid.width($(w2ui.layout.el("main")).width());
+        doResize = true;
+    }
+
+    if (jqGrid.height() != $(w2ui.layout.el("main")).height()) {
+        jqGrid.height($(w2ui.layout.el("main")).height());
+        doResize = true;
+    }
+
+    if (doResize) {
+        grid.resizeCanvas();
+        grid.autosizeColumns();
+    }
 };
 
 var globalProcessUpdate = function () {
