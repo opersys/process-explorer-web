@@ -1,0 +1,275 @@
+"use strict";
+
+var dataView, grid,
+    // Process models layed out in a tree structure,
+    psTree,
+    // ProcessColl object, collection of all process.
+    ps = new ProcessColl();
+
+var processFormatter = function (row, cell, value, columnDef, dataContext) {
+    var spacer = "<span style='display: inline-block; height: 1px; width: " + (15 * dataContext["indent"]) + "px'></span>";
+    var idx = dataView.getIdxById(dataContext.id);
+    var psItem;
+
+    psItem = ps.get(dataContext.id);
+
+    if (psItem && _.size(psItem.get("children")) > 0) {
+        if (dataContext._collapsed)
+            return spacer + " <span class='toggle expand'></span>&nbsp;" + value;
+        else
+            return spacer + " <span class='toggle collapse'></span>&nbsp;" + value;
+    } else
+        return spacer + " <span class='toggle'></span>&nbsp;" + value;
+};
+
+var treeFilter = function (item) {
+    if (item.parent != null) {
+        var parent = dataView.getItemById(item.parent);
+
+        while (parent) {
+            if (parent._collapsed)
+                return false;
+
+            parent = dataView.getItemById(parent.parent);
+        }
+    }
+
+    return true;
+};
+
+// Clear the data view and reinsert all process. This is necessary when a new
+// process is added.
+function updateAllProcess() {
+    var item;
+    var iin = [], iout = [];
+    var states = {};
+    var psItem, p;
+
+    // Flatten the list of items to add to the tree.
+    iin.push({ pid: 0, indent: 0 });
+
+    while (iin.length > 0) {
+        p = iin.shift();
+        psItem = ps.get(p.pid);
+
+        if (!psItem) continue;
+
+        iout.push(p);
+
+        var childPids = _.map(_.keys(psItem.get("children")).sort(),
+            function (pid) {
+                return {pid: pid, indent: p.indent + 1};
+            }
+        );
+
+        iin = childPids.concat(iin);
+    }
+
+    dataView.beginUpdate();
+
+    // Delete the items but save their transient states.
+    for (var i = 0; i < dataView.getLength(); i++)  {
+        var dataItem = dataView.getItem(i);
+
+        states[dataItem.id] = {
+            _collapsed: dataItem._collapsed
+        };
+
+        dataView.deleteItem(dataView.getItem(i).id);
+    }
+
+    while (iout.length > 0) {
+        p = iout.shift();
+        psItem = ps.get(p.pid);
+
+        dataView.addItem({
+            id: psItem.get("pid"),
+            name: psItem.get("name"),
+            vss: psItem.get("vss"),
+            rss: psItem.get("rss"),
+            indent: p.indent,
+            parent: psItem.get("ppid") == 0 ? null : psItem.get("ppid"),
+            _collapsed: states[psItem.get("pid")] ? states[psItem.get("pid")]._collapsed : false
+        });
+    }
+
+    dataView.endUpdate();
+
+    resizeWindow();
+}
+
+// Update a single process item.
+function updateProcess(psItem, fname, indent) {
+    // Highlight the item that is being updated.
+}
+
+var resizeWindow = function () {
+    // Resize the layout to the size of the window.
+    $("#layout")
+        .width($(window).width())
+        .height($(window).height());
+
+    // Change the size properties of the grid so that it fits inside the layout.
+    var jqGrid = $("#grid");
+    $(w2ui.layout.el("main")).append(jqGrid);
+    jqGrid
+        .width($(w2ui.layout.el("main")).width())
+        .height($(w2ui.layout.el("main")).height());
+    grid.resizeCanvas(); grid.autosizeColumns();
+};
+
+var globalProcessUpdate = function () {
+    // Clear the process tree.
+    psTree = {};
+
+    ps.fetch({success: function () {
+        console.log("Process list update.")
+
+        // Scan the dataview for process that are no longer in the collection
+        var dataItems = dataView.getItems();
+
+        for (var i = 0; i < dataItems.length; i++) {
+            if (dataItems[i].id == 0)
+                continue;
+
+            if (!ps.get(dataItems[i].id)) {
+                console.log("Removing process " + dataItems[i].id);
+                dataView.deleteItem(dataItems[i].id);
+            }
+        }
+
+        // Calculate the process tree
+        ps.each(function (e) {
+
+            // Process tree calculation.
+            if (e.get("pid") == 0)
+                psTree[0] = e;
+
+            else if (e.get("ppid") != undefined) {
+                var ppsItem = ps.get(e.get("ppid"));
+                var ppsItemCh = ppsItem.get("children");
+                ppsItemCh[e.get("pid")] = e;
+                ppsItem.set("children", ppsItemCh);
+            }
+        });
+
+        updateAllProcess();
+    }});
+};
+
+var initGrid = function () {
+    var columns = [
+        { id: "pid", name: "PID", field: "id", formatter: processFormatter },
+        { id: "name", name: "Name", field: "name" },
+        { id: "vss", name: "VSS", field: "vss" },
+        { id: "rss", name: "RSS", field: "rss" },
+        { id: "track", name: "Track" },
+        { id: "graph", name: "Graphs" }
+    ];
+
+    var options = {
+        enableColumnReorder: false
+    };
+
+    grid = new Slick.Grid("#grid", dataView, columns, options);
+
+    grid.onClick.subscribe(function (e, args) {
+        var item = dataView.getItem(args.row);
+        var pid = item.id;
+
+        if ($(e.target).hasClass("toggle")) {
+            dataView.whenReady(function () {
+                var item = this.getItemById(pid);
+
+                if (!item) return;
+
+                if (!item._collapsed)
+                    item._collapsed = true;
+                else
+                    item._collapsed = false;
+
+                this.updateItem(pid, item);
+            });
+
+            //e.stopImmediatePropagation();
+        }
+    });
+};
+
+var initDataView = function () {
+    dataView = new Slick.Data.DataView({ inlineFilters: false });
+
+    dataView.onRowCountChanged.subscribe(function (e, args) {
+        grid.updateRowCount();
+        grid.render();
+    });
+
+    dataView.onRowsChanged.subscribe(function (e, args) {
+        grid.invalidateRows(args.rows);
+        grid.render();
+    });
+
+    // Override the dataView beginUpdate/endUpdate
+    var oldBeginUpdate = dataView.beginUpdate;
+    var oldEndUpdate = dataView.endUpdate;
+
+    dataView.beginUpdate = function () {
+        oldBeginUpdate();
+    };
+
+    dataView.endUpdate = function () {
+        oldEndUpdate();
+        this.runWhenReady();
+    };
+
+    dataView.whenReady = function (cb) {
+        if (!this._queue)
+            this._queue = new Queue();
+
+        this._queue.enqueue(cb);
+
+        if (!this.suspend)
+            this.runWhenReady();
+    };
+
+    dataView.runWhenReady = function () {
+        if (!this._queue)
+            return;
+
+        while (!this._queue.isEmpty())
+            this._queue.dequeue().call(this);
+    };
+
+    dataView.setFilter(treeFilter);
+
+    // Listen to changes on the model to update the grid.
+    ps.on("change:vss", function (psItem) { updateProcess(psItem, "vss"); });
+    ps.on("change:rss", function (psItem) { updateProcess(psItem, "rss"); });
+    ps.on("change:name", function (psItem) { updateProcess(psItem, "name"); });
+};
+
+$(document).ready(function () {
+    initDataView();
+    initGrid();
+
+    // Generate the main layout
+    $("#layout").w2layout({
+        name: "layout",
+        panels: [
+            { type: "top", size: 60, content: "TOP BAR" },
+            { type: "left", size: 40, content: "LEFT BAR" },
+            { type: "main" }
+        ]
+    });
+
+    $(window).resize(resizeWindow);
+
+    // Update the process list right now.
+    globalProcessUpdate();
+
+    // The process collection updates every 5 seconds.
+    window.setInterval(globalProcessUpdate, 5000);
+
+    // Reformat the window content.
+    resizeWindow();
+});
