@@ -67,16 +67,14 @@ function updateAllProcess() {
 
     dataView.beginUpdate();
 
-    // Delete the items but save their transient states.
-    for (var i = 0; i < dataView.getLength(); i++)  {
-        var dataItem = dataView.getItem(i);
-
-        states[dataItem.id] = {
-            _collapsed: dataItem._collapsed
+    // Save the item transient states before clearing the array..
+    for (var i = 0; i < dataView.getItems().length; i++)  {
+        states[dataView.getItems()[i].id] = {
+            _collapsed: dataView.getItems()[i]._collapsed
         };
-
-        dataView.deleteItem(dataView.getItem(i).id);
     }
+
+    dataView.getItems().length = 0;
 
     while (iout.length > 0) {
         p = iout.shift();
@@ -115,7 +113,8 @@ var resizeWindow = function () {
     jqGrid
         .width($(w2ui.layout.el("main")).width())
         .height($(w2ui.layout.el("main")).height());
-    grid.resizeCanvas(); grid.autosizeColumns();
+    grid.resizeCanvas();
+    grid.autosizeColumns();
 };
 
 var globalProcessUpdate = function () {
@@ -178,21 +177,19 @@ var initGrid = function () {
         var pid = item.id;
 
         if ($(e.target).hasClass("toggle")) {
-            dataView.whenReady(function () {
-                var item = this.getItemById(pid);
+            var item = dataView.getItemById(pid);
 
-                if (!item) return;
+            if (!item) return;
 
-                if (!item._collapsed)
-                    item._collapsed = true;
-                else
-                    item._collapsed = false;
+            if (!item._collapsed)
+                item._collapsed = true;
+            else
+                item._collapsed = false;
 
-                this.updateItem(pid, item);
-            });
-
-            //e.stopImmediatePropagation();
+            dataView.updateItem(pid, item);
         }
+
+        e.stopImmediatePropagation();
     });
 };
 
@@ -208,37 +205,6 @@ var initDataView = function () {
         grid.invalidateRows(args.rows);
         grid.render();
     });
-
-    // Override the dataView beginUpdate/endUpdate
-    var oldBeginUpdate = dataView.beginUpdate;
-    var oldEndUpdate = dataView.endUpdate;
-
-    dataView.beginUpdate = function () {
-        oldBeginUpdate();
-    };
-
-    dataView.endUpdate = function () {
-        oldEndUpdate();
-        this.runWhenReady();
-    };
-
-    dataView.whenReady = function (cb) {
-        if (!this._queue)
-            this._queue = new Queue();
-
-        this._queue.enqueue(cb);
-
-        if (!this.suspend)
-            this.runWhenReady();
-    };
-
-    dataView.runWhenReady = function () {
-        if (!this._queue)
-            return;
-
-        while (!this._queue.isEmpty())
-            this._queue.dequeue().call(this);
-    };
 
     dataView.setFilter(treeFilter);
 
