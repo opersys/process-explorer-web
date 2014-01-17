@@ -83,8 +83,8 @@ function updateAllProcess() {
         dataView.addItem({
             id: psItem.get("pid"),
             name: psItem.get("name"),
-            vss: psItem.get("vss"),
-            rss: psItem.get("rss"),
+            vss: Humanize.filesizeformat(psItem.get("vss")),
+            rss: Humanize.filesizeformat(psItem.get("rss")),
             indent: p.indent,
             parent: psItem.get("ppid") == 0 ? null : psItem.get("ppid"),
             _collapsed: states[psItem.get("pid")] ? states[psItem.get("pid")]._collapsed : false
@@ -101,7 +101,11 @@ function updateProcess(psItem, fname) {
     var colIdx, rowIdx;
     var dataItem = dataView.getItemById(psItem.get("pid"));
 
-    dataItem[fname] = psItem.get(fname);
+    if (fname == "vss" || fname == "rss")
+        dataItem[fname] = Humanize.filesizeformat(psItem.get(fname));
+    else
+        dataItem[fname] = psItem.get(fname);
+
     dataView.updateItem(psItem.get("pid"), dataItem);
 
     colIdx = grid.getColumnIndex(fname);
