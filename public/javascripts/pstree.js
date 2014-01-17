@@ -97,8 +97,17 @@ function updateAllProcess() {
 }
 
 // Update a single process item.
-function updateProcess(psItem, fname, indent) {
-    // Highlight the item that is being updated.
+function updateProcess(psItem, fname) {
+    var colIdx, rowIdx;
+    var dataItem = dataView.getItemById(psItem.get("pid"));
+
+    dataItem[fname] = psItem.get(fname);
+    dataView.updateItem(psItem.get("pid"), dataItem);
+
+    colIdx = grid.getColumnIndex(fname);
+    rowIdx = dataView.getRowById(psItem.get("pid"));
+
+    grid.flashCell(rowIdx, colIdx, 750);
 }
 
 var resizeWindow = function () {
