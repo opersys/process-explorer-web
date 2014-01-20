@@ -1,4 +1,4 @@
-var pswalk = require('../build/Release/pswalk');
+var pswalk = require('../build/Debug/pswalk');
 var util = require('util');
 
 exports.pstree = function(req, res) {
