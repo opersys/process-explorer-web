@@ -2,19 +2,19 @@ var sysinfo = require('../build/Debug/pswalk');
 var util = require('util');
 
 exports.sysinfo = function(req, res) {
-    var sysinfo = { ps: [] };
+    var info = { ps: [] };
 
-    sysinfo.cpuinfo = psinfo.cpuinfo();
+    info.cpuinfo = sysinfo.cpuinfo();
 
-    s.push({
+    info.ps.push({
         pid: 0,
         parent: "#",
         name: "Kernel"
     });
 
     sysinfo.pswalk(function (procdata) {
-        s.push(procdata);
+        info.ps.push(procdata);
     });
 
-    res.json(psinfo);
+    res.json(info);
 };

@@ -4,7 +4,9 @@ var dataView, grid,
     // Process models layed out in a tree structure,
     psTree,
     // ProcessColl object, collection of all process.
-    ps = new ProcessColl();
+    ps = new ProcessColl(),
+    // CPU Info
+    newCpuInfo, oldCpuInfo;
 
 var processFormatter = function (row, cell, value, columnDef, dataContext) {
     var spacer = "<span style='display: inline-block; height: 1px; width: " + (15 * dataContext["indent"]) + "px'></span>";
@@ -148,8 +150,31 @@ var globalProcessUpdate = function () {
     // Clear the process tree.
     psTree = {};
 
-    ps.fetch({success: function () {
+    $.ajax("/sysinfo").done(function (sysinfo) {
+        var totalDeltaTime;
+
         console.log("Process list update.")
+
+        newCpuInfo = new CpuInfo(sysinfo.cpuinfo);
+
+        if (oldCpuInfo) {
+            totalDeltaTime =
+                (newCpuInfo.get("utime") + newCpuInfo.get("ntime") + newCpuInfo.get("stime") + newCpuInfo.get("itime")
+                + newCpuInfo.get("iowtime") + newCpuInfo.get("irqtime") + newCpuInfo.get("sirqtime"))
+                - (oldCpuInfo.get("utime") + oldCpuInfo.get("ntime") + oldCpuInfo.get("stime") + oldCpuInfo.get("itime")
+                + oldCpuInfo.get("iowtime") + oldCpuInfo.get("irqtime") + oldCpuInfo.get("sirqtime"));
+
+            console.log(((newCpuInfo.get("utime") + newCpuInfo.get("ntime"))
+                - (oldCpuInfo.get("utime") + oldCpuInfo.get("ntime"))) * 100  / totalDeltaTime);
+            console.log((newCpuInfo.get("stime") - newCpuInfo.get("stime")) * 100 / totalDeltaTime);
+            console.log((newCpuInfo.get("iowtime") - oldCpuInfo.get("iowtime")) * 100 / totalDeltaTime);
+            console.log(((newCpuInfo.get("irqtime") + newCpuInfo.get("sirqtime")) - (oldCpuInfo.get("irqtime") + oldCpuInfo.get("sirqtime"))) * 100 / totalDeltaTime);
+        }
+
+        oldCpuInfo = newCpuInfo;
+
+        for (var i = 0; i < sysinfo.ps.length; i++)
+            ps.add(new Process(sysinfo.ps[i]))
 
         // Scan the dataview for process that are no longer in the collection
         var dataItems = dataView.getItems();
@@ -166,7 +191,6 @@ var globalProcessUpdate = function () {
 
         // Calculate the process tree
         ps.each(function (e) {
-
             // Process tree calculation.
             if (e.get("pid") == 0)
                 psTree[0] = e;
@@ -180,7 +204,7 @@ var globalProcessUpdate = function () {
         });
 
         updateAllProcess();
-    }});
+    });
 };
 
 var initGrid = function () {
