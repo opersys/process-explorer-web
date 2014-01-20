@@ -50,6 +50,8 @@ int num_used_procs, num_free_procs;
 extern "C" {
 #endif
 
+int cpu_info(const char **err);
+
 int read_procs(const char **err);
 
 #ifdef __cplusplus

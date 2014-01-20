@@ -128,6 +128,23 @@ int read_status(char *filename, struct proc_info *proc) {
     return 1;
 }
 
+int cpu_info(const char **err) {
+    FILE *file;
+
+    file = fopen("/proc/stat", "r");
+
+    if (!file) {
+        *err = "Failed to open process stat file";
+        return 0;
+    }
+
+    fscanf(file, "cpu  %lu %lu %lu %lu %lu %lu %lu", &cpu.utime, &cpu.ntime, &cpu.stime,
+           &cpu.itime, &cpu.iowtime, &cpu.irqtime, &cpu.sirqtime);
+    fclose(file);
+
+    return 1;
+}
+
 /**
  * Returns 1 on success, 0 otherwise. *err is set to an error string when return is 0.
  */
@@ -135,7 +152,6 @@ int read_procs(const char **err) {
     DIR *proc_dir, *task_dir;
     struct dirent *pid_dir, *tid_dir;
     char filename[64];
-    FILE *file;
     int proc_num;
     struct proc_info *proc;
     pid_t pid, tid;
@@ -150,16 +166,7 @@ int read_procs(const char **err) {
     procs = (struct proc_info **)calloc(INIT_PROCS * (threads ? THREAD_MULT : 1), sizeof(struct proc_info *));
     num_procs = INIT_PROCS * (threads ? THREAD_MULT : 1);
 
-    file = fopen("/proc/stat", "r");
-
-    if (!file) {
-        *err = "Failed to open process stat file";
-        return 0;
-    }
-
-    fscanf(file, "cpu  %lu %lu %lu %lu %lu %lu %lu", &cpu.utime, &cpu.ntime, &cpu.stime,
-           &cpu.itime, &cpu.iowtime, &cpu.irqtime, &cpu.sirqtime);
-    fclose(file);
+    if (!cpu_info(err)) return 0;
 
     proc_num = 0;
     while ((pid_dir = readdir(proc_dir))) {
