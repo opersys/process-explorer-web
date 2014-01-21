@@ -4,9 +4,9 @@ var dataView, grid,
     // Process models layed out in a tree structure,
     psTree,
     // ProcessColl object, collection of all process.
-    ps = new ProcessColl(),
+    ps = new ProcessCollection(), oldPs,
     // CPU Info
-    newCpuInfo, oldCpuInfo;
+    sysCpu = new SystemCpuInfo();
 
 var processFormatter = function (row, cell, value, columnDef, dataContext) {
     var spacer = "<span style='display: inline-block; height: 1px; width: " + (15 * dataContext["indent"]) + "px'></span>";
@@ -85,6 +85,7 @@ function updateAllProcess() {
         dataView.addItem({
             id: psItem.get("pid"),
             name: psItem.get("name"),
+            pct: psItem.get("pct"),
             vss: Humanize.filesizeformat(psItem.get("vss")),
             rss: Humanize.filesizeformat(psItem.get("rss")),
             indent: p.indent,
@@ -102,6 +103,8 @@ function updateAllProcess() {
 function updateProcess(psItem, fname) {
     var colIdx, rowIdx;
     var dataItem = dataView.getItemById(psItem.get("pid"));
+
+    if (!dataItem) return;
 
     if (fname == "vss" || fname == "rss")
         dataItem[fname] = Humanize.filesizeformat(psItem.get(fname));
@@ -153,28 +156,21 @@ var globalProcessUpdate = function () {
     $.ajax("/sysinfo").done(function (sysinfo) {
         var totalDeltaTime;
 
-        console.log("Process list update.")
+        console.log("Process list update.");
 
-        newCpuInfo = new CpuInfo(sysinfo.cpuinfo);
+        sysCpu.set(sysinfo.cpuinfo);
 
-        if (oldCpuInfo) {
-            totalDeltaTime =
-                (newCpuInfo.get("utime") + newCpuInfo.get("ntime") + newCpuInfo.get("stime") + newCpuInfo.get("itime")
-                + newCpuInfo.get("iowtime") + newCpuInfo.get("irqtime") + newCpuInfo.get("sirqtime"))
-                - (oldCpuInfo.get("utime") + oldCpuInfo.get("ntime") + oldCpuInfo.get("stime") + oldCpuInfo.get("itime")
-                + oldCpuInfo.get("iowtime") + oldCpuInfo.get("irqtime") + oldCpuInfo.get("sirqtime"));
+        for (var i = 0; i < sysinfo.ps.length; i++) {
+            var proc = ps.get(sysinfo.ps[i].pid);
 
-            console.log(((newCpuInfo.get("utime") + newCpuInfo.get("ntime"))
-                - (oldCpuInfo.get("utime") + oldCpuInfo.get("ntime"))) * 100  / totalDeltaTime);
-            console.log((newCpuInfo.get("stime") - newCpuInfo.get("stime")) * 100 / totalDeltaTime);
-            console.log((newCpuInfo.get("iowtime") - oldCpuInfo.get("iowtime")) * 100 / totalDeltaTime);
-            console.log(((newCpuInfo.get("irqtime") + newCpuInfo.get("sirqtime")) - (oldCpuInfo.get("irqtime") + oldCpuInfo.get("sirqtime"))) * 100 / totalDeltaTime);
+            if (!proc) {
+                proc = new Process(sysinfo.ps[i]);
+                ps.add(proc);
+            } else
+                proc.set(sysinfo.ps[i]);
+
+            proc.updatePct(sysCpu.get("totalDeltaTime"));
         }
-
-        oldCpuInfo = newCpuInfo;
-
-        for (var i = 0; i < sysinfo.ps.length; i++)
-            ps.add(new Process(sysinfo.ps[i]))
 
         // Scan the dataview for process that are no longer in the collection
         var dataItems = dataView.getItems();
@@ -199,7 +195,7 @@ var globalProcessUpdate = function () {
                 var ppsItem = ps.get(e.get("ppid"));
                 var ppsItemCh = ppsItem.get("children");
                 ppsItemCh[e.get("pid")] = e;
-                ppsItem.set("children", ppsItemCh);
+                ppsItem.set({"children": ppsItemCh});
             }
         });
 
@@ -211,6 +207,7 @@ var initGrid = function () {
     var columns = [
         { id: "pid", name: "PID", field: "id", formatter: processFormatter },
         { id: "name", name: "Name", field: "name" },
+        { id: "pct", name: "%", field: "pct"},
         { id: "vss", name: "VSS", field: "vss" },
         { id: "rss", name: "RSS", field: "rss" },
         { id: "track", name: "Track" },
@@ -263,6 +260,14 @@ var initDataView = function () {
     ps.on("change:vss", function (psItem) { updateProcess(psItem, "vss"); });
     ps.on("change:rss", function (psItem) { updateProcess(psItem, "rss"); });
     ps.on("change:name", function (psItem) { updateProcess(psItem, "name"); });
+    ps.on("change:pct", function (psItem) { updateProcess(psItem, "pct"); });
+
+    sysCpu.on("change", function (cpuinfo) {
+        console.log(cpuinfo.get("userPct"));
+        console.log(cpuinfo.get("sysPct"));
+        console.log(cpuinfo.get("iowPct"));
+        console.log(cpuinfo.get("irqPct"));
+    });
 };
 
 $(document).ready(function () {
