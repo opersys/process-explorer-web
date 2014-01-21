@@ -1,7 +1,12 @@
 var Process = Backbone.Model.extend({
     initialize: function () {
-        this.set("children", {});
-        this.set("indent", 0);
+        // Properties specific to the view.
+        this.set("ui-children", {});
+        this.set("ui-indent", 0);
+        this.set("ui-row", 0);
+        this.set("ui-collapsed", false);
+
+        // Calculated property.
         this.set("pct", 0);
     },
     idAttribute: "pid",
@@ -24,7 +29,8 @@ var Process = Backbone.Model.extend({
         Backbone.Model.prototype.set.apply(this, arguments);
     },
     updatePct: function (totalDeltaTime) {
-        this.set("pct", this.get("deltaTime") / totalDeltaTime * 100);
+        if (this.get("totalDeltaTime"))
+            this.set("pct", this.get("deltaTime") / totalDeltaTime * 100);
     }
 });
 
@@ -44,6 +50,7 @@ var SystemCpuInfo = Backbone.Model.extend({
     }
 });
 
-var ProcessCollection = Backbone.Collection.extend({
-    model: Process
+var ProcessCollection = Slickback.Collection.extend({
+    model: Process,
+    comparator: "ui-row"
 });
