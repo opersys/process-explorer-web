@@ -52,5 +52,39 @@ var SystemCpuInfo = Backbone.Model.extend({
 
 var ProcessCollection = Slickback.Collection.extend({
     model: Process,
-    comparator: "ui-row"
+    url: "/sysinfo",
+    comparator: "ui-row",
+
+    getItem: function (n) {
+        return this._rows[n];
+    },
+    getLength: function () {
+        return this._rows.length;
+    },
+    reindex: function () {
+        this._rows = [];
+
+        // Iterate through the collection depth first to attribute row numbers
+        var e, r = 0, iin = [this.get(0)];
+
+        while ((e = iin.shift())) {
+            if (!e.get("ui-collapsed"))
+                iin = _.values(e.get("ui-children")).concat(iin);
+
+            e.set("ui-row", r++);
+            this._rows.push(e);
+        }
+
+        this.onRowCountChanged.notify();
+        this.onRowsChanged.notify();
+    },
+    constructor: function () {
+        Backbone.Collection.apply(this, arguments);
+
+        this.reindex();
+
+        this.on("add", this.reindex);
+        this.on("remove", this.reindex);
+        this.on("change:ui-collapsed", this.reindex);
+    }
 });

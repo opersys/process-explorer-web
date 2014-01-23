@@ -1,10 +1,8 @@
 "use strict";
 
 var dataView, grid,
-    // Process models layed out in a tree structure,
-    psTree,
-    // ProcessColl object, collection of all process.
-    ps = new ProcessCollection(), oldPs,
+    // ProcessCollection object, collection of all process.
+    ps = new ProcessCollection(),
     // CPU Info
     sysCpu = new SystemCpuInfo();
 
@@ -26,21 +24,6 @@ var memoryFormatter = function (row, cell, value, columnDef, proc) {
 
 var percentFormatter = function (row, cell, value, columnDef, proc) {
     return Slick.Formatters.PercentCompleteBar(row, cell, proc.get(columnDef.field), proc);
-};
-
-var treeFilter = function (item) {
-    if (item.parent != null) {
-        var parent = dataView.getItemById(item.parent);
-
-        while (parent) {
-            if (parent._collapsed)
-                return false;
-
-            parent = dataView.getItemById(parent.parent);
-        }
-    }
-
-    return true;
 };
 
 // Update a single process item.
@@ -125,21 +108,12 @@ var globalProcessUpdate = function () {
 
                 // Set the indent and the order of the current process in the
                 // tree view.
-                e.set({"ui-indent": ppsItem.get("ui-indent") +  1});
+                e.set({
+                    "ui-indent": ppsItem.get("ui-indent") +  1,
+                    "ui-parent": ppsItem
+                });
             }
         });
-
-        // Iterate through the collection depth first to attribute row numbers
-        var e, r = 0, iin = [ps.get(0)];
-
-        while ((e = iin.shift())) {
-            e.set("ui-row", r++);
-            iin = _.values(e.get("ui-children")).concat(iin);
-        }
-
-        // Usually a collection would sort itself but I think Slickback is
-        // isn't cooperating well with this for some reason.
-        ps.sort();
 
         resizeWindow();
     });
@@ -152,8 +126,6 @@ var initGrid = function () {
         { id: "pct", name: "%", field: "pct", formatter: percentFormatter },
         { id: "vss", name: "VSS", field: "vss", formatter: memoryFormatter },
         { id: "rss", name: "RSS", field: "rss", formatter: memoryFormatter  },
-        { id: "track", name: "Track" },
-        { id: "graph", name: "Graphs" }
     ];
 
     var options = {
@@ -164,20 +136,13 @@ var initGrid = function () {
     grid = new Slick.Grid("#grid", ps, columns, options);
 
     grid.onClick.subscribe(function (e, args) {
-        var item = dataView.getItem(args.row);
-        var pid = item.id;
+        var proc = grid.getDataItem(args.row);
 
         if ($(e.target).hasClass("toggle")) {
-            var item = dataView.getItemById(pid);
-
-            if (!item) return;
-
-            if (!item._collapsed)
-                item._collapsed = true;
+            if (!proc.get("ui-collapsed"))
+                proc.set({"ui-collapsed": true});
             else
-                item._collapsed = false;
-
-            dataView.updateItem(pid, item);
+                proc.set({"ui-collapsed": false});
         }
 
         e.stopImmediatePropagation();
@@ -185,15 +150,18 @@ var initGrid = function () {
 
     ps.onRowCountChanged.subscribe(function () {
         grid.updateRowCount();
-        ps.sort();
         grid.render();
+
+        resizeWindow();
     });
 
     ps.onRowsChanged.subscribe(function () {
         grid.invalidateAllRows();
-        ps.sort();
         grid.render();
+
+        resizeWindow();
     });
+
 };
 
 $(document).ready(function () {
