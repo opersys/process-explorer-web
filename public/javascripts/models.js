@@ -34,7 +34,9 @@ var Process = Backbone.Model.extend({
     }
 });
 
-var SystemCpuInfo = Backbone.Model.extend({
+var CpuInfo = Backbone.Model.extend({
+    idAttribute: "no",
+
     set: function (n, options) {
         var o = this.attributes;
         n.totalDeltaTime =
@@ -50,9 +52,14 @@ var SystemCpuInfo = Backbone.Model.extend({
     }
 });
 
+var CpuInfoCollection = Backbone.Collection.extend({
+    model: CpuInfo,
+    url: "/sysinfo" // NOT USED
+});
+
 var ProcessCollection = Slickback.Collection.extend({
     model: Process,
-    url: "/sysinfo",
+    url: "/sysinfo", // NOT USED
     comparator: "ui-row",
 
     getItem: function (n) {

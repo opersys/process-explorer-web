@@ -10,8 +10,17 @@
 #define MAX_LINE 256
 
 struct cpu_info {
-    long unsigned utime, ntime, stime, itime;
-    long unsigned iowtime, irqtime, sirqtime;
+	// CPU number (-1 for global info)
+	int no;
+
+	// CPU system data.
+    long unsigned utime;
+    long unsigned ntime;
+    long unsigned stime;
+    long unsigned itime;
+    long unsigned iowtime;
+    long unsigned irqtime;
+    long unsigned sirqtime;
 };
 
 struct proc_info {
@@ -39,7 +48,15 @@ struct proc_info {
     char policy[POLICY_NAME_LEN];
 };
 
-struct cpu_info cpu;
+// Global CPU state.
+struct cpu_info global_cpu;
+
+// Array of CPU info from /proc/stat
+struct cpu_info* cpu;
+
+// Number of CPUs on the system
+int nb_cpu;
+
 int max_procs, delay, iterations, threads;
 struct proc_info **procs;
 int num_procs;

@@ -3,8 +3,10 @@
 var dataView, grid,
     // ProcessCollection object, collection of all process.
     ps = new ProcessCollection(),
-    // CPU Info
-    sysCpu = new SystemCpuInfo();
+    // Global CPU Info
+    globalCpu = new CpuInfo(),
+    // Individual CPU info
+    cpuInfo = new CpuInfoCollection();
 
 var pidFormatter = function (row, cell, value, columnDef, proc) {
     var spacer = "<span style='display: inline-block; height: 1px; width: " + (15 * proc.get("ui-indent")) + "px'></span>";
@@ -82,7 +84,10 @@ var globalProcessUpdate = function () {
 
         console.log("Process list update.");
 
-        sysCpu.set(sysinfo.cpuinfo);
+        globalCpu.set(sysinfo.cpuinfo.global);
+
+        for (var i = 0; i < sysinfo.cpuinfo.cpus.length; i++)
+            cpuInfo.set(sysinfo.cpuinfo.cpus[i], {remove: false});
 
         for (var i = 0; i < sysinfo.ps.length; i++) {
             var proc = ps.get(sysinfo.ps[i].pid);
@@ -93,7 +98,7 @@ var globalProcessUpdate = function () {
             } else
                 proc.set(sysinfo.ps[i]);
 
-            proc.updatePct(sysCpu.get("totalDeltaTime"));
+            proc.updatePct(globalCpu.get("totalDeltaTime"));
         }
 
         // Calculate the process tree
