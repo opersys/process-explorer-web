@@ -5,22 +5,44 @@
 using namespace v8;
 
 Handle<Value> CpuInfo(const Arguments& args) {
-	Handle<Object> obj;
+	Handle<Object> jcpuinfo, jgcpu, jcpus;
 	const char *err;
 
 	if (!cpu_info(&err))
 		ThrowException(Exception::TypeError(String::New(err)));
 
-	obj = Object::New();
-	obj->Set(String::NewSymbol("utime"), Local<Value>::New(Uint32::New(cpu.utime)));
-	obj->Set(String::NewSymbol("ntime"), Local<Value>::New(Uint32::New(cpu.ntime)));
-	obj->Set(String::NewSymbol("stime"), Local<Value>::New(Uint32::New(cpu.stime)));
-	obj->Set(String::NewSymbol("itime"), Local<Value>::New(Uint32::New(cpu.itime)));
-	obj->Set(String::NewSymbol("iowtime"), Local<Value>::New(Uint32::New(cpu.iowtime)));
-	obj->Set(String::NewSymbol("irqtime"), Local<Value>::New(Uint32::New(cpu.irqtime)));
-	obj->Set(String::NewSymbol("sirqtime"), Local<Value>::New(Uint32::New(cpu.sirqtime)));
+	jgcpu = Object::New();
+	jgcpu->Set(String::NewSymbol("utime"), Local<Value>::New(Uint32::New(global_cpu.utime)));
+	jgcpu->Set(String::NewSymbol("ntime"), Local<Value>::New(Uint32::New(global_cpu.ntime)));
+	jgcpu->Set(String::NewSymbol("stime"), Local<Value>::New(Uint32::New(global_cpu.stime)));
+	jgcpu->Set(String::NewSymbol("itime"), Local<Value>::New(Uint32::New(global_cpu.itime)));
+	jgcpu->Set(String::NewSymbol("iowtime"), Local<Value>::New(Uint32::New(global_cpu.iowtime)));
+	jgcpu->Set(String::NewSymbol("irqtime"), Local<Value>::New(Uint32::New(global_cpu.irqtime)));
+	jgcpu->Set(String::NewSymbol("sirqtime"), Local<Value>::New(Uint32::New(global_cpu.sirqtime)));
 
-	return obj;
+    jcpus = Array::New();
+
+    for (int i = 0; i < nb_cpu; i++) {
+        Handle<Object> jcpu;
+
+        jcpu = Object::New();
+        jcpu->Set(String::NewSymbol("no"), Local<Value>::New(Uint32::New(cpu[i].no)));
+        jcpu->Set(String::NewSymbol("utime"), Local<Value>::New(Uint32::New(cpu[i].utime)));
+        jcpu->Set(String::NewSymbol("ntime"), Local<Value>::New(Uint32::New(cpu[i].ntime)));
+        jcpu->Set(String::NewSymbol("stime"), Local<Value>::New(Uint32::New(cpu[i].stime)));
+        jcpu->Set(String::NewSymbol("itime"), Local<Value>::New(Uint32::New(cpu[i].itime)));
+        jcpu->Set(String::NewSymbol("iowtime"), Local<Value>::New(Uint32::New(cpu[i].iowtime)));
+        jcpu->Set(String::NewSymbol("irqtime"), Local<Value>::New(Uint32::New(cpu[i].irqtime)));
+        jcpu->Set(String::NewSymbol("sirqtime"), Local<Value>::New(Uint32::New(cpu[i].sirqtime)));
+
+        jcpus->Set(v8::Number::New(i), jcpu);
+    }
+
+    jcpuinfo = Object::New();
+    jcpuinfo->Set(String::NewSymbol("global"), jgcpu);
+    jcpuinfo->Set(String::NewSymbol("cpus"), jcpus);
+
+	return jcpuinfo;
 }
 
 // Native process walker.

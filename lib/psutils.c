@@ -130,6 +130,8 @@ int read_status(char *filename, struct proc_info *proc) {
 
 int cpu_info(const char **err) {
     FILE *file;
+    int i, c;
+    struct cpu_info cpui;
 
     file = fopen("/proc/stat", "r");
 
@@ -138,8 +140,29 @@ int cpu_info(const char **err) {
         return 0;
     }
 
-    fscanf(file, "cpu  %lu %lu %lu %lu %lu %lu %lu", &cpu.utime, &cpu.ntime, &cpu.stime,
-           &cpu.itime, &cpu.iowtime, &cpu.irqtime, &cpu.sirqtime);
+    c = fscanf(file, "cpu  %lu %lu %lu %lu %lu %lu %lu %*d %*d %*d\n",
+		&global_cpu.utime, &global_cpu.ntime, &global_cpu.stime,
+        &global_cpu.itime, &global_cpu.iowtime, &global_cpu.irqtime,
+        &global_cpu.sirqtime);
+    global_cpu.no = -1;
+
+	if (!cpu) {
+		nb_cpu = sysconf(_SC_NPROCESSORS_ONLN);
+		cpu = calloc(nb_cpu, sizeof(struct cpu_info));
+		if (!cpu) {
+			*err = "Failed to allocate memory";
+			return 0;
+		}
+	}
+
+	for (i = 0; i < nb_cpu; i++) {
+		fscanf(file, "cpu%d %lu %lu %lu %lu %lu %lu %lu %*d %*d %*d\n",
+				&cpu[i].no,
+				&cpu[i].utime, &cpu[i].ntime, &cpu[i].stime,
+				&cpu[i].itime, &cpu[i].iowtime, &cpu[i].irqtime,
+				&cpu[i].sirqtime);
+	}
+
     fclose(file);
 
     return 1;
