@@ -85,21 +85,12 @@ var globalProcessUpdate = function () {
         console.log("Process list update.");
 
         globalCpu.set(sysinfo.cpuinfo.global);
+        cpuInfo.set(sysinfo.cpuinfo.cpus);
+        ps.set(sysinfo.ps);
 
-        for (var i = 0; i < sysinfo.cpuinfo.cpus.length; i++)
-            cpuInfo.set(sysinfo.cpuinfo.cpus[i], {remove: false});
-
-        for (var i = 0; i < sysinfo.ps.length; i++) {
-            var proc = ps.get(sysinfo.ps[i].pid);
-
-            if (!proc) {
-                proc = new Process(sysinfo.ps[i]);
-                ps.add(proc);
-            } else
-                proc.set(sysinfo.ps[i]);
-
+        ps.each(function (proc) {
             proc.updatePct(globalCpu.get("totalDeltaTime"));
-        }
+        });
 
         // Calculate the process tree
         ps.each(function (e) {
@@ -165,6 +156,10 @@ var initGrid = function () {
         grid.render();
 
         resizeWindow();
+    });
+
+    ps.on("remove", function (proc) {
+        console.log("Process " + proc.get("name") + "[" + proc.get("pid") + "] removed.");
     });
 
 };
