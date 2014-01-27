@@ -7,8 +7,12 @@ var dataView, grid,
     globalCpu = new CpuInfo(),
     // Individual CPU info
     cpuInfo = new CpuInfoCollection(),
+    // Memory info
+    memInfo = new MemInfo(),
     // CPU % chart
-    cpuChart;
+    cpuChart,
+    // Mem % chart
+    memChart;
 
 var pidFormatter = function (row, cell, value, columnDef, proc) {
     var spacer = "<span style='display: inline-block; height: 1px; width: " + (15 * proc.get("ui-indent")) + "px'></span>";
@@ -51,10 +55,12 @@ function updateProcess(psItem, fname) {
 }
 
 var resizeWindow = function () {
+    /*
     var doResize = false;
 
     // Change the size properties of the grid so that it fits inside the layout.
     var jqGrid = $("#grid");
+    var jqCont = $("#grid-container");
 
     if (jqGrid.width() != $("#grid-container").width()) {
         jqGrid.width($("#grid-container").width());
@@ -70,6 +76,10 @@ var resizeWindow = function () {
         grid.resizeCanvas();
         grid.autosizeColumns();
     }
+    */
+
+    grid.resizeCanvas();
+    grid.autosizeColumns();
 };
 
 var globalProcessUpdate = function () {
@@ -80,15 +90,20 @@ var globalProcessUpdate = function () {
 
         globalCpu.set(sysinfo.cpuinfo.global);
         cpuInfo.set(sysinfo.cpuinfo.cpus);
+        memInfo.set(sysinfo.meminfo);
         ps.set(sysinfo.ps);
 
         // Update the CPU graph
         cpuInfo.each(function (ci) {
-            cpuChart.setCpu(ci);
+            cpuChart.serie(ci.get("no"), "userPct", ci);
         });
 
+        memChart.serie("memUsed", "memUsed", memInfo);
+        memChart.serie("memShared", "memShared", memInfo);
+
         ps.each(function (proc) {
-            proc.updatePct(globalCpu.get("totalDeltaTime") / globalCpu.get("ncpu"));
+            proc.updateCpuPct(globalCpu.get("totalDeltaTime") / globalCpu.get("ncpu"));
+            proc.updateMemPct(memInfo.get("memTotal"));
         });
 
         // Calculate the process tree
@@ -118,13 +133,15 @@ var initGrid = function () {
     var columns = [
         { id: "pid", name: "PID", field: "id", formatter: pidFormatter },
         { id: "name", name: "Name", field: "name" },
-        { id: "pct", name: "%CPU", field: "pct", formatter: percentFormatter },
+        { id: "cpuPct", name: "%CPU", field: "cpuPct", formatter: percentFormatter },
+        { id: "memPct", name: "%Mem", field: "memPct", formatter: percentFormatter },
         { id: "vss", name: "VSS", field: "vss", formatter: memoryFormatter },
         { id: "rss", name: "RSS", field: "rss", formatter: memoryFormatter  },
     ];
 
     var options = {
         enableColumnReorder: false,
+        autoHeight: true,
         formatterFactory: Slickback.BackboneModelFormatterFactory
     };
 
@@ -166,7 +183,17 @@ var initGrid = function () {
 $(document).ready(function () {
     initGrid();
 
-    cpuChart = new ChartView({el: $("#cpuChart")});
+    cpuChart = new ChartView({
+        el: $("#cpuChart"),
+        max: 100,
+        min: 0,
+        delay: 5000
+    });
+    memChart = new ChartView({
+        el: $("#memChart"),
+        min: 0,
+        delay: 5000
+    });
 
     $(window).resize(resizeWindow);
 

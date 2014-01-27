@@ -5,6 +5,7 @@ exports.sysinfo = function(req, res) {
     var info = { ps: [] };
 
     info.cpuinfo = sysinfo.cpuinfo();
+    info.meminfo = sysinfo.meminfo();
 
     info.ps.push({
         pid: 0,

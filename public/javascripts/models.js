@@ -1,4 +1,17 @@
+var MemInfo = Backbone.Model.extend({
+    initialize: function () {
+        this.set("memUsed");
+    },
+
+    set: function (n, v) {
+        n.memUsed = this.get("memTotal") - this.get("memFree");
+        Backbone.Model.prototype.set.apply(this, arguments);
+    }
+});
+
 var Process = Backbone.Model.extend({
+    idAttribute: "pid",
+
     initialize: function () {
         // Properties specific to the view.
         this.set("ui-children", {});
@@ -6,10 +19,11 @@ var Process = Backbone.Model.extend({
         this.set("ui-row", 0);
         this.set("ui-collapsed", false);
 
-        // Calculated property.
-        this.set("pct", 0);
+        // Calculated.
+        this.set("cpuPct", 0);
+        this.set("memPct", 0);
     },
-    idAttribute: "pid",
+
     set: function (n, v) {
         var o = this.attributes;
 
@@ -31,11 +45,19 @@ var Process = Backbone.Model.extend({
 
         Backbone.Model.prototype.set.apply(this, arguments);
     },
-    updatePct: function (cpuPeriod) {
+
+    updateCpuPct: function (cpuPeriod) {
         if (this.get("deltaTime"))
-            this.set("pct", this.get("deltaTime") / cpuPeriod * 100);
+            this.set("cpuPct", this.get("deltaTime") / cpuPeriod * 100);
         else
-            this.set("pct", 0);
+            this.set("cpuPct", 0);
+    },
+
+    updateMemPct: function (totalMem) {
+        if (this.get("rss"))
+            this.set("memPct", this.get("rss") / totalMem * 100);
+        else
+            this.set("memPct", 0);
     }
 });
 
