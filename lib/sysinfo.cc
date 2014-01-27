@@ -19,6 +19,7 @@ Handle<Value> CpuInfo(const Arguments& args) {
 	jgcpu->Set(String::NewSymbol("iowtime"), Local<Value>::New(Uint32::New(global_cpu.iowtime)));
 	jgcpu->Set(String::NewSymbol("irqtime"), Local<Value>::New(Uint32::New(global_cpu.irqtime)));
 	jgcpu->Set(String::NewSymbol("sirqtime"), Local<Value>::New(Uint32::New(global_cpu.sirqtime)));
+	jgcpu->Set(String::NewSymbol("ncpu"), Local<Value>::New(Uint32::New(nb_cpu)));
 
     jcpus = Array::New();
 

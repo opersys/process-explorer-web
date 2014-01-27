@@ -6,7 +6,9 @@ var dataView, grid,
     // Global CPU Info
     globalCpu = new CpuInfo(),
     // Individual CPU info
-    cpuInfo = new CpuInfoCollection();
+    cpuInfo = new CpuInfoCollection(),
+    // CPU % chart
+    cpuChart;
 
 var pidFormatter = function (row, cell, value, columnDef, proc) {
     var spacer = "<span style='display: inline-block; height: 1px; width: " + (15 * proc.get("ui-indent")) + "px'></span>";
@@ -25,7 +27,7 @@ var memoryFormatter = function (row, cell, value, columnDef, proc) {
 };
 
 var percentFormatter = function (row, cell, value, columnDef, proc) {
-    return Slick.Formatters.PercentCompleteBar(row, cell, proc.get(columnDef.field), proc);
+    return proc.get(columnDef.field).toFixed(1) + "%";
 };
 
 // Update a single process item.
@@ -62,6 +64,12 @@ var resizeWindow = function () {
     if (!jqGrid.parent().is($(w2ui.layout.el("main"))))
         $(w2ui.layout.el("main")).append(jqGrid);
 
+    // Insert the graph in the w2ui layout.
+    var jqGraph = $("#graphs");
+
+    if (!jqGraph.parent().is($(w2ui.layout.el("top"))))
+        $(w2ui.layout.el("top")).append(jqGraph);
+
     if (jqGrid.width() != $(w2ui.layout.el("main")).width()) {
         jqGrid.width($(w2ui.layout.el("main")).width());
         doResize = true;
@@ -88,8 +96,13 @@ var globalProcessUpdate = function () {
         cpuInfo.set(sysinfo.cpuinfo.cpus);
         ps.set(sysinfo.ps);
 
+        // Update the CPU graph
+        cpuInfo.each(function (ci) {
+            cpuChart.setCpu(ci);
+        });
+
         ps.each(function (proc) {
-            proc.updatePct(globalCpu.get("totalDeltaTime"));
+            proc.updatePct(globalCpu.get("totalDeltaTime") / globalCpu.get("ncpu"));
         });
 
         // Calculate the process tree
@@ -119,7 +132,7 @@ var initGrid = function () {
     var columns = [
         { id: "pid", name: "PID", field: "id", formatter: pidFormatter },
         { id: "name", name: "Name", field: "name" },
-        { id: "pct", name: "%", field: "pct", formatter: percentFormatter },
+        { id: "pct", name: "%CPU", field: "pct", formatter: percentFormatter },
         { id: "vss", name: "VSS", field: "vss", formatter: memoryFormatter },
         { id: "rss", name: "RSS", field: "rss", formatter: memoryFormatter  },
     ];
@@ -167,12 +180,13 @@ var initGrid = function () {
 $(document).ready(function () {
     initGrid();
 
+    cpuChart = new ChartView({el: $("#cpuChart")});
+
     // Generate the main layout
     $("#layout").w2layout({
         name: "layout",
         panels: [
-            { type: "top", size: 60, content: "TOP BAR" },
-            { type: "left", size: 40, content: "LEFT BAR" },
+            { type: "top", size: 60 },
             { type: "main" }
         ]
     });

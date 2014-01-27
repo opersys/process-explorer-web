@@ -21,6 +21,9 @@ struct cpu_info {
     long unsigned iowtime;
     long unsigned irqtime;
     long unsigned sirqtime;
+    long unsigned stealtime;
+    long unsigned guesttime;
+    long unsigned guestnicetime;
 };
 
 struct proc_info {

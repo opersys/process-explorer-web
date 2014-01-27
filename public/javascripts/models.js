@@ -23,14 +23,19 @@ var Process = Backbone.Model.extend({
         if (n.hasOwnProperty("stime") && o.stime)
             n.deltaStime = n.stime - o.stime;
 
+        if (!n.deltaStime) n.deltaStime = 0;
+        if (!n.deltaUtime) n.deltaUtime = 0;
+
         if (n.deltaUtime >= 0 && n.deltaStime >= 0)
             n.deltaTime = n.deltaUtime + n.deltaStime;
 
         Backbone.Model.prototype.set.apply(this, arguments);
     },
-    updatePct: function (totalDeltaTime) {
-        if (this.get("totalDeltaTime"))
-            this.set("pct", this.get("deltaTime") / totalDeltaTime * 100);
+    updatePct: function (cpuPeriod) {
+        if (this.get("deltaTime"))
+            this.set("pct", this.get("deltaTime") / cpuPeriod * 100);
+        else
+            this.set("pct", 0);
     }
 });
 

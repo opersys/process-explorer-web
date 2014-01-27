@@ -140,10 +140,10 @@ int cpu_info(const char **err) {
         return 0;
     }
 
-    c = fscanf(file, "cpu  %lu %lu %lu %lu %lu %lu %lu %*d %*d %*d\n",
+    c = fscanf(file, "cpu  %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu\n",
 		&global_cpu.utime, &global_cpu.ntime, &global_cpu.stime,
-        &global_cpu.itime, &global_cpu.iowtime, &global_cpu.irqtime,
-        &global_cpu.sirqtime);
+        &global_cpu.itime, &global_cpu.iowtime, &global_cpu.irqtime, &global_cpu.sirqtime,
+        &global_cpu.stealtime, &global_cpu.guesttime, &global_cpu.guestnicetime);
     global_cpu.no = -1;
 
 	if (!cpu) {
@@ -159,8 +159,8 @@ int cpu_info(const char **err) {
 		fscanf(file, "cpu%d %lu %lu %lu %lu %lu %lu %lu %*d %*d %*d\n",
 				&cpu[i].no,
 				&cpu[i].utime, &cpu[i].ntime, &cpu[i].stime,
-				&cpu[i].itime, &cpu[i].iowtime, &cpu[i].irqtime,
-				&cpu[i].sirqtime);
+				&cpu[i].itime, &cpu[i].iowtime, &cpu[i].irqtime, &cpu[i].sirqtime,
+				&cpu[i].stealtime, &cpu[i].guesttime, &cpu[i].guestnicetime);
 	}
 
     fclose(file);
