@@ -53,30 +53,16 @@ function updateProcess(psItem, fname) {
 var resizeWindow = function () {
     var doResize = false;
 
-    // Resize the layout to the size of the window.
-    $("#layout")
-        .width($(window).width())
-        .height($(window).height());
-
     // Change the size properties of the grid so that it fits inside the layout.
     var jqGrid = $("#grid");
 
-    if (!jqGrid.parent().is($(w2ui.layout.el("main"))))
-        $(w2ui.layout.el("main")).append(jqGrid);
-
-    // Insert the graph in the w2ui layout.
-    var jqGraph = $("#graphs");
-
-    if (!jqGraph.parent().is($(w2ui.layout.el("top"))))
-        $(w2ui.layout.el("top")).append(jqGraph);
-
-    if (jqGrid.width() != $(w2ui.layout.el("main")).width()) {
-        jqGrid.width($(w2ui.layout.el("main")).width());
+    if (jqGrid.width() != $("#grid-container").width()) {
+        jqGrid.width($("#grid-container").width());
         doResize = true;
     }
 
-    if (jqGrid.height() != $(w2ui.layout.el("main")).height()) {
-        jqGrid.height($(w2ui.layout.el("main")).height());
+    if (jqGrid.height() != $("#grid-container").height()) {
+        jqGrid.height($("#grid-container").height());
         doResize = true;
     }
 
@@ -181,15 +167,6 @@ $(document).ready(function () {
     initGrid();
 
     cpuChart = new ChartView({el: $("#cpuChart")});
-
-    // Generate the main layout
-    $("#layout").w2layout({
-        name: "layout",
-        panels: [
-            { type: "top", size: 60 },
-            { type: "main" }
-        ]
-    });
 
     $(window).resize(resizeWindow);
 
