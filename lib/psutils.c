@@ -59,7 +59,6 @@ int add_proc(int proc_num, struct proc_info *proc) {
 int read_stat(char *filename, struct proc_info *proc) {
     FILE *file;
     char buf[MAX_LINE], *open_paren, *close_paren;
-    int res, idx;
 
     file = fopen(filename, "r");
     if (!file) return 0;
@@ -130,8 +129,7 @@ int read_status(char *filename, struct proc_info *proc) {
 
 int cpu_info(const char **err) {
     FILE *file;
-    int i, c;
-    struct cpu_info cpui;
+    int i;
 
     file = fopen("/proc/stat", "r");
 
@@ -140,7 +138,7 @@ int cpu_info(const char **err) {
         return 0;
     }
 
-    c = fscanf(file, "cpu  %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu\n",
+    fscanf(file, "cpu  %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu\n",
 		&global_cpu.utime, &global_cpu.ntime, &global_cpu.stime,
         &global_cpu.itime, &global_cpu.iowtime, &global_cpu.irqtime, &global_cpu.sirqtime,
         &global_cpu.stealtime, &global_cpu.guesttime, &global_cpu.guestnicetime);
@@ -156,7 +154,7 @@ int cpu_info(const char **err) {
 	}
 
 	for (i = 0; i < nb_cpu; i++) {
-		fscanf(file, "cpu%d %lu %lu %lu %lu %lu %lu %lu %*d %*d %*d\n",
+		fscanf(file, "cpu%d %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu\n",
 				&cpu[i].no,
 				&cpu[i].utime, &cpu[i].ntime, &cpu[i].stime,
 				&cpu[i].itime, &cpu[i].iowtime, &cpu[i].irqtime, &cpu[i].sirqtime,
