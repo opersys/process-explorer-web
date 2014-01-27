@@ -9,6 +9,16 @@
 #define THREAD_MULT 8
 #define MAX_LINE 256
 
+struct mem_info {
+  	long unsigned memTotal;
+  	long unsigned memFree;
+  	long unsigned memShared;
+	long unsigned buffers;
+	long unsigned cached;
+	long unsigned swapTotal;
+	long unsigned swapFree;
+};
+
 struct cpu_info {
 	// CPU number (-1 for global info)
 	int no;
@@ -57,6 +67,9 @@ struct cpu_info global_cpu;
 // Array of CPU info from /proc/stat
 struct cpu_info* cpu;
 
+// Memory info
+struct mem_info mem;
+
 // Number of CPUs on the system
 int nb_cpu;
 
@@ -71,6 +84,8 @@ extern "C" {
 #endif
 
 int cpu_info(const char **err);
+
+int mem_info(const char **err);
 
 int read_procs(const char **err);
 

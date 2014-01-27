@@ -22,7 +22,7 @@ html
 		script(type = "text/javascript", src = "/javascripts/views.js")
 		script(type = "text/javascript", src="/javascripts/pstree.js")
 	body
-		div(class = "ui-grid-a")
-			div(id = "cpuChart", class = "ui-block-a")
-		div(id = "grid-container", class = "ui-grid-solo")
-			div(id = "grid")
+		div(class = "ui-grid-a", style = "height: 100px")
+			div(id = "cpuChart", class = "ui-block-a", style = "height: 100%")
+			div(id = "memChart", class = "ui-block-b", style = "height: 100%")
+		div(id = "grid", class = "ui-grid-solo")

@@ -7,38 +7,56 @@ var ChartView = Backbone.View.extend({
         "#c0c0c0", "#808080", "#000000", "#ffa500", "#a52a2a",
         "#800000", "#008000", "#808000"
     ],
-
-    render: function () {
-        this.$el.append($("<canvas id='graphCanvas'></canvas>")
-            .attr("height", 50)
-            .attr("width", 200));
-
-        this._smoothie = new SmoothieChart({
-            millisPerPixel: 90,
-            maxValue: 100,
-            minValue: 0
-        });
-        this._smoothie.streamTo(document.getElementById("graphCanvas"), 5000);
-    },
-
     _series: {},
 
-    initialize: function () {
+    initialize: function (opts) {
+        this._delay = opts.delay;
+        this._max = opts.max
+        this._min = opts.min;
+        this._field = opts.field;
+        this._key = opts.key;
+        this._model = opts.model;
+
+        // On resize.
+        this.$el.on("resize", function () {
+            this.render();
+        });
+
         this.render();
     },
 
-    setCpu: function (ci) {
+    render: function () {
+        this._canvas = $("<canvas></canvas>")
+            .attr("height", this.$el.height())
+            .attr("width", this.$el.width())
+            .uniqueId()
+
+        this.$el.append(this._canvas);
+
+        this._smoothie = new SmoothieChart({
+            millisPerPixel: 90,
+            maxValue: this._max,
+            minValue: this._min
+        });
+
+        this._smoothie.streamTo(this._canvas[0], this._delay);
+    },
+
+    serie: function (skey, field, m) {
         var self = this;
 
-        if (!self._series[ci.get("no")]) {
-            self._series[ci.get("no")] = new TimeSeries();
-            self._smoothie.addTimeSeries(self._series[ci.get("no")],
-                { lineWidth: 2, strokeStyle: this._colors[this._colorIdx++] });
-
-            cpuInfo.on("change:userPct", function (m) {
-                self._series[m.get("no")].append(new Date().getTime(), m.get("userPct"));
+        if (!self._series[skey]) {
+            self._series[skey] = new TimeSeries();
+            self._smoothie.addTimeSeries(self._series[skey], {
+                lineWidth: 2,
+                strokeStyle: this._colors[this._colorIdx++]
             });
-            this._smoothie.streamTo(document.getElementById("graphCanvas"), 5000);
+
+            m.on("change:" + field, function (m) {
+                self._series[skey].append(new Date().getTime(), m.get(field));
+            });
+
+            //this._smoothie.streamTo(this._canvas.one(), this._delay);
         }
     }
 });

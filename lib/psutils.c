@@ -127,6 +127,31 @@ int read_status(char *filename, struct proc_info *proc) {
     return 1;
 }
 
+int mem_info(const char **err) {
+    FILE *file;
+	char line[MAX_LINE];
+
+    file = fopen("/proc/meminfo", "r");
+    if (!file) {
+    	*err = "Failed to open memory info file";
+    	return 0;
+    }
+
+	while (fgets(line, sizeof(line), file)) {
+		sscanf(line, "MemTotal: %lu kB", &mem.memTotal);
+        sscanf(line, "MemFree: %lu kB", &mem.memFree);
+        sscanf(line, "MemShared: %lu kB", &mem.memShared);
+        sscanf(line, "Buffers: %lu kB", &mem.buffers);
+        sscanf(line, "Cached: %lu kB", &mem.cached);
+        sscanf(line, "SwapTotal: %lu kB", &mem.swapTotal);
+        sscanf(line, "SwapFree: %lu kB", &mem.swapFree);
+	}
+
+	fclose(file);
+
+	return 1;
+}
+
 int cpu_info(const char **err) {
     FILE *file;
     int i;
