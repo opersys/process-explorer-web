@@ -35,21 +35,11 @@ var percentFormatter = function (row, cell, value, columnDef, proc) {
 };
 
 // Update a single process item.
-function updateProcess(psItem, fname) {
+function updateProcess(fname, proc, v, opts) {
     var colIdx, rowIdx;
-    var dataItem = dataView.getItemById(psItem.get("pid"));
-
-    if (!dataItem) return;
-
-    if (fname == "vss" || fname == "rss")
-        dataItem[fname] = Humanize.filesizeformat(psItem.get(fname));
-    else
-        dataItem[fname] = psItem.get(fname);
-
-    dataView.updateItem(psItem.get("pid"), dataItem);
 
     colIdx = grid.getColumnIndex(fname);
-    rowIdx = dataView.getRowById(psItem.get("pid"));
+    rowIdx = proc.get("ui-row");
 
     grid.flashCell(rowIdx, colIdx, 750);
 }
@@ -132,7 +122,7 @@ var initGrid = function () {
         { id: "cpuPct", name: "%CPU", field: "cpuPct", formatter: percentFormatter },
         { id: "memPct", name: "%Mem", field: "memPct", formatter: percentFormatter },
         { id: "vss", name: "VSS", field: "vss", formatter: memoryFormatter },
-        { id: "rss", name: "RSS", field: "rss", formatter: memoryFormatter  },
+        { id: "rss", name: "RSS", field: "rss", formatter: memoryFormatter  }
     ];
 
     var options = {
@@ -155,18 +145,19 @@ var initGrid = function () {
         e.stopImmediatePropagation();
     });
 
+    ps.on("change:cpuPct", function (m, v, opts) { updateProcess("cpuPct", m, v, opts); });
+    ps.on("change:memPct", function (m, v, opts) { updateProcess("memPct", m, v, opts); });
+    ps.on("change:vss", function (m, v, opts) { updateProcess("vss", m, v, opts) });
+    ps.on("change:rss", function (m, v, opts) { updateProcess("rss", m, v, opts) });
+
     ps.onRowCountChanged.subscribe(function () {
         grid.updateRowCount();
         grid.render();
-
-        //resizeWindow();
     });
 
     ps.onRowsChanged.subscribe(function () {
         grid.invalidateAllRows();
         grid.render();
-
-        //resizeWindow();
     });
 
     ps.on("remove", function (proc) {
