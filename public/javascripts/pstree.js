@@ -17,6 +17,9 @@ var dataView, grid,
 var pidFormatter = function (row, cell, value, columnDef, proc) {
     var spacer = "<span style='display: inline-block; height: 1px; width: " + (15 * proc.get("ui-indent")) + "px'></span>";
 
+    if (!ps.treeView)
+        return grid.getOptions().defaultFormatter(row, cell, value, columnDef, proc);
+
     if (_.size(proc.get("ui-children")) > 0) {
         if (proc.get("ui-collapsed"))
             return spacer + " <span class='toggle expand'></span>&nbsp;" + value;
@@ -119,10 +122,10 @@ var initGrid = function () {
     var columns = [
         { id: "pid", name: "PID", field: "id", formatter: pidFormatter },
         { id: "name", name: "Name", field: "name" },
-        { id: "cpuPct", name: "%CPU", field: "cpuPct", formatter: percentFormatter },
-        { id: "memPct", name: "%Mem", field: "memPct", formatter: percentFormatter },
-        { id: "vss", name: "VSS", field: "vss", formatter: memoryFormatter },
-        { id: "rss", name: "RSS", field: "rss", formatter: memoryFormatter  }
+        { id: "cpuPct", name: "%CPU", field: "cpuPct", formatter: percentFormatter, sortable: true },
+        { id: "memPct", name: "%Mem", field: "memPct", formatter: percentFormatter, sortable: true },
+        { id: "vss", name: "VSS", field: "vss", formatter: memoryFormatter, sortable: true },
+        { id: "rss", name: "RSS", field: "rss", formatter: memoryFormatter, sortable: true }
     ];
 
     var options = {
@@ -156,7 +159,14 @@ var initGrid = function () {
     });
 
     ps.onRowsChanged.subscribe(function () {
-        grid.invalidateAllRows();
+        grid.invalidate();
+        grid.render();
+    });
+
+    grid.onSort.subscribe(function (e, args) {
+        ps.sortPs(args.sortCol.field, args.sortAsc);
+
+        grid.invalidate();
         grid.render();
     });
 
