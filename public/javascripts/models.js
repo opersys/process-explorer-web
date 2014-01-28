@@ -101,15 +101,17 @@ var ProcessCollection = Slickback.Collection.extend({
         }, 200);
     },
 
-    getItem: function (n) {
+    _uirow_getItem: function (n) {
         return this._rows[n];
     },
 
-    getLength: function () {
+    _uirow_getLength: function () {
         return this._rows.length;
     },
 
-    reindex: function () {
+    _comparator_reindex: function () {},
+
+    _uirow_reindex: function () {
         this._rows = [];
 
         // Iterate through the collection depth first to attribute row numbers
@@ -127,7 +129,32 @@ var ProcessCollection = Slickback.Collection.extend({
         this.onRowsChanged.notify();
     },
 
+    sortPs: function (stype, isAsc) {
+        if (stype == "ui-row") {
+            this.reindex = this._uirow_reindex;
+            this.getItem = this._uirow_getItem;
+            this.getLength = this._uirow_getLength;
+            this.treeView = true;
+        }
+        else {
+            this.comparator = function (m) {
+                return (isAsc ? 1 : -1) * m.get(stype);
+            };
+            this.sort();
+
+            this.reindex = this._comparator_reindex;
+            this.getItem = function (i) { return this.models[i]; };
+            this.getLength = function (i) { return this.models.length; };
+            this.treeView = false;
+         }
+    },
+
     constructor: function () {
+        this.reindex = this._uirow_reindex;
+        this.getItem = this._uirow_getItem;
+        this.getLength = this._uirow_getLength;
+        this.treeView = true;
+
         Backbone.Collection.apply(this, arguments);
 
         //this.on("add", this.reindex);
