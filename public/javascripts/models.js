@@ -88,13 +88,27 @@ var ProcessCollection = Slickback.Collection.extend({
     model: Process,
     url: "/sysinfo", // NOT USED
     comparator: "ui-row",
+    _holdreindex: false,
+    _rows: [],
+
+    set: function () {
+        var self = this;
+
+        Backbone.Collection.prototype.set.apply(this, arguments);
+
+        setTimeout(function () {
+            self.reindex.call(self);
+        }, 200);
+    },
 
     getItem: function (n) {
         return this._rows[n];
     },
+
     getLength: function () {
         return this._rows.length;
     },
+
     reindex: function () {
         this._rows = [];
 
@@ -115,10 +129,8 @@ var ProcessCollection = Slickback.Collection.extend({
     constructor: function () {
         Backbone.Collection.apply(this, arguments);
 
-        this.reindex();
-
-        this.on("add", this.reindex);
-        this.on("remove", this.reindex);
+        //this.on("add", this.reindex);
+        //this.on("remove", this.reindex);
         this.on("change:ui-collapsed", this.reindex);
     }
 });

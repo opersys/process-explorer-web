@@ -55,20 +55,19 @@ function updateProcess(psItem, fname) {
 }
 
 var resizeWindow = function () {
-    /*
     var doResize = false;
 
     // Change the size properties of the grid so that it fits inside the layout.
     var jqGrid = $("#grid");
     var jqCont = $("#grid-container");
 
-    if (jqGrid.width() != $("#grid-container").width()) {
-        jqGrid.width($("#grid-container").width());
+    if (jqGrid.width() != jqCont.width()) {
+        jqGrid.width(jqCont.width());
         doResize = true;
     }
 
-    if (jqGrid.height() != $("#grid-container").height()) {
-        jqGrid.height($("#grid-container").height());
+    if (jqGrid.height() != jqCont.height()) {
+        jqGrid.height(jqCont.height());
         doResize = true;
     }
 
@@ -76,10 +75,6 @@ var resizeWindow = function () {
         grid.resizeCanvas();
         grid.autosizeColumns();
     }
-    */
-
-    grid.resizeCanvas();
-    grid.autosizeColumns();
 };
 
 var globalProcessUpdate = function () {
@@ -91,6 +86,7 @@ var globalProcessUpdate = function () {
         globalCpu.set(sysinfo.cpuinfo.global);
         cpuInfo.set(sysinfo.cpuinfo.cpus);
         memInfo.set(sysinfo.meminfo);
+
         ps.set(sysinfo.ps);
 
         // Update the CPU graph
@@ -141,7 +137,6 @@ var initGrid = function () {
 
     var options = {
         enableColumnReorder: false,
-        autoHeight: true,
         formatterFactory: Slickback.BackboneModelFormatterFactory
     };
 
@@ -164,20 +159,19 @@ var initGrid = function () {
         grid.updateRowCount();
         grid.render();
 
-        resizeWindow();
+        //resizeWindow();
     });
 
     ps.onRowsChanged.subscribe(function () {
         grid.invalidateAllRows();
         grid.render();
 
-        resizeWindow();
+        //resizeWindow();
     });
 
     ps.on("remove", function (proc) {
         console.log("Process " + proc.get("name") + "[" + proc.get("pid") + "] removed.");
     });
-
 };
 
 $(document).ready(function () {
