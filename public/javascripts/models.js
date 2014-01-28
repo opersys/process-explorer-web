@@ -126,6 +126,7 @@ var ProcessCollection = Slickback.Collection.extend({
         this.onRowCountChanged.notify();
         this.onRowsChanged.notify();
     },
+
     constructor: function () {
         Backbone.Collection.apply(this, arguments);
 
