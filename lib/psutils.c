@@ -89,6 +89,18 @@ int read_stat(char *filename, struct proc_info *proc) {
     return 1;
 }
 
+int read_mem(char *filename, struct proc_info *proc) {
+	FILE *file;
+
+	file = fopen(filename, "r");
+	if (!file) return 0;
+
+	fscanf(file, "%*d %*d %lu %*d %*d %*d %*d", &proc->shm);
+	fclose(file);
+
+	return 1;
+}
+
 int read_cmdline(char *filename, struct proc_info *proc) {
     FILE *file;
     char line[MAX_LINE];
@@ -103,9 +115,9 @@ int read_cmdline(char *filename, struct proc_info *proc) {
 
     if (strlen(line) > 0) {
         strncpy(proc->cmdline, line, PROC_CMDLINE_LEN);
-        proc->name[PROC_CMDLINE_LEN-1] = 0;
+        proc->cmdline[PROC_CMDLINE_LEN-1] = 0;
     } else
-        proc->name[0] = 0;
+        proc->cmdline[0] = 0;
 
     return 1;
 }
@@ -244,6 +256,12 @@ int read_procs(const char **err) {
             sprintf(filename, "/proc/%d/status", pid);
             if (!read_status(filename, proc)) {
             	*err = "Failed to read process status file";
+            	return 0;
+            }
+
+            sprintf(filename, "/proc/%d/statm", pid);
+            if (!read_mem(filename, proc)) {
+            	*err = "Failed to read process memory file";
             	return 0;
             }
 

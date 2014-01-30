@@ -73,6 +73,7 @@ Handle<Value> ProcessWalk(const Arguments& args) {
   	Handle<Value> argv[1];
   	Handle<Object> obj;
     const char *err;
+    long unsigned time;
 
   	cb = Handle<Function>::Cast(args[0]);
 
@@ -81,6 +82,10 @@ Handle<Value> ProcessWalk(const Arguments& args) {
         for (int i = 0; i < num_procs; i++) {
         	if (procs[i]) {
         	    obj = Object::New();
+
+        	    /* FIXME: CLOCK_TICKS are system dependent so calculate the time
+        	       value in second here as a convenience for the interface. */
+				time = (procs[i]->utime + procs[i]->stime) / sysconf(_SC_CLK_TCK);
 
           		obj->Set(String::NewSymbol("pid"), Local<Value>::New(Number::New(procs[i]->pid)));
 			  	obj->Set(String::NewSymbol("ppid"), Local<Value>::New(Number::New(procs[i]->ppid)));
@@ -91,8 +96,10 @@ Handle<Value> ProcessWalk(const Arguments& args) {
   				obj->Set(String::NewSymbol("nice"), Local<Value>::New(Number::New(procs[i]->nice)));
   				obj->Set(String::NewSymbol("vss"), Local<Value>::New(Number::New(procs[i]->vss)));
   				obj->Set(String::NewSymbol("rss"), Local<Value>::New(Number::New(procs[i]->rss * getpagesize())));
+  				obj->Set(String::NewSymbol("shm"), Local<Value>::New(Number::New(procs[i]->shm * getpagesize())));
   				obj->Set(String::NewSymbol("state"), Local<Value>::New(String::New(&procs[i]->state, 1)));
   	        	obj->Set(String::NewSymbol("cmdline"), Local<Value>::New(String::New(procs[i]->cmdline)));
+                obj->Set(String::NewSymbol("time"), Local<Value>::New(Number::New(time)));
 
             	argv[0] = obj;
            		cb->Call(Context::GetCurrent()->Global(), 1, argv);

@@ -54,6 +54,7 @@ struct proc_info {
     long unsigned delta_time;
     long vss;
     long rss;
+    long shm;
     int prs;
     int prio;
     int nice;
