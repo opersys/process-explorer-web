@@ -2,27 +2,61 @@ doctype html
 html
 	head
 		title= title
-		link(rel = "stylesheet", href = "/stylesheets/style.css")
-		link(rel = "stylesheet", href = "/stylesheets/themes/default/style.css")
-		link(rel = "stylesheet", href = "/stylesheets/slick.grid.css")
-		link(rel = "stylesheet", href = "/stylesheets/slick-default-theme.css")
-		link(rel = "stylesheet", href = "/stylesheets/jquery.mobile-1.4.0.min.css")
-		script(type = "text/javascript", src = "/javascripts/lib/jquery-2.0.3.min.js")
-		script(type = "text/javascript", src = "/javascripts/lib/jquery.event.drag-2.2.js")
-		script(type = "text/javascript", src = "/javascripts/lib/jquery.mobile-1.4.0.min.js")
-		script(type = "text/javascript", src = "/javascripts/lib/underscore-min.js")
-		script(type = "text/javascript", src = "/javascripts/lib/backbone.js")
-		script(type = "text/javascript", src = "/javascripts/lib/slickgrid/slick.core.js")
-		script(type = "text/javascript", src = "/javascripts/lib/slickgrid/slick.grid.js")
-		script(type = "text/javascript", src = "/javascripts/lib/slickgrid/slick.formatters.js")
-		script(type = "text/javascript", src = "/javascripts/lib/slickback.min.js")
-		script(type = "text/javascript", src = "/javascripts/lib/humanize.min.js")
-		script(type = "text/javascript", src = "/javascripts/lib/smoothie.js")
-		script(type = "text/javascript", src = "/javascripts/models.js")
-		script(type = "text/javascript", src = "/javascripts/views.js")
-		script(type = "text/javascript", src="/javascripts/pstree.js")
+		link(rel="stylesheet", href="/stylesheets/style.css")
+		link(rel="stylesheet", href="/stylesheets/themes/default/style.css")
+		link(rel="stylesheet", href="/stylesheets/slick.grid.css")
+		link(rel="stylesheet", href="/stylesheets/slick-default-theme.css")
+		link(rel="stylesheet", href="/stylesheets/jquery.mobile-1.4.0.min.css")
+		script(type="text/javascript", src="/javascripts/lib/jquery-2.0.3.min.js")
+		script(type="text/javascript", src="/javascripts/lib/jquery.event.drag-2.2.js")
+		script(type="text/javascript", src="/javascripts/lib/jquery.mobile-1.4.0.min.js")
+		script(type="text/javascript", src="/javascripts/lib/underscore-min.js")
+		script(type="text/javascript", src="/javascripts/lib/backbone.js")
+		script(type="text/javascript", src="/javascripts/lib/slickgrid/slick.core.js")
+		script(type="text/javascript", src="/javascripts/lib/slickgrid/slick.grid.js")
+		script(type="text/javascript", src="/javascripts/lib/slickgrid/slick.formatters.js")
+		script(type="text/javascript", src="/javascripts/lib/slickback.min.js")
+		script(type="text/javascript", src="/javascripts/lib/humanize.min.js")
+		script(type="text/javascript", src="/javascripts/lib/smoothie.js")
+		script(type="text/javascript", src="/javascripts/lib/moment.min.js")
+		script(type="text/javascript", src="/javascripts/models.js")
+		script(type="text/javascript", src="/javascripts/views.js")
+		script(type="text/javascript", src="/javascripts/pstree.js")
 	body
-		div(class = "ui-grid-a", style = "height: 100px")
-			div(id = "cpuChart", class = "ui-block-a", style = "height: 100%")
-			div(id = "memChart", class = "ui-block-b", style = "height: 100%")
-		div(id = "grid", class = "ui-grid-solo", style = "height: 500px")
+		div(data-role="page", class="type-interior")
+			div(data-role="content")
+				div(class="ui-grid-a")
+					div(class="ui-block-a",
+						data-role="collapsible",
+						data-collapsed="false",
+						data-mini="true")
+						h3
+							|CPU
+						div(class = "ui-body", style = "width: 100%; height: 120px")
+							div(id = "cpuChart", class = "ui-block-a", style = "width: 300px; height: 100px")
+
+					div(class="ui-block-b",
+						data-role="collapsible",
+						data-collapsed="false",
+						data-mini="true")
+						h3
+							|Memory
+						div(class = "ui-body", style = "width: 100%; height: 120px")
+							div(id = "memChart", class = "ui-block-b", style = "width: 300px; height: 100px")
+
+				div(class = "ui-grid-solo", data-role="collapsible", data-collapsed="false")
+					h3
+						| Processes
+					div(data-role="header")
+						div(class = "ui-grid-b")
+							div(class="ui-block-a")
+								input(type="text", name="txtSearch", id="txtSearch", placeholder="Search", size="20"
+				    				  class="ui-corner-all ui-inline")
+							div(class="ui-block-b")
+								a(href="#", name="btnRefresh", id="btnRefresh", data-icon="refresh",
+					  	  	 		class="ui-shadow ui-btn ui-corner-all ui-btn-inline ui-icon-refresh ui-btn-icon-notext ui-mini")
+								a(href="#", name="btnTree", id="btnTree"
+									class="ui-shadow ui-btn ui-corner-all ui-btn-inline ui-icon-gears ui-mini")
+									|Show as tree
+					div(class = "ui-body")
+						div(id = "grid", class = "ui-grid-solo", style = "height: 500px")

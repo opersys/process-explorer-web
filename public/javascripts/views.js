@@ -29,7 +29,6 @@ var ChartView = Backbone.View.extend({
         this._canvas = $("<canvas></canvas>")
             .attr("height", this.$el.height())
             .attr("width", this.$el.width())
-            .uniqueId()
 
         this.$el.append(this._canvas);
 

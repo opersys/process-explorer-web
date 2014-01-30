@@ -14,14 +14,15 @@ var Process = Backbone.Model.extend({
 
     initialize: function () {
         // Properties specific to the view.
-        this.set("ui-children", {});
-        this.set("ui-indent", 0);
-        this.set("ui-row", 0);
-        this.set("ui-collapsed", false);
+        this.attributes["ui-children"] = {};
+        this.attributes["ui-indent"] = 0;
+        this.attributes["ui-row"] = 0;
+        this.attributes["ui-collapsed"] = false;
 
         // Calculated.
-        this.set("cpuPct", 0);
-        this.set("memPct", 0);
+        this.attributes["cpuPct"] = 0;
+        this.attributes["memPct"] = 0;
+        //this.attributes["timestr"] = "00:00";
     },
 
     set: function (n, v) {
@@ -42,6 +43,15 @@ var Process = Backbone.Model.extend({
 
         if (n.deltaUtime >= 0 && n.deltaStime >= 0)
             n.deltaTime = n.deltaUtime + n.deltaStime;
+
+        // Hide the hours if the time is under 0, keeping the time compact.
+        if (n.time) {
+            var m = moment.utc(n.time, "X");
+            if (m.hours() == 0)
+                n.timestr = m.format("mm:ss");
+            else
+                n.timestr = m.format("hh[h]mm");
+        }
 
         Backbone.Model.prototype.set.apply(this, arguments);
     },

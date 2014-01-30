@@ -15,18 +15,20 @@ var dataView, grid,
     memChart;
 
 var pidFormatter = function (row, cell, value, columnDef, proc) {
-    var spacer = "<span style='display: inline-block; height: 1px; width: " + (15 * proc.get("ui-indent")) + "px'></span>";
-
     if (!ps.treeView)
         return grid.getOptions().defaultFormatter(row, cell, value, columnDef, proc);
 
+    var spacer = "<span style='display: inline-block; height: 1px; width: "
+        + (15 * proc.get("ui-indent")) + "px'></span>";
+    var val = proc.get("pid") + " [" + proc.get("name") + "]";
+
     if (_.size(proc.get("ui-children")) > 0) {
         if (proc.get("ui-collapsed"))
-            return spacer + " <span class='toggle expand'></span>&nbsp;" + value;
+            return spacer + " <span class='toggle expand'></span>&nbsp;" + val;
         else
-            return spacer + " <span class='toggle collapse'></span>&nbsp;" + value;
+            return spacer + " <span class='toggle collapse'></span>&nbsp;" + val;
     } else
-        return spacer + " <span class='toggle'></span>&nbsp;" + value;
+        return spacer + " <span class='toggle'></span>&nbsp;" + val;
 };
 
 var memoryFormatter = function (row, cell, value, columnDef, proc) {
@@ -36,6 +38,18 @@ var memoryFormatter = function (row, cell, value, columnDef, proc) {
 var percentFormatter = function (row, cell, value, columnDef, proc) {
     return proc.get(columnDef.field).toFixed(1) + "%";
 };
+
+var timeFormatter = function (row, cell, value, columnDef, proc) {
+    var v = proc.get(columnDef.field);
+
+    if (!v || v == 0) return "00:00";
+
+    var m = moment.utc(v, "X");
+    if (m.hours() == 0)
+        return m.format("mm:ss");
+    else
+        return m.format("hh[h]mm");
+}
 
 // Update a single process item.
 function updateProcess(fname, proc, v, opts) {
@@ -120,17 +134,29 @@ var globalProcessUpdate = function () {
 
 var initGrid = function () {
     var columns = [
-        { id: "pid", name: "PID", field: "id", formatter: pidFormatter },
-        { id: "name", name: "Name", field: "name" },
-        { id: "cpuPct", name: "%CPU", field: "cpuPct", formatter: percentFormatter, sortable: true },
-        { id: "memPct", name: "%Mem", field: "memPct", formatter: percentFormatter, sortable: true },
-        { id: "vss", name: "VSS", field: "vss", formatter: memoryFormatter, sortable: true },
-        { id: "rss", name: "RSS", field: "rss", formatter: memoryFormatter, sortable: true }
+        { id: "pid", name: "PID", field: "id",
+            formatter: pidFormatter  },
+        { id: "state", name: "S", field: "state", minWidth: 15, maxWidth: 20 },
+        { id: "prio", name: "PRI", field: "prio", minWidth: 20, maxWidth: 30 },
+        { id: "cpuPct", name: "%CPU", field: "cpuPct", minWidth: 40, maxWidth: 60,
+            formatter: percentFormatter, sortable: true },
+        { id: "memPct", name: "%Mem", field: "memPct", minWidth: 40, maxWidth: 60,
+            formatter: percentFormatter, sortable: true },
+        { id: "vss", name: "VSS", field: "vss", minWidth: 60, maxWidth: 80,
+            formatter: memoryFormatter, sortable: true },
+        { id: "rss", name: "RSS", field: "rss", minWidth: 60, maxWidth: 80,
+            formatter: memoryFormatter, sortable: true },
+        { id: "shm", name: "SHM", field: "shm", minwidth: 60, maxWidth: 80,
+            formatter: memoryFormatter, sortable: true },
+        { id: "time", name: "Time", field: "time", minWidth: 60, maxWidth: 80,
+            formatter: timeFormatter, sortable: true },
+        { id: "cmdline", name: "Command line", field: "cmdline", minWidth: 100 }
     ];
 
     var options = {
         enableColumnReorder: false,
-        formatterFactory: Slickback.BackboneModelFormatterFactory
+        formatterFactory: Slickback.BackboneModelFormatterFactory,
+        forceFitColumns: true
     };
 
     grid = new Slick.Grid("#grid", ps, columns, options);
