@@ -21,10 +21,11 @@ html
 		script(type="text/javascript", src="/javascripts/views.js")
 		script(type="text/javascript", src="/javascripts/pstree.js")
 	body
-		div(style = "width: 100%; height: 120px")
-			div(id = "cpuChart", style = "width: 300px; height: 100px")
+		div(id="graphContainer")
+			div(style = "width: 100%; height: 120px")
+				div(id = "cpuChart", style = "width: 300px; height: 100px")
 
-		div(style = "width: 100%; height: 120px")
-			div(id = "memChart", style = "width: 300px; height: 100px")
+			div(style = "width: 100%; height: 120px")
+				div(id = "memChart", style = "width: 300px; height: 100px")
 
-		div(id = "grid", class = "ui-grid-solo", style = "height: 500px")
+		div(id = "grid")
