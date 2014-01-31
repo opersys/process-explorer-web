@@ -1,20 +1,21 @@
 var ProcessView = Backbone.View.extend({
 
-    _pidFormatter: function (row, cell, value, columnDef, proc) {
+    _nameFormatter: function (row, cell, value, columnDef, proc) {
+        var v = proc.get(columnDef.field);
+
         if (!ps.treeView)
-            return this._grid.getOptions().defaultFormatter(row, cell, value, columnDef, proc);
+            return this._grid.getOptions().defaultFormatter(row, cell, v, columnDef, proc);
 
         var spacer = "<span style='display: inline-block; height: 1px; width: "
             + (15 * proc.get("ui-indent")) + "px'></span>";
-        var val = proc.get("pid") + " [" + proc.get("name") + "]";
 
         if (_.size(proc.get("ui-children")) > 0) {
             if (proc.get("ui-collapsed"))
-                return spacer + " <span class='toggle expand'></span>&nbsp;" + val;
+                return spacer + " <span class='toggle expand'></span>&nbsp;" + v;
             else
-                return spacer + " <span class='toggle collapse'></span>&nbsp;" + val;
+                return spacer + " <span class='toggle collapse'></span>&nbsp;" + v;
         } else
-            return spacer + " <span class='toggle'></span>&nbsp;" + val;
+            return spacer + " <span class='toggle'></span>&nbsp;" + v;
     },
 
     _memoryFormatter: function (row, cell, value, columnDef, proc) {
@@ -38,7 +39,8 @@ var ProcessView = Backbone.View.extend({
     },
 
     _columns: [
-        { id: "pid", name: "PID", field: "id" },
+        { id: "name", name: "Name", field: "name" },
+        { id: "pid", name: "PID", field: "pid", minWidth: 30, maxWidth: 50 },
         { id: "state", name: "S", field: "state", minWidth: 15, maxWidth: 20 },
         { id: "prio", name: "PRI", field: "prio", minWidth: 20, maxWidth: 30 },
         { id: "cpuPct", name: "%CPU", field: "cpuPct", minWidth: 40, maxWidth: 60, sortable: true },
@@ -52,7 +54,7 @@ var ProcessView = Backbone.View.extend({
 
     _options: {
         enableColumnReorder: false,
-        formatterFactory: Slickback.BackboneModelFormatterFactory,
+        formatterFactory: Slickback.BackboneModelFormatterFactory
     },
 
     _updateProcess: function (fname, proc, v, opts) {
@@ -115,8 +117,8 @@ var ProcessView = Backbone.View.extend({
         // Initialize the column formatters and call the formatters
         // in the context of the view.
 
-        this._columns[this._grid.getColumnIndex("pid")].formatter = function () {
-            return self._pidFormatter.apply(self, arguments);
+        this._columns[this._grid.getColumnIndex("name")].formatter = function () {
+            return self._nameFormatter.apply(self, arguments);
         };
 
         this._columns[this._grid.getColumnIndex("cpuPct")].formatter = function () {
