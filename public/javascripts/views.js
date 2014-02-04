@@ -203,8 +203,7 @@ var ChartView = Backbone.View.extend({
         this._key = opts.key;
         this._model = opts.model;
 
-        this.$el.css("display", "inline-block")
-        this.$el.css("padding", "2px 2px 2px 2px");
+        this.$el.css("display", "inline-block");
         this.$el.width(opts.width);
         this.$el.height(opts.height);
 
@@ -214,7 +213,7 @@ var ChartView = Backbone.View.extend({
     render: function () {
         this._canvas = $("<canvas></canvas>")
             .attr("height", this.$el.height())
-            .attr("width", this.$el.width())
+            .attr("width", this.$el.width());
 
         this.$el.append(this._canvas);
 
