@@ -15,9 +15,8 @@ var procView,
     memChart;
 
 var resizeWindow = function () {
-    procView.size(
-        $(window).width(),
-        $(window).height() - $("#graphContainer").height() - 1);
+    $("#mainLayout").width($(window).width());
+    $("#mainLayout").height($(window).height());
 };
 
 var globalProcessUpdate = function () {
@@ -67,19 +66,42 @@ var globalProcessUpdate = function () {
 };
 
 $(document).ready(function () {
+    $('#mainLayout').w2layout({
+        name: 'mainLayout',
+        panels: [{
+            type: 'top',
+            size: 105,
+            content:
+                "<div id='cpuGraph'></div><div id='memGraph'></div>"
+        }, {
+            type: 'main'
+        }
+        ],
+        onResize: function (ev) {
+            if (procView)
+                procView.autoResize();
+        }
+    });
+
+    $(w2ui["mainLayout"].el("top")).append($("#graphLayout"));
+
     cpuChart = new ChartView({
-        el: $("#cpuChart"),
+        el: $("#cpuGraph"),
         max: 100,
         min: 0,
-        delay: 5000
+        delay: 5000,
+        width: 300,
+        height: 101
     });
     memChart = new ChartView({
-        el: $("#memChart"),
+        el: $("#memGraph"),
         min: 0,
-        delay: 5000
+        delay: 5000,
+        width: 300,
+        height: 101
     });
     procView = new ProcessView({
-        el: $("#grid"),
+        el: $(w2ui["mainLayout"].el("main")),
         ps: ps
     });
 

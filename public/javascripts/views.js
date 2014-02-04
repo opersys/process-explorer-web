@@ -87,21 +87,20 @@ var ProcessView = Backbone.View.extend({
 
     _onPsRowCountChanged: function () {
         this._grid.updateRowCount();
+        this.autoResize();
         this._grid.render();
     },
 
     _onPsRowsChanged: function () {
         this._grid.invalidate();
+        this.autoResize();
         this._grid.render();
     },
 
-    size: function (x, y) {
-        if (this.$el.width() == x && this.$el.height() == y)
+    autoResize: function () {
+        if ($(this._grid.getCanvasNode()).width() == this.$el.width() &&
+            $(this._grid.getCanvasNode()).height() == this.$el.height())
             return;
-
-        this.$el
-            .width(x)
-            .height(y);
 
         this._grid.resizeCanvas();
         this._grid.autosizeColumns();
@@ -204,10 +203,10 @@ var ChartView = Backbone.View.extend({
         this._key = opts.key;
         this._model = opts.model;
 
-        // On resize.
-        this.$el.on("resize", function () {
-            this.render();
-        });
+        this.$el.css("display", "inline-block")
+        this.$el.css("padding", "2px 2px 2px 2px");
+        this.$el.width(opts.width);
+        this.$el.height(opts.height);
 
         this.render();
     },
