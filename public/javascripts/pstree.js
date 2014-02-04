@@ -19,6 +19,22 @@ var resizeWindow = function () {
     $("#mainLayout").height($(window).height());
 };
 
+function uncompress(clist) {
+    var ctab = clist.ctab;
+    var lstlst = clist.list;
+    var r = [];
+
+    _.each(lstlst, function (lst) {
+        var obj = {};
+
+        _.each(ctab, function (k) {
+            obj[k] = lst.shift();
+        });
+        r.push(obj);
+    });
+    return r;
+}
+
 var globalProcessUpdate = function () {
     $.ajax("/sysinfo").done(function (sysinfo) {
         var totalDeltaTime;
@@ -29,7 +45,7 @@ var globalProcessUpdate = function () {
         cpuInfo.set(sysinfo.cpuinfo.cpus);
         memInfo.set(sysinfo.meminfo);
 
-        ps.set(sysinfo.ps);
+        ps.set(uncompress(sysinfo.ps));
 
         // Update the CPU graph
         cpuInfo.each(function (ci) {
