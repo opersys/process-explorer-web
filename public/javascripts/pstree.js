@@ -15,8 +15,10 @@ var procView,
     memChart;
 
 var resizeWindow = function () {
-    $("#mainLayout").width($(window).width());
-    $("#mainLayout").height($(window).height());
+    $("#mainLayout")
+        .width($(window).width())
+        .height($(window).height());
+    w2ui["mainLayout"].resize();
 };
 
 function uncompress(clist) {
@@ -125,7 +127,7 @@ $(document).ready(function () {
         console.log("Process " + proc.get("name") + "[" + proc.get("pid") + "] removed.");
     });
 
-    $(window).resize(resizeWindow);
+    $(window).resize($.debounce( 100, resizeWindow));
 
     // Update the process list right now.
     globalProcessUpdate();
