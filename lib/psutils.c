@@ -284,6 +284,7 @@ int read_procs(const char **err) {
         procs[i] = NULL;
 
     closedir(proc_dir);
+    num_procs = proc_num;
 
     return *err == NULL;
 }
