@@ -75,20 +75,30 @@ struct mem_info mem;
 int nb_cpu;
 
 int max_procs, delay, iterations, threads;
+
+// Array of process structures.
 struct proc_info **procs;
-int num_procs;
+
+// Linked list of process structure, already allocated and reusable.
 struct proc_info *free_procs;
-int num_used_procs, num_free_procs;
+
+// Number of process structure currently used.
+int num_procs;
+
+// Number of space for process structures.
+int num_alloc_procs;
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int cpu_info(const char **err);
+    int cpu_info(const char **err);
+    
+    int mem_info(const char **err);
+    
+    int read_procs(const char **err);
 
-int mem_info(const char **err);
-
-int read_procs(const char **err);
+    void cleanup();
 
 #ifdef __cplusplus
 }

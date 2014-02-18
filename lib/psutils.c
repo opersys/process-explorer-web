@@ -1,5 +1,5 @@
-/* This files is based on the content of system/core/toolbox of the Android Open
-   Source Project with some modifications. */
+/* This files is based on the content of system/core/toolbox/top.c of
+   the Android Open Source Project with some modifications. */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -14,42 +14,42 @@
 
 #include "psutils.h"
 
-void free_proc(struct proc_info *proc) {
+void release_proc(struct proc_info *proc) {
     proc->next = free_procs;
     free_procs = proc;
-
-    num_used_procs--;
-    num_free_procs++;
 }
 
 struct proc_info *alloc_proc(void) {
     struct proc_info *proc;
 
-    if (free_procs) {
+    if (free_procs != NULL) {
         proc = free_procs;
         free_procs = free_procs->next;
-        num_free_procs--;
-    } else {
-        proc = (struct proc_info *)malloc(sizeof(*proc));
-        if (!proc) return NULL;
     }
-
-    num_used_procs++;
+    else
+        proc = malloc(sizeof(struct proc_info));
 
     return proc;
 }
 
 int add_proc(int proc_num, struct proc_info *proc) {
-    int i;
+    int i, n;
+    size_t sz;
 
-    if (proc_num >= num_procs) {
-        procs = (struct proc_info **)realloc(procs, 2 * num_procs * sizeof(struct proc_info *));
+    if (proc_num >= num_alloc_procs) {        
+        // Double the size of the process structure array.
+        n = 2 * (num_alloc_procs + 1);
+        sz = n * sizeof(struct proc_info *);
+
+        procs = (struct proc_info **)realloc(procs, sz);
         if (!procs) return 0;
 
-        for (i = num_procs; i < 2 * num_procs; i++)
-            procs[i] = NULL;
+        num_alloc_procs = n;
 
-        num_procs = 2 * num_procs;
+        // Initialize the process structure pointers to null so they
+        // can be allocated later.
+        for (i = proc_num; i < num_alloc_procs; i++)
+            procs[i] = NULL;
     }
     procs[proc_num] = proc;
 
@@ -207,13 +207,28 @@ int cpu_info(const char **err) {
  * Returns 1 on success, 0 otherwise. *err is set to an error string when return is 0.
  */
 int read_procs(const char **err) {
-    DIR *proc_dir, *task_dir;
-    struct dirent *pid_dir, *tid_dir;
+    DIR *proc_dir;
+    struct dirent *pid_dir;
     char filename[64];
     int proc_num;
     struct proc_info *proc;
-    pid_t pid, tid;
+    pid_t pid;
     int i;
+
+    *err = NULL;
+
+    // Release the process structures.
+    for (i = 0; i < num_alloc_procs; i++)
+        if (procs[i])
+            release_proc(procs[i]);
+
+    // Reinitialize the master variables.
+    num_procs = 0;
+    proc_num = 0;
+
+    // FIXME: We need to fetch the CPU info for between it's used to
+    // calculate the process CPU%.
+    if (!cpu_info(err)) return 0;
 
     proc_dir = opendir("/proc");
     if (!proc_dir) {
@@ -221,112 +236,54 @@ int read_procs(const char **err) {
     	return 0;
     }
 
-    procs = (struct proc_info **)calloc(INIT_PROCS * (threads ? THREAD_MULT : 1), sizeof(struct proc_info *));
-    num_procs = INIT_PROCS * (threads ? THREAD_MULT : 1);
-
-    if (!cpu_info(err)) return 0;
-
-    proc_num = 0;
     while ((pid_dir = readdir(proc_dir))) {
         if (!isdigit(pid_dir->d_name[0]))
             continue;
 
         pid = atoi(pid_dir->d_name);
 
-        struct proc_info cur_proc;
-
-        if (!threads) {
-            proc = alloc_proc();
-            if (!proc) return 0;
-
-            proc->pid = proc->tid = pid;
-
-            sprintf(filename, "/proc/%d/stat", pid);
-            if (!read_stat(filename, proc)) {
-				*err = "Failed to read process stat file";
-            	return 0;
-           	}
-
-            sprintf(filename, "/proc/%d/cmdline", pid);
-            if (!read_cmdline(filename, proc)) {
-            	*err = "Failed to read process command line";
-            	return 0;
-           	}
-
-            sprintf(filename, "/proc/%d/status", pid);
-            if (!read_status(filename, proc)) {
-            	*err = "Failed to read process status file";
-            	return 0;
-            }
-
-            sprintf(filename, "/proc/%d/statm", pid);
-            if (!read_mem(filename, proc)) {
-            	*err = "Failed to read process memory file";
-            	return 0;
-            }
-
-            proc->num_threads = 0;
-        } else {
-            sprintf(filename, "/proc/%d/cmdline", pid);
-            if (!read_cmdline(filename, &cur_proc)) {
-            	*err = "Failed to read process command line";
-            	return 0;
-            }
-
-            sprintf(filename, "/proc/%d/status", pid);
-            if (!read_status(filename, &cur_proc)) {
-            	*err = "Failed to read process status file";
-            	return 0;
-            }
-
-            proc = NULL;
+        proc = alloc_proc();
+        if (!proc) {
+            *err = "Failed to allocate process structure memory";
+            break;
         }
 
-        sprintf(filename, "/proc/%d/task", pid);
-        task_dir = opendir(filename);
-        if (!task_dir) continue;
-
-        while ((tid_dir = readdir(task_dir))) {
-            if (!isdigit(tid_dir->d_name[0]))
-                continue;
-
-            if (threads) {
-                tid = atoi(tid_dir->d_name);
-
-                proc = alloc_proc();
-
-                proc->pid = pid; proc->tid = tid;
-
-                sprintf(filename, "/proc/%d/task/%d/stat", pid, tid);
-                if (!read_stat(filename, proc)) {
-                	*err = "Failed to read process stat file";
-                	return 0;
+        proc->pid = proc->tid = pid;
+        
+        sprintf(filename, "/proc/%d/stat", pid);
+        if (!read_stat(filename, proc))
+            *err = "Failed to read process stat file";
+        else {
+            sprintf(filename, "/proc/%d/cmdline", pid);
+            if (!read_cmdline(filename, proc)) 
+                *err = "Failed to read process command line";
+            else {        
+                sprintf(filename, "/proc/%d/status", pid);
+                if (!read_status(filename, proc))
+                    *err = "Failed to read process status file";
+                else {
+                    sprintf(filename, "/proc/%d/statm", pid);
+                    if (!read_mem(filename, proc))
+                        *err = "Failed to read process memory file";
                 }
-
-                strcpy(proc->name, cur_proc.name);
-                proc->uid = cur_proc.uid;
-                proc->gid = cur_proc.gid;
-
-                add_proc(proc_num++, proc);
-            } else {
-                proc->num_threads++;
             }
-        }
+        }       
 
-        closedir(task_dir);
+        if (*err) {
+            release_proc(proc);
+            break;
+        }                     
 
-        if (!threads) {
-            if (!add_proc(proc_num++, proc)) {
-                *err = "Failed to add process data";
-                return 0;
-            }
+        if (!add_proc(proc_num++, proc)) {
+            *err = "Failed to add process data";
+            break;
         }
     }
 
-    for (i = proc_num; i < num_procs; i++)
+    for (i = proc_num; i < num_alloc_procs; i++)
         procs[i] = NULL;
 
     closedir(proc_dir);
 
-    return 1;
+    return *err == NULL;
 }
