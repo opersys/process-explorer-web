@@ -86,14 +86,18 @@ var globalProcessUpdate = function () {
 $(document).ready(function () {
     $('#mainLayout').w2layout({
         name: 'mainLayout',
-        panels: [{
-            type: 'top',
-            size: 105,
-            content:
-                "<div id='cpuGraph'></div><div id='memGraph'></div>"
-        }, {
-            type: 'main'
-        }
+        panels: [
+            {
+                type: 'top',
+                size: 105,
+                content: "<div id='cpuGraph'></div><div id='memGraph'></div>"
+            },
+            {
+                type: 'main',
+                toolbar: {
+                    items: []
+                }
+            }
         ],
         onResize: function (ev) {
             if (procView)
