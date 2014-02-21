@@ -1,3 +1,5 @@
+"use strict";
+
 var MemInfo = Backbone.Model.extend({
     initialize: function () {
         this.set("memUsed");
@@ -181,10 +183,10 @@ var LogCat = Backbone.Model.extend({
     parse: function (input) {
         var ls, tag, pid, msg;
 
-        ls = input.line.split(":");
         tag = input.line[0];
-        pid = /\(\s*([0-9]*)\s*\)/.exec(ls[0])[1];
-        msg = ls[1];
+        ls = input.line.split(":");
+        pid = /\(\s*([0-9]*)\s*\)/.exec(ls.shift())[1];
+        msg = ls.join(":");
 
         return {
             no: input.no,
