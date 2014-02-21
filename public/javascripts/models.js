@@ -172,3 +172,55 @@ var ProcessCollection = Slickback.Collection.extend({
         this.on("change:ui-collapsed", this.reindex);
     }
 });
+
+var LogCat = Backbone.Model.extend({
+    url: "/sysinfo", // NOT USED
+    idAttribute: "no",
+
+    // Parse the brief logcat format.
+    parse: function (input) {
+        var ls, tag, pid, msg;
+
+        ls = input.line.split(":");
+        tag = input.line[0];
+        pid = /\(\s*([0-9]*)\s*\)/.exec(ls[0])[1];
+        msg = ls[1];
+
+        return {
+            no: input.no,
+            tag: tag,
+            pid: pid,
+            msg: msg
+        };
+    }
+});
+
+var LogCatLines = Slickback.Collection.extend({
+    model: LogCat,
+    url: "/sysinfo", // NOT USED
+
+    constructor: function () {
+        Backbone.Collection.apply(this, arguments);
+
+        var self = this;
+        var socket = io.connect("http://localhost:3000/logcat");
+
+        self.no = 0;
+
+        socket.on("logcat", function (lcData) {
+            // Split into lines
+            var lcLine, lcLines = lcData.split(/\n/);
+
+            while (lcLine = lcLines.shift()) {
+                if (lcLine != "") {
+                    self.add({
+                        no: self.no++,
+                        line: lcLine
+                    }, {
+                        parse: true
+                    });
+                }
+            }
+        });
+    }
+});

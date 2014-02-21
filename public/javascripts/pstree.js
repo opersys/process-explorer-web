@@ -1,14 +1,18 @@
 "use strict";
 
-var procView,
+var procView, logCatView,
     // ProcessCollection object, collection of all process.
     ps = new ProcessCollection(),
     // Global CPU Info
     globalCpu = new CpuInfo(),
     // Individual CPU info
     cpuInfo = new CpuInfoCollection(),
+    // Logcat
+    logCatLines = new LogCatLines(),
     // Memory info
     memInfo = new MemInfo(),
+    // Concept
+    logcat = new LogCat(),
     // CPU % chart
     cpuChart,
     // Mem % chart
@@ -88,15 +92,19 @@ $(document).ready(function () {
         name: 'mainLayout',
         panels: [
             {
-                type: 'top',
+                type: "top",
                 size: 105,
                 content: "<div id='cpuGraph'></div><div id='memGraph'></div>"
             },
             {
-                type: 'main',
+                type: "main",
                 toolbar: {
                     items: []
                 }
+            },
+            {
+                type: "preview",
+                size: 200
             }
         ],
         onResize: function (ev) {
@@ -126,9 +134,17 @@ $(document).ready(function () {
         el: $(w2ui["mainLayout"].el("main")),
         ps: ps
     });
+    logCatView = new LogCatView({
+        el: $(w2ui["mainLayout"].el("preview")),
+        logcat: logCatLines
+    });
 
     ps.on("remove", function (proc) {
         console.log("Process " + proc.get("name") + "[" + proc.get("pid") + "] removed.");
+    });
+
+    logCatLines.on("change", function (proc) {
+        console.log("BLARG");
     });
 
     $(window).resize($.debounce( 100, resizeWindow));

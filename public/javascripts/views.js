@@ -1,3 +1,63 @@
+var LogCatView = Backbone.View.extend({
+
+    _columns: [
+        { id: "tag", name: "T", field: "tag" },
+        { id: "pid", name: "PID", field: "pid" },
+        { id: "msg", name: "Message", field: "msg" }
+    ],
+
+    _options: {
+        enableColumnReorder: false,
+        formatterFactory: Slickback.BackboneModelFormatterFactory
+    },
+
+    _onPsRowCountChanged: function () {
+        this._grid.updateRowCount();
+        this.autoResize();
+        this._grid.render();
+    },
+
+    _onPsRowsChanged: function () {
+        this._grid.invalidate();
+        this.autoResize();
+        this._grid.render();
+    },
+
+    autoResize: function () {
+        if ($(this._grid.getCanvasNode()).width() == this.$el.width() &&
+            $(this._grid.getCanvasNode()).height() == this.$el.height())
+            return;
+
+        this._grid.resizeCanvas();
+        this._grid.autosizeColumns();
+    },
+
+    initialize: function (opts) {
+        var self = this;
+
+        this._grid = new Slick.Grid(this.$el, opts.logcat, this._columns, this._options);
+        this._logcat = opts.logcat;
+
+        this._logcat.on("add", function (m) {
+            self._grid.scrollRowToTop(m.get("no"));
+        });
+
+        // FIXME: SlickBack style events, we don't really need that.
+        this._logcat.onRowCountChanged.subscribe(function () {
+            self._onPsRowCountChanged.apply(self);
+        });
+        this._logcat.onRowsChanged.subscribe(function () {
+            self._onPsRowsChanged.apply(self)
+        });
+
+        this.render();
+    },
+
+    render: function () {
+        this._grid.resizeCanvas();
+    }
+});
+
 var ProcessView = Backbone.View.extend({
 
     _nameFormatter: function (row, cell, value, columnDef, proc) {
@@ -197,7 +257,7 @@ var ChartView = Backbone.View.extend({
 
     initialize: function (opts) {
         this._delay = opts.delay;
-        this._max = opts.max
+        this._max = opts.max;
         this._min = opts.min;
         this._field = opts.field;
         this._key = opts.key;
