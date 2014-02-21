@@ -3,6 +3,8 @@ var routes = require("./routes");
 var sysinfo = require("./routes/sysinfo");
 var http = require("http");
 var path = require("path");
+var socketio = require("socket.io");
+var spawn = require("child_process").spawn;
 
 var app = express();
 
@@ -26,6 +28,19 @@ if ("development" == app.get("env")) {
 app.get("/", routes.index);
 app.get("/sysinfo", sysinfo.sysinfo);
 
-http.createServer(app).listen(app.get('port'), function(){
-  console.log("Express server listening on port " + app.get("port"));
+var server = http.createServer(app);
+var ws = socketio.listen(server);
+
+server.listen(app.get('port'), function() {
+    console.log("Express server listening on port " + app.get("port"));
 });
+
+ws.of("/logcat")
+  .on("connection", function (socket) {
+    var logcat = spawn("logcat");
+
+    logcat.stdout.on("data", function (data) {
+        socket.emit("logcat", data.toString());
+    });
+});
+
