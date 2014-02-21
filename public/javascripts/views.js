@@ -1,3 +1,5 @@
+"use strict";
+
 var LogCatView = Backbone.View.extend({
 
     _columns: [
