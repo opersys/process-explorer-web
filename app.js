@@ -35,12 +35,19 @@ server.listen(app.get('port'), function() {
     console.log("Express server listening on port " + app.get("port"));
 });
 
-ws.of("/logcat")
-  .on("connection", function (socket) {
+ws.configure("development", function () {
+    ws.set("log level", 1);
+});
+
+ws.of("/logcat").on("connection", function (socket) {
     var logcat = spawn("logcat");
 
     logcat.stdout.on("data", function (data) {
         socket.emit("logcat", data.toString());
+    });
+
+    socket.on("disconnect", function () {
+        logcat.kill();
     });
 });
 
