@@ -90,6 +90,7 @@ var globalProcessUpdate = function () {
 $(document).ready(function () {
     $('#mainLayout').w2layout({
         name: 'mainLayout',
+        padding: 4,
         panels: [
             {
                 type: "top",
@@ -104,12 +105,18 @@ $(document).ready(function () {
             },
             {
                 type: "preview",
-                size: 200
+                size: 200,
+                resizer: 5,
+                resizable: true
             }
         ],
         onResize: function (ev) {
+            console.log("onResize");
+
             if (procView)
                 procView.autoResize();
+            if (logCatView)
+                logCatView.autoResize();
         }
     });
 

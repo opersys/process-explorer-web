@@ -3,9 +3,9 @@
 var LogCatView = Backbone.View.extend({
 
     _columns: [
-        { id: "tag", name: "T", field: "tag" },
-        { id: "pid", name: "PID", field: "pid" },
-        { id: "msg", name: "Message", field: "msg" }
+        { id: "tag", name: "T", field: "tag", minWidth: 20, maxWidth: 20 },
+        { id: "pid", name: "PID", field: "pid", minWidth: 50, maxWidth: 50 },
+        { id: "msg", name: "Message", field: "msg", minWidth: 300 }
     ],
 
     _options: {
@@ -14,15 +14,25 @@ var LogCatView = Backbone.View.extend({
     },
 
     _onPsRowCountChanged: function () {
+        var self = this;
+
         this._grid.updateRowCount();
-        this.autoResize();
-        this._grid.render();
+
+        $.debounce(500, function () {
+            self.autoResize();
+            self._grid.render();
+        });
     },
 
     _onPsRowsChanged: function () {
+        var self = this;
+
         this._grid.invalidate();
-        this.autoResize();
-        this._grid.render();
+
+        $.debounce(500, function () {
+            self.autoResize();
+            self._grid.render();
+        });
     },
 
     autoResize: function () {
@@ -40,9 +50,11 @@ var LogCatView = Backbone.View.extend({
         this._grid = new Slick.Grid(this.$el, opts.logcat, this._columns, this._options);
         this._logcat = opts.logcat;
 
-        this._logcat.on("add", function (m) {
-            self._grid.scrollRowToTop(m.get("no"));
-        });
+        this._logcat.on("add", $.debounce(250,
+            function (m) {
+                self._grid.scrollRowToTop(m.get("no"));
+            }
+        ));
 
         // FIXME: SlickBack style events, we don't really need that.
         this._logcat.onRowCountChanged.subscribe(function () {
@@ -111,7 +123,7 @@ var ProcessView = Backbone.View.extend({
         { id: "rss", name: "RSS", field: "rss", minWidth: 60, maxWidth: 80, sortable: true },
         { id: "shm", name: "SHM", field: "shm", minwidth: 60, maxWidth: 80, sortable: true },
         { id: "time", name: "Time", field: "time", minWidth: 60, maxWidth: 80, sortable: true },
-        { id: "cmdline", name: "Command line", field: "cmdline", minWidth: 100 }
+        { id: "cmdline", name: "Command line", field: "cmdline", minWidth: 80 }
     ],
 
     _options: {
@@ -148,20 +160,30 @@ var ProcessView = Backbone.View.extend({
     },
 
     _onPsRowCountChanged: function () {
+        var self = this;
+
         this._grid.updateRowCount();
-        this.autoResize();
-        this._grid.render();
+
+        $.debounce(500, function () {
+            self.autoResize();
+            self._grid.render();
+        });
     },
 
     _onPsRowsChanged: function () {
+        var self = this;
+
         this._grid.invalidate();
-        this.autoResize();
-        this._grid.render();
+
+        $.debounce(500, function () {
+            self.autoResize();
+            self._grid.render();
+        });
     },
 
     autoResize: function () {
-        if ($(this._grid.getCanvasNode()).width() == this.$el.width() &&
-            $(this._grid.getCanvasNode()).height() == this.$el.height())
+        if ($(this._grid.getCanvasNode()).width() == this.$el.innerWidth() &&
+            $(this._grid.getCanvasNode()).height() == this.$el.innerHeight())
             return;
 
         this._grid.resizeCanvas();

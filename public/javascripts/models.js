@@ -212,17 +212,23 @@ var LogCatLines = Slickback.Collection.extend({
         socket.on("logcat", function (lcData) {
             // Split into lines
             var lcLine, lcLines = lcData.split(/\n/);
+            var lcModels = [];
 
+            // Gather all the logcat lines so that they can be added
+            // to the collection in a single bunch hopefully reducing
+            // the processing time and lowering the number of events
+            // raised.
             while (lcLine = lcLines.shift()) {
                 if (lcLine != "") {
-                    self.add({
+                    lcModels.push({
                         no: self.no++,
                         line: lcLine
-                    }, {
-                        parse: true
                     });
                 }
             }
+
+            // Add all the models in a single call.
+            self.add(lcModels, {parse: true});
         });
     }
 });
