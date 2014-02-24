@@ -10,7 +10,9 @@ var LogCatView = Backbone.View.extend({
 
     _options: {
         enableColumnReorder: false,
-        formatterFactory: Slickback.BackboneModelFormatterFactory
+        formatterFactory: Slickback.BackboneModelFormatterFactory,
+        enableCellNavigation: true,
+        forceFitColumns: true
     },
 
     _onPsRowCountChanged: function () {
@@ -63,6 +65,8 @@ var LogCatView = Backbone.View.extend({
         this._logcat.onRowsChanged.subscribe(function () {
             self._onPsRowsChanged.apply(self)
         });
+
+        this._grid.setSelectionModel(new Slick.RowSelectionModel());
 
         this.render();
     },
@@ -128,7 +132,9 @@ var ProcessView = Backbone.View.extend({
 
     _options: {
         enableColumnReorder: false,
-        formatterFactory: Slickback.BackboneModelFormatterFactory
+        formatterFactory: Slickback.BackboneModelFormatterFactory,
+        enableCellNavigation: true,
+        forceFitColumns: true
     },
 
     _updateProcess: function (fname, proc, v, opts) {
@@ -149,8 +155,6 @@ var ProcessView = Backbone.View.extend({
             else
                 proc.set({"ui-collapsed": false});
         }
-
-        e.stopImmediatePropagation();
     },
 
     _onGridSort: function (e, args) {
@@ -259,6 +263,8 @@ var ProcessView = Backbone.View.extend({
         this._ps.onRowsChanged.subscribe(function () {
             self._onPsRowsChanged.apply(self)
         });
+
+        this._grid.setSelectionModel(new Slick.RowSelectionModel());
 
         this.render();
     },
