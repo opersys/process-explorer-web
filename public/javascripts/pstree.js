@@ -88,6 +88,8 @@ var globalProcessUpdate = function () {
 };
 
 $(document).ready(function () {
+    var pidFilterMode = false;
+
     $('#mainLayout').w2layout({
         name: 'mainLayout',
         padding: 4,
@@ -100,14 +102,34 @@ $(document).ready(function () {
             {
                 type: "main",
                 toolbar: {
-                    items: []
+                    items: [
+                        { type: "check", id: "btnPlay", caption: "Play", icon: "icon-play" }
+                    ]
                 }
             },
             {
                 type: "preview",
                 size: 200,
                 resizer: 5,
-                resizable: true
+                resizable: true,
+                toolbar: {
+                    name: "tbPreview",
+                    items: [
+                        { type: "check",  id: "btnFilterByProcess", caption: "Filter", icon: "icon-long-arrow-down" },
+                        { type: "button", id: "btnClear",           caption: "Clear",  icon: "icon-remove" }
+                    ],
+                    onClick: function (ev) {
+                        if (ev.target == "btnClear")
+                            logCatLines.reset();
+
+                        if (ev.target == "btnFilterByProcess") {
+                            pidFilterMode = !pidFilterMode;
+
+                            if (!pidFilterMode)
+                                logCatLines.clearPid();
+                        }
+                    }
+                }
             }
         ],
         onResize: function (ev) {
@@ -150,8 +172,9 @@ $(document).ready(function () {
         console.log("Process " + proc.get("name") + "[" + proc.get("pid") + "] removed.");
     });
 
-    logCatLines.on("change", function (proc) {
-        console.log("BLARG");
+    procView.on("onProcessSelected", function (el) {
+        if (pidFilterMode)
+            logCatLines.setPid(el.get("pid"));
     });
 
     $(window).resize($.debounce( 100, resizeWindow));
