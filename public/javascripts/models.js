@@ -201,6 +201,52 @@ var LogCatLines = Slickback.Collection.extend({
     model: LogCat,
     url: "/sysinfo", // NOT USED
 
+    set: function () {
+        var self = this;
+
+        Backbone.Collection.prototype.set.apply(this, arguments);
+
+        setTimeout(function () {
+            self.reindex.call(self);
+        }, 200);
+    },
+
+    setPid: function (pid) {
+        this.getItem = this._pid_getItem;
+        this.getLength = this._pid_getLength;
+        this._pid = pid;
+
+        this.reindex();
+    },
+
+    clearPid: function () {
+        this.getItem = function (i) { return this.models[i]; };
+        this.getLength = function () { return this.models.length; }
+
+        this._pid = null;
+
+        this.reindex();
+    },
+
+    reindex: function () {
+        var self = this;
+
+        this._rows = _.filter(this.models, function (m) {
+            return m.get("pid") == self._pid;
+        });
+
+        this.onRowCountChanged.notify();
+        this.onRowsChanged.notify();
+    },
+
+    _pid_getItem: function (i) {
+        return this._rows[i];
+    },
+
+    _pid_getLength: function () {
+        return this._rows.length;
+    },
+
     constructor: function () {
         Backbone.Collection.apply(this, arguments);
 

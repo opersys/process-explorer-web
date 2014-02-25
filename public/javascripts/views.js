@@ -58,6 +58,10 @@ var LogCatView = Backbone.View.extend({
             }
         ));
 
+        this._grid.onClick.subscribe(function (e, args) {
+            self._onGridClick.apply(self, [e, args]);
+        });
+
         // FIXME: SlickBack style events, we don't really need that.
         this._logcat.onRowCountChanged.subscribe(function () {
             self._onPsRowCountChanged.apply(self);
@@ -157,6 +161,13 @@ var ProcessView = Backbone.View.extend({
         }
     },
 
+    _onGridSelectedRowsChange: function (e, args) {
+        var sel = this._grid.getActiveCell();
+
+        if (sel)
+            this.trigger("onProcessSelected", this._grid.getDataItem(sel.row));
+    },
+
     _onGridSort: function (e, args) {
         this._ps.sortPs(args.sortCol.field, args.sortAsc);
         this._grid.invalidate();
@@ -237,6 +248,9 @@ var ProcessView = Backbone.View.extend({
         });
         this._grid.onSort.subscribe(function (e, args) {
             self._onGridSort.apply(self, [e, args]);
+        });
+        this._grid.onSelectedRowsChanged.subscribe(function (e, args) {
+            self._onGridSelectedRowsChange(self, [e, args]);
         });
 
         this._ps = opts.ps;
