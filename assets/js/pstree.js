@@ -110,6 +110,7 @@ $(document).ready(function () {
                 size: 200,
                 resizer: 5,
                 resizable: true,
+                class: "logcatview",
                 toolbar: {
                     name: "tbPreview",
                     items: [
@@ -162,7 +163,7 @@ $(document).ready(function () {
         ps: ps
     });
     logCatView = new LogCatView({
-        el: $(w2ui["mainLayout"].el("preview")),
+        el: $(w2ui["mainLayout"].el("preview")).addClass("logcatview"),
         logcat: logCatLines
     });
 
