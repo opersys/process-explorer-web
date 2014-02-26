@@ -1,14 +1,24 @@
 {
-  "name": "application-name",
-  "version": "0.0.1",
-  "private": true,
-  "scripts": {
-    "start": "node app.js"
-  },
-  "dependencies": {
-    "express": "3.4.7",
-    "jade": "*",
-    "underscore": "*",
-    "socket.io": "*"
-  }
+    "name": "process-explorer",
+    "version": "0.0.1",
+    "private": true,
+    "scripts": {
+        "start": "node-android app.js"
+    },
+    "dependencies": {
+        "express": "3.4.6",
+        "underscore": "*",
+        "socket.io": "*"
+    },
+    "devDependencies": {
+        "jade": "*",
+        "grunt": "~0.4.2",
+        "grunt-contrib-uglify": "*",
+        "grunt-contrib-concat": "*",
+        "grunt-css": "*",
+        "grunt-copy-to": "*",   
+        "grunt-mkdir": "*",
+        "grunt-jade": "*",
+        "grunt-exec": "*"
+    }
 }
