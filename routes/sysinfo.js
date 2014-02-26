@@ -1,5 +1,12 @@
 var _ = require("underscore");
-var sysinfo = require("../build/Debug/pswalk");
+var sysinfo = null;
+
+try {
+    sysinfo = require("../build/Debug/pswalk");
+} catch (e) {
+    sysinfo = require("../pswalk");
+}
+
 var util = require("util");
 
 function compress(objlist) {
