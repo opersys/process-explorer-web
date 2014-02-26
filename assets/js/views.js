@@ -12,7 +12,7 @@ var LogCatView = Backbone.View.extend({
         enableColumnReorder: false,
         formatterFactory: Slickback.BackboneModelFormatterFactory,
         enableCellNavigation: true,
-        forceFitColumns: true
+        forceFitColumns: true,
     },
 
     _onPsRowCountChanged: function () {
