@@ -139,12 +139,12 @@ $(document).ready(function () {
                         { type: "check", id: "btnPlay", caption: "Play", icon: "icon-play",
                           checked: options.getOptionValue("playing")
                         },
-                        { type: 'menu',  id: 'mnuDelay', caption: 'Delay', img: 'icon-time', items: [
+                        { type: "menu",  id: "mnuDelay", caption: "Delay", img: "icon-time", items: [
                             { text: "1 sec" },
                             { text: "2 sec" },
                             { text: "5 sec" },
                             { text: "10 sec" }
-                        ]}
+                        ]},
                     ],
                     onClick: function (ev) {
                         if (ev.target == "btnPlay")
@@ -183,12 +183,13 @@ $(document).ready(function () {
             }
         ],
         onResize: function (ev) {
-            console.log("onResize");
-
-            if (procView)
-                procView.autoResize();
-            if (logCatView)
-                logCatView.autoResize();
+            // Thanks, w2ui. This thing is elegant but rather confusing...
+            ev.onComplete = function () {
+                if (procView)
+                    procView.autoResize();
+                if (logCatView)
+                    logCatView.autoResize();
+            };
         }
     });
 
