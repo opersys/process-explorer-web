@@ -73,9 +73,9 @@ var LogCatView = Backbone.View.extend({
     },
 
     autoResize: function () {
-        if ($(this._grid.getCanvasNode()).width() == this.$el.width() &&
+        /*if ($(this._grid.getCanvasNode()).width() == this.$el.width() &&
             $(this._grid.getCanvasNode()).height() == this.$el.height())
-            return;
+            return;*/
 
         this._grid.resizeCanvas();
         this._grid.autosizeColumns();
@@ -234,9 +234,9 @@ var ProcessView = Backbone.View.extend({
     },
 
     autoResize: function () {
-        if ($(this._grid.getCanvasNode()).width() == this.$el.innerWidth() &&
+        /*if ($(this._grid.getCanvasNode()).width() == this.$el.innerWidth() &&
             $(this._grid.getCanvasNode()).height() == this.$el.innerHeight())
-            return;
+            return;*/
 
         this._grid.resizeCanvas();
         this._grid.autosizeColumns();
