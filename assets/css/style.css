@@ -6,6 +6,15 @@ a {
     color: #00B7FF;
 }
 
+/* CHART VIEW */
+
+.chartView {
+    padding-top: 2px;
+    padding-bottom: 2px;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
 /* LOGCAT VIEW SPECIFICS */
 
 .logcatview .slick-viewport .grid-canvas .slick-cell {
