@@ -1,4 +1,6 @@
 var procView, logCatView,
+    // Options
+    options = new Options(),
     // ProcessCollection object, collection of all process.
     ps = new ProcessCollection(),
     // Global CPU Info
@@ -86,7 +88,40 @@ var globalProcessUpdate = function () {
 };
 
 $(document).ready(function () {
-    var pidFilterMode = false;
+    var updateTimer;
+
+    options.fetch();
+    options.initOption("pidFilterMode", false);
+    options.initOption("rowColorMode", false);
+    options.initOption("playing", true);
+    options.initOption("delay", 5000);
+
+    // Initialize the timer.
+    updateTimer = $.timer(globalProcessUpdate, options.getOptionValue("delay"));
+
+    options.getOption("pidFilterMode").on("change", function () {
+        if (!options.getOptionValue("pidFilterMode"))
+            logCatLines.clearPid();
+    });
+
+    options.getOption("rowColorMode").on("change", function () {
+        if (options.getOptionValue("rowColorMode"))
+            logCatView.applyColors();
+        else
+            logCatView.clearColors();
+    });
+
+    options.getOption("playing").on("change", function () {
+        // The process collection updates every 5 seconds.
+        if (options.getOptionValue("playing"))
+            updateTimer.play();
+        else
+            updateTimer.pause();
+    });
+
+    options.getOption("delay").on("change", function () {
+        updateTimer.set({ time: options.getOptionValue("delay") });
+    });
 
     $('#mainLayout').w2layout({
         name: 'mainLayout',
@@ -101,8 +136,20 @@ $(document).ready(function () {
                 type: "main",
                 toolbar: {
                     items: [
-                        { type: "check", id: "btnPlay", caption: "Play", icon: "icon-play" }
-                    ]
+                        { type: "check", id: "btnPlay", caption: "Play", icon: "icon-play",
+                          checked: options.getOptionValue("playing")
+                        },
+                        { type: 'menu',  id: 'mnuDelay', caption: 'Delay', img: 'icon-time', items: [
+                            { text: "1 sec" },
+                            { text: "2 sec" },
+                            { text: "5 sec" },
+                            { text: "10 sec" }
+                        ]}
+                    ],
+                    onClick: function (ev) {
+                        if (ev.target == "btnPlay")
+                            options.toggleOption("playing");
+                    }
                 }
             },
             {
@@ -114,19 +161,23 @@ $(document).ready(function () {
                 toolbar: {
                     name: "tbPreview",
                     items: [
-                        { type: "check",  id: "btnFilterByProcess", caption: "Filter", icon: "icon-long-arrow-down" },
-                        { type: "button", id: "btnClear",           caption: "Clear",  icon: "icon-remove" }
+                        { type: "check",  id: "btnFilterByProcess", caption: "Filter", icon: "icon-long-arrow-down",
+                          checked: options.getOptionValue("pidFilterMode")
+                        },
+                        { type: "button", id: "btnClear",           caption: "Clear",  icon: "icon-remove" },
+                        { type: "check",  id: "btnColors",          caption: "Color",  icon: "icon-tint",
+                          checked: options.getOptionValue("rowColorMode")
+                        }
                     ],
                     onClick: function (ev) {
                         if (ev.target == "btnClear")
                             logCatLines.reset();
 
-                        if (ev.target == "btnFilterByProcess") {
-                            pidFilterMode = !pidFilterMode;
+                        if (ev.target == "btnFilterByProcess")
+                            options.toggleOption("pidFilterMode");
 
-                            if (!pidFilterMode)
-                                logCatLines.clearPid();
-                        }
+                        if (ev.target == "btnColors")
+                            options.toggleOption("rowColorMode");
                     }
                 }
             }
@@ -172,17 +223,16 @@ $(document).ready(function () {
     });
 
     procView.on("onProcessSelected", function (el) {
-        if (pidFilterMode)
+        if (options.getOption("pidFilterMode"))
             logCatLines.setPid(el.get("pid"));
     });
 
-    $(window).resize($.debounce( 100, resizeWindow));
+    $(window).resize($.debounce(100, resizeWindow));
+
+    options.activate();
 
     // Update the process list right now.
     globalProcessUpdate();
-
-    // The process collection updates every 5 seconds.
-    window.setInterval(globalProcessUpdate, 5000);
 
     // Reformat the window content.
     resizeWindow();

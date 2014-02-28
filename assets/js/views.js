@@ -2,6 +2,8 @@
 
 var LogCatView = Backbone.View.extend({
 
+    doApplyColors: false,
+
     _columns: [
         { id: "tag", name: "T", field: "tag", minWidth: 20, maxWidth: 20 },
         { id: "pid", name: "PID", field: "pid", minWidth: 50, maxWidth: 50 },
@@ -12,7 +14,38 @@ var LogCatView = Backbone.View.extend({
         enableColumnReorder: false,
         formatterFactory: Slickback.BackboneModelFormatterFactory,
         enableCellNavigation: true,
-        forceFitColumns: true,
+        forceFitColumns: true
+    },
+
+    clearColors: function () {
+        this._grid.removeCellCssStyles("warnings");
+        this._grid.removeCellCssStyles("errors");
+
+        this.doApplyColors = false
+    },
+
+    applyColors: function () {
+        var errorRows = [], warningRows = [];
+        var errorCss = {
+            "tag": "error", "pid": "error", "msg": "error"
+        };
+        var warningCss = {
+            "tag": "warning", "pid": "warning", "msg": "warning"
+        };
+
+        //
+        for (var i = 0; i < this._grid.getDataLength(); i++) {
+            var row = this._grid.getDataItem(i);
+            if (row.get("tag") == "E")
+                errorRows[i] = errorCss;
+            else if (row.get("tag") == "W")
+                warningRows[i] = warningCss;
+        }
+
+        this._grid.setCellCssStyles("warnings", warningRows);
+        this._grid.setCellCssStyles("errors", errorRows);
+
+        this.doApplyColors = true;
     },
 
     _onPsRowCountChanged: function () {
@@ -21,9 +54,11 @@ var LogCatView = Backbone.View.extend({
         this._grid.updateRowCount();
 
         $.debounce(500, function () {
-            self.autoResize();
-            self._grid.render();
-        });
+        //    self.autoResize();
+        //   self._grid.render();
+            if (self.doApplyColors)
+                self.applyColors();
+        })();
     },
 
     _onPsRowsChanged: function () {
@@ -31,10 +66,10 @@ var LogCatView = Backbone.View.extend({
 
         this._grid.invalidate();
 
-        $.debounce(500, function () {
-            self.autoResize();
-            self._grid.render();
-        });
+        //$.debounce(500, function () {
+        //    self.autoResize();
+        //    //self._grid.render();
+        //})();
     },
 
     autoResize: function () {
@@ -48,6 +83,12 @@ var LogCatView = Backbone.View.extend({
 
     initialize: function (opts) {
         var self = this;
+        var errorCss = {
+            "tag": "error", "pid": "error", "msg": "error"
+        };
+        var warningCss = {
+            "tag": "warning", "pid": "warning", "msg": "warning"
+        };
 
         this._grid = new Slick.Grid(this.$el, opts.logcat, this._columns, this._options);
         this._logcat = opts.logcat;
@@ -57,10 +98,6 @@ var LogCatView = Backbone.View.extend({
                 self._grid.scrollRowToTop(m.get("no"));
             }
         ));
-
-        this._grid.onClick.subscribe(function (e, args) {
-            self._onGridClick.apply(self, [e, args]);
-        });
 
         // FIXME: SlickBack style events, we don't really need that.
         this._logcat.onRowCountChanged.subscribe(function () {
@@ -179,10 +216,10 @@ var ProcessView = Backbone.View.extend({
 
         this._grid.updateRowCount();
 
-        $.debounce(500, function () {
+        /*$.debounce(500, function () {
             self.autoResize();
             self._grid.render();
-        });
+        })();(*/
     },
 
     _onPsRowsChanged: function () {
@@ -190,10 +227,10 @@ var ProcessView = Backbone.View.extend({
 
         this._grid.invalidate();
 
-        $.debounce(500, function () {
+        /*$.debounce(500, function () {
             self.autoResize();
             self._grid.render();
-        });
+        })();*/
     },
 
     autoResize: function () {

@@ -76,8 +76,10 @@ module.exports = function (grunt) {
                     "assets/jslib/jquery-2.0.3.min.js",
                     "assets/jslib/jquery.event.drag-2.2.js",
                     "assets/jslib/jquery.ba-throttle-debounce.min.js",
+                    "assets/jslib/jquery.timer.js",
                     "assets/jslib/underscore-min.js",
                     "assets/jslib/backbone.js",
+                    "assets/jslib/backbone.localStorage-min.js",
                     "assets/jslib/humanize.min.js",
                     "assets/jslib/Queue.js",
                     "assets/jslib/moment.min.js",
@@ -92,7 +94,11 @@ module.exports = function (grunt) {
                 dest: "dist/public/js/<%= pkg.name %>_libs.js"
             },
             dist_main: {
-                src: [ "assets/js/*.js" ],
+                src: [
+                    "assets/js/models.js",
+                    "assets/js/views.js",
+                    "assets/js/pstree.js"
+                ],
                 dest: "dist/public/js/<%= pkg.name %>_main.js"
             }
         },
