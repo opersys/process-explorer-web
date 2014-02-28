@@ -343,20 +343,32 @@ var ChartView = Backbone.View.extend({
         this._field = opts.field;
         this._key = opts.key;
         this._model = opts.model;
+        this._caption = opts.caption;
+        this._width = opts.width;
+        this._height = opts.height;
 
         this.$el.css("display", "inline-block");
-        this.$el.width(opts.width);
-        this.$el.height(opts.height);
+        //this.$el.width(opts.width);
+        //this.$el.height(opts.height);
 
         this.render();
     },
 
     render: function () {
+        this._wrapper = $("<div></div>")
+            .addClass("chartView")
+            .width(this._width)
+            .height(this._height);
+        this._caption = $("<span>" + this._caption + "</span>");
         this._canvas = $("<canvas></canvas>")
-            .attr("height", this.$el.height())
-            .attr("width", this.$el.width());
 
-        this.$el.append(this._canvas);
+        this.$el.append(this._wrapper
+            .append(this._caption)
+            .append(this._canvas));
+
+        this._canvas
+            .attr("height", this._wrapper.height() - this._caption.height())
+            .attr("width", this._wrapper.width())
 
         this._smoothie = new SmoothieChart({
             millisPerPixel: 90,

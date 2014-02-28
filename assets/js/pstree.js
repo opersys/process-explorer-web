@@ -192,22 +192,22 @@ $(document).ready(function () {
         }
     });
 
-    $(w2ui["mainLayout"].el("top")).append($("#graphLayout"));
-
     cpuChart = new ChartView({
         el: $("#cpuGraph"),
         max: 100,
         min: 0,
         delay: 5000,
         width: 300,
-        height: 101
+        height: 101,
+        caption: "CPU"
     });
     memChart = new ChartView({
         el: $("#memGraph"),
         min: 0,
         delay: 5000,
         width: 300,
-        height: 101
+        height: 101,
+        caption: "Memory"
     });
     procView = new ProcessView({
         el: $(w2ui["mainLayout"].el("main")),
