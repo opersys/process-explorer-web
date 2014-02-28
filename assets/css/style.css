@@ -17,6 +17,14 @@ a {
     height: 0px;
 }
 
+.logcatview .slick-cell.error {
+    background-color: red;
+}
+
+.logcatview .slick-cell.warning {
+    background-color: #ffff00;
+}
+
 /* PROCESS VIEW SPECIFICS */
 
 /* Process view treeview feature. */
