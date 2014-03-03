@@ -82,6 +82,11 @@ var LogCatView = Backbone.View.extend({
     },
 
     initialize: function (opts) {
+        this._logcat = opts.logcat;
+        this.render();
+    },
+
+    render: function () {
         var self = this;
         var errorCss = {
             "tag": "error", "pid": "error", "msg": "error"
@@ -90,8 +95,7 @@ var LogCatView = Backbone.View.extend({
             "tag": "warning", "pid": "warning", "msg": "warning"
         };
 
-        this._grid = new Slick.Grid(this.$el, opts.logcat, this._columns, this._options);
-        this._logcat = opts.logcat;
+        this._grid = new Slick.Grid(this.$el, this._logcat, this._columns, this._options);
 
         this._logcat.on("add", $.debounce(250,
             function (m) {
@@ -109,10 +113,6 @@ var LogCatView = Backbone.View.extend({
 
         this._grid.setSelectionModel(new Slick.RowSelectionModel());
 
-        this.render();
-    },
-
-    render: function () {
         this._grid.resizeCanvas();
     }
 });
@@ -243,6 +243,11 @@ var ProcessView = Backbone.View.extend({
     },
 
     initialize: function (opts) {
+        this._ps = opts.ps;
+        this.render();
+    },
+
+    render: function () {
         var self = this;
 
         // Create and initialize the grid as per:
@@ -290,10 +295,6 @@ var ProcessView = Backbone.View.extend({
             self._onGridSelectedRowsChange(self, [e, args]);
         });
 
-        this._ps = opts.ps;
-
-        //this._cont.on("resize", this._onResize());
-
         this._ps.on("change:cpuPct", function (m, v, opts) {
             self._updateProcess("cpuPct", m, v, opts);
         });
@@ -303,7 +304,7 @@ var ProcessView = Backbone.View.extend({
         this._ps.on("change:vss", function (m, v, opts) {
             self._updateProcess("vss", m, v, opts)
         });
-        this._ps.on("change:rss", function (m, v, opts) { 
+        this._ps.on("change:rss", function (m, v, opts) {
             self._updateProcess("rss", m, v, opts)
         });
 
@@ -317,10 +318,6 @@ var ProcessView = Backbone.View.extend({
 
         this._grid.setSelectionModel(new Slick.RowSelectionModel());
 
-        this.render();
-    },
-
-    render: function () {
         this._grid.resizeCanvas();
     }
 });

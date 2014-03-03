@@ -87,6 +87,16 @@ var globalProcessUpdate = function () {
     });
 };
 
+function setButton(toolbar, btnId, value) {
+    _.each(toolbar.items, function (b) {
+        if (b.id == btnId) {
+            _.each(_.keys(value), function (k) {
+                b[k] = value[k];
+            });
+        }
+    });
+}
+
 $(document).ready(function () {
     var updateTimer;
 
@@ -95,6 +105,8 @@ $(document).ready(function () {
     options.initOption("rowColorMode", false);
     options.initOption("playing", true);
     options.initOption("delay", 5000);
+    options.initOption("maximizeLogcat", false);
+    options.initOption("minimizeLogcat", false);
 
     // Initialize the timer.
     updateTimer = $.timer(globalProcessUpdate, options.getOptionValue("delay"));
@@ -123,8 +135,32 @@ $(document).ready(function () {
         updateTimer.set({ time: options.getOptionValue("delay") });
     });
 
-    $('#mainLayout').w2layout({
-        name: 'mainLayout',
+    options.getOption("minimizeLogcat").on("change", function () {
+        var panel = w2ui["mainLayout"].get("preview");
+
+        if (options.getOptionValue("minimizeLogcat")) {
+            setButton(panel.toolbar, "btnFilterByProcess", {hidden: true});
+            setButton(panel.toolbar, "btnClear", {hidden: true});
+            setButton(panel.toolbar, "btnColors", {hidden: true});
+            setButton(panel.toolbar, "btnMinimize", {icon: "icon-chevron-up"});
+
+            w2ui["mainLayout"].set("preview", {size: 0});
+        } else {
+            setButton(panel.toolbar, "btnFilterByProcess", {hidden: false});
+            setButton(panel.toolbar, "btnClear", {hidden: false});
+            setButton(panel.toolbar, "btnColors", {hidden: false});
+            setButton(panel.toolbar, "btnMinimize", {icon: "icon-chevron-down"});
+
+            w2ui["mainLayout"].set("preview", {size: 200});
+        }
+
+        panel.toolbar.refresh();
+        logCatView.setElement(w2ui["mainLayout"].el("preview"));
+        logCatView.render();
+    });
+
+    $("#mainLayout").w2layout({
+        name: "mainLayout",
         padding: 4,
         panels: [
             {
@@ -145,6 +181,7 @@ $(document).ready(function () {
                             { text: "5 sec" },
                             { text: "10 sec" }
                         ]},
+                        { type: ""}
                     ],
                     onClick: function (ev) {
                         if (ev.target == "btnPlay")
@@ -167,7 +204,9 @@ $(document).ready(function () {
                         { type: "button", id: "btnClear",           caption: "Clear",  icon: "icon-remove" },
                         { type: "check",  id: "btnColors",          caption: "Color",  icon: "icon-tint",
                           checked: options.getOptionValue("rowColorMode")
-                        }
+                        },
+                        { type: "spacer" },
+                        { type: "button", id: "btnMinimize", icon: "icon-chevron-down" }
                     ],
                     onClick: function (ev) {
                         if (ev.target == "btnClear")
@@ -178,6 +217,12 @@ $(document).ready(function () {
 
                         if (ev.target == "btnColors")
                             options.toggleOption("rowColorMode");
+
+                        if (ev.target == "btnMaximize")
+                            options.toggleOption("maximizeLogcat");
+
+                        if (ev.target == "btnMinimize")
+                            options.toggleOption("minimizeLogcat");
                     }
                 }
             }
