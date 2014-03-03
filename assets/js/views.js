@@ -373,7 +373,10 @@ var ChartView = Backbone.View.extend({
         this._smoothie = new SmoothieChart({
             millisPerPixel: 90,
             maxValue: this._max,
-            minValue: this._min
+            minValue: this._min,
+            grid: {
+                verticalSections: 5
+            }
         });
 
         this._smoothie.streamTo(this._canvas[0], this._delay);
