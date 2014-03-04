@@ -111,26 +111,6 @@ $(document).ready(function () {
     // Initialize the timer.
     updateTimer = $.timer(globalProcessUpdate, options.getOptionValue("delay"));
 
-    options.getOption("pidFilterMode").on("change", function () {
-        if (!options.getOptionValue("pidFilterMode"))
-            logCatLines.clearPid();
-    });
-
-    options.getOption("rowColorMode").on("change", function () {
-        if (options.getOptionValue("rowColorMode"))
-            logCatView.applyColors();
-        else
-            logCatView.clearColors();
-    });
-
-    options.getOption("playing").on("change", function () {
-        // The process collection updates every 5 seconds.
-        if (options.getOptionValue("playing"))
-            updateTimer.play();
-        else
-            updateTimer.pause();
-    });
-
     options.getOption("delay").on("change", function () {
         updateTimer.set({ time: options.getOptionValue("delay") });
     });
@@ -218,9 +198,6 @@ $(document).ready(function () {
                         if (ev.target == "btnColors")
                             options.toggleOption("rowColorMode");
 
-                        if (ev.target == "btnMaximize")
-                            options.toggleOption("maximizeLogcat");
-
                         if (ev.target == "btnMinimize")
                             options.toggleOption("minimizeLogcat");
                     }
@@ -257,11 +234,13 @@ $(document).ready(function () {
     });
     procView = new ProcessView({
         el: $(w2ui["mainLayout"].el("main")),
-        ps: ps
+        ps: ps,
+        options: options
     });
     logCatView = new LogCatView({
         el: $(w2ui["mainLayout"].el("preview")).addClass("logcatview"),
-        logcat: logCatLines
+        logcat: logCatLines,
+        options: options
     });
 
     ps.on("remove", function (proc) {

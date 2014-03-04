@@ -1,122 +1,3 @@
-"use strict";
-
-var LogCatView = Backbone.View.extend({
-
-    doApplyColors: false,
-
-    _columns: [
-        { id: "tag", name: "T", field: "tag", minWidth: 20, maxWidth: 20 },
-        { id: "pid", name: "PID", field: "pid", minWidth: 50, maxWidth: 50 },
-        { id: "msg", name: "Message", field: "msg", minWidth: 300 }
-    ],
-
-    _options: {
-        enableColumnReorder: false,
-        formatterFactory: Slickback.BackboneModelFormatterFactory,
-        enableCellNavigation: true,
-        forceFitColumns: true
-    },
-
-    clearColors: function () {
-        this._grid.removeCellCssStyles("warnings");
-        this._grid.removeCellCssStyles("errors");
-
-        this.doApplyColors = false
-    },
-
-    applyColors: function () {
-        var errorRows = [], warningRows = [];
-        var errorCss = {
-            "tag": "error", "pid": "error", "msg": "error"
-        };
-        var warningCss = {
-            "tag": "warning", "pid": "warning", "msg": "warning"
-        };
-
-        //
-        for (var i = 0; i < this._grid.getDataLength(); i++) {
-            var row = this._grid.getDataItem(i);
-            if (row.get("tag") == "E")
-                errorRows[i] = errorCss;
-            else if (row.get("tag") == "W")
-                warningRows[i] = warningCss;
-        }
-
-        this._grid.setCellCssStyles("warnings", warningRows);
-        this._grid.setCellCssStyles("errors", errorRows);
-
-        this.doApplyColors = true;
-    },
-
-    _onPsRowCountChanged: function () {
-        var self = this;
-
-        this._grid.updateRowCount();
-
-        $.debounce(500, function () {
-        //    self.autoResize();
-        //   self._grid.render();
-            if (self.doApplyColors)
-                self.applyColors();
-        })();
-    },
-
-    _onPsRowsChanged: function () {
-        var self = this;
-
-        this._grid.invalidate();
-
-        //$.debounce(500, function () {
-        //    self.autoResize();
-        //    //self._grid.render();
-        //})();
-    },
-
-    autoResize: function () {
-        /*if ($(this._grid.getCanvasNode()).width() == this.$el.width() &&
-            $(this._grid.getCanvasNode()).height() == this.$el.height())
-            return;*/
-
-        this._grid.resizeCanvas();
-        this._grid.autosizeColumns();
-    },
-
-    initialize: function (opts) {
-        this._logcat = opts.logcat;
-        this.render();
-    },
-
-    render: function () {
-        var self = this;
-        var errorCss = {
-            "tag": "error", "pid": "error", "msg": "error"
-        };
-        var warningCss = {
-            "tag": "warning", "pid": "warning", "msg": "warning"
-        };
-
-        this._grid = new Slick.Grid(this.$el, this._logcat, this._columns, this._options);
-
-        this._logcat.on("add", $.debounce(250,
-            function (m) {
-                self._grid.scrollRowToTop(m.get("no"));
-            }
-        ));
-
-        // FIXME: SlickBack style events, we don't really need that.
-        this._logcat.onRowCountChanged.subscribe(function () {
-            self._onPsRowCountChanged.apply(self);
-        });
-        this._logcat.onRowsChanged.subscribe(function () {
-            self._onPsRowsChanged.apply(self)
-        });
-
-        this._grid.setSelectionModel(new Slick.RowSelectionModel());
-
-        this._grid.resizeCanvas();
-    }
-});
-
 var ProcessView = Backbone.View.extend({
 
     _nameFormatter: function (row, cell, value, columnDef, proc) {
@@ -157,7 +38,7 @@ var ProcessView = Backbone.View.extend({
             return m.format("hh[h]mm");
     },
 
-    _columns: [
+    _gridColumns: [
         { id: "name", name: "Name", field: "name" },
         { id: "pid", name: "PID", field: "pid", minWidth: 30, maxWidth: 50 },
         { id: "state", name: "S", field: "state", minWidth: 15, maxWidth: 20 },
@@ -171,7 +52,7 @@ var ProcessView = Backbone.View.extend({
         { id: "cmdline", name: "Command line", field: "cmdline", minWidth: 80 }
     ],
 
-    _options: {
+    _gridOptions: {
         enableColumnReorder: false,
         formatterFactory: Slickback.BackboneModelFormatterFactory,
         enableCellNavigation: true,
@@ -244,6 +125,21 @@ var ProcessView = Backbone.View.extend({
 
     initialize: function (opts) {
         this._ps = opts.ps;
+        this._options = opts.options;
+
+        // Add the options handlers.
+        this._options.getOption("pidFilterMode").on("change", function () {
+            if (!options.getOptionValue("pidFilterMode"))
+                logCatLines.clearPid();
+        });
+
+        this._options.getOption("rowColorMode").on("change", function () {
+            if (options.getOptionValue("rowColorMode"))
+                logCatView.applyColors();
+            else
+                logCatView.clearColors();
+        });
+
         this.render();
     },
 
@@ -252,36 +148,36 @@ var ProcessView = Backbone.View.extend({
 
         // Create and initialize the grid as per:
         // https://github.com/mleibman/SlickGrid/blob/gh-pages/examples/example-explicit-initialization.html
-        this._grid = new Slick.Grid(this.$el, ps, this._columns, this._options);
+        this._grid = new Slick.Grid(this.$el, ps, this._gridColumns, this._gridOptions);
 
         // Initialize the column formatters and call the formatters
         // in the context of the view.
 
-        this._columns[this._grid.getColumnIndex("name")].formatter = function () {
+        this._gridColumns[this._grid.getColumnIndex("name")].formatter = function () {
             return self._nameFormatter.apply(self, arguments);
         };
 
-        this._columns[this._grid.getColumnIndex("cpuPct")].formatter = function () {
+        this._gridColumns[this._grid.getColumnIndex("cpuPct")].formatter = function () {
             return self._percentFormatter.apply(self, arguments);
         };
 
-        this._columns[this._grid.getColumnIndex("memPct")].formatter = function () {
+        this._gridColumns[this._grid.getColumnIndex("memPct")].formatter = function () {
             return self._percentFormatter.apply(self, arguments);
         };
 
-        this._columns[this._grid.getColumnIndex("rss")].formatter = function () {
+        this._gridColumns[this._grid.getColumnIndex("rss")].formatter = function () {
             return self._memoryFormatter.apply(self, arguments);
         };
 
-        this._columns[this._grid.getColumnIndex("vss")].formatter = function () {
+        this._gridColumns[this._grid.getColumnIndex("vss")].formatter = function () {
             return self._memoryFormatter.apply(self, arguments);
         };
 
-        this._columns[this._grid.getColumnIndex("shm")].formatter = function () {
+        this._gridColumns[this._grid.getColumnIndex("shm")].formatter = function () {
             return self._memoryFormatter.apply(self, arguments);
         };
 
-        this._columns[this._grid.getColumnIndex("time")].formatter = function () {
+        this._gridColumns[this._grid.getColumnIndex("time")].formatter = function () {
             return self._timeFormatter.apply(self, arguments);
         };
 
@@ -322,78 +218,3 @@ var ProcessView = Backbone.View.extend({
     }
 });
 
-var ChartView = Backbone.View.extend({
-
-    _colorIdx: 0,
-    _colors: [
-        "#ff0000", "#00ffff", "#0000ff", "#0000a0", "#add8e6",
-        "#800080", "#ffff00", "#00ff00", "#ff00ff", "#ffffff",
-        "#c0c0c0", "#808080", "#000000", "#ffa500", "#a52a2a",
-        "#800000", "#008000", "#808000"
-    ],
-    _series: {},
-
-    initialize: function (opts) {
-        this._delay = opts.delay;
-        this._max = opts.max;
-        this._min = opts.min;
-        this._field = opts.field;
-        this._key = opts.key;
-        this._model = opts.model;
-        this._caption = opts.caption;
-        this._width = opts.width;
-        this._height = opts.height;
-
-        this.$el.css("display", "inline-block");
-        //this.$el.width(opts.width);
-        //this.$el.height(opts.height);
-
-        this.render();
-    },
-
-    render: function () {
-        this._wrapper = $("<div></div>")
-            .addClass("chartView")
-            .width(this._width)
-            .height(this._height);
-        this._caption = $("<span>" + this._caption + "</span>");
-        this._canvas = $("<canvas></canvas>")
-
-        this.$el.append(this._wrapper
-            .append(this._caption)
-            .append(this._canvas));
-
-        this._canvas
-            .attr("height", this._wrapper.height() - this._caption.height())
-            .attr("width", this._wrapper.width())
-
-        this._smoothie = new SmoothieChart({
-            millisPerPixel: 90,
-            maxValue: this._max,
-            minValue: this._min,
-            grid: {
-                verticalSections: 5
-            }
-        });
-
-        this._smoothie.streamTo(this._canvas[0], this._delay);
-    },
-
-    serie: function (skey, field, m) {
-        var self = this;
-
-        if (!self._series[skey]) {
-            self._series[skey] = new TimeSeries();
-            self._smoothie.addTimeSeries(self._series[skey], {
-                lineWidth: 2,
-                strokeStyle: this._colors[this._colorIdx++]
-            });
-
-            m.on("change:" + field, function (m) {
-                self._series[skey].append(new Date().getTime(), m.get(field));
-            });
-
-            //this._smoothie.streamTo(this._canvas.one(), this._delay);
-        }
-    }
-});
