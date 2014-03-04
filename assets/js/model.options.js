@@ -33,6 +33,15 @@ var Options = Backbone.Collection.extend({
         return this.getOption(opt).get("val");
     },
 
+    setOptionValue: function (opt, nval) {
+        var m;
+        if ((m = this.findWhere({ opt: opt }))) {
+            var v = m.get("val");
+            m.set("val", nval);
+            m.save();
+        }
+    },
+
     activate: function (opt) {
         this.forEach(function (opt) {
             opt.trigger("change");

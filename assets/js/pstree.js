@@ -111,8 +111,26 @@ $(document).ready(function () {
     // Initialize the timer.
     updateTimer = $.timer(globalProcessUpdate, options.getOptionValue("delay"));
 
+    options.getOption("playing").on("change", function () {
+        var v = options.getOptionValue("playing");
+
+        if (v)
+            updateTimer.play();
+        else
+            updateTimer.pause();
+    });
+
     options.getOption("delay").on("change", function () {
-        updateTimer.set({ time: options.getOptionValue("delay") });
+        var v = options.getOptionValue("delay");
+
+        updateTimer.set({ time: v });
+
+        // Update the toolbar text.
+        setButton(w2ui["mainLayout"].get("main").toolbar, "mnuDelay", {
+            caption: (v / 1000) + " " + Humanize.pluralize(v / 1000, "second", "seconds")
+        });
+
+        w2ui["mainLayout"].get("main").toolbar.refresh();
     });
 
     options.getOption("minimizeLogcat").on("change", function () {
@@ -152,20 +170,22 @@ $(document).ready(function () {
                 type: "main",
                 toolbar: {
                     items: [
-                        { type: "check", id: "btnPlay", caption: "Play", icon: "icon-play",
+                        { type: "check", id: "btnPlay", caption: "Run", icon: "icon-play",
                           checked: options.getOptionValue("playing")
                         },
-                        { type: "menu",  id: "mnuDelay", caption: "Delay", img: "icon-time", items: [
-                            { text: "1 sec" },
-                            { text: "2 sec" },
-                            { text: "5 sec" },
-                            { text: "10 sec" }
-                        ]},
-                        { type: ""}
+                        { type: "menu",  id: "mnuDelay", caption: "", img: "icon-time", items: [
+                            { id: "1000", text: "1 sec" },
+                            { id: "2000", text: "2 sec" },
+                            { id: "5000", text: "5 sec" },
+                            { id: "10000", text: "10 sec" }
+                        ]}
                     ],
                     onClick: function (ev) {
                         if (ev.target == "btnPlay")
                             options.toggleOption("playing");
+
+                        if (ev.target == "mnuDelay" && ev.subItem)
+                            options.setOptionValue("delay", ev.subItem.id);
                     }
                 }
             },
