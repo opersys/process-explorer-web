@@ -20,7 +20,7 @@ var Options = Backbone.Collection.extend({
         var m;
         if ((m  = this.findWhere({ opt: opt }))) {
             var v = m.get("val");
-            this.set({ id: m.get("id"), opt: opt, val: !v });
+            m.set("val", !v);
             m.save();
         }
     },
