@@ -89,14 +89,26 @@ module.exports = function (grunt) {
                     "assets/jslib/slickgrid/slick.grid.js",
                     "assets/jslib/slickgrid/slick.formatters.js",
                     "assets/jslib/slickgrid/plugins/slick.rowselectionmodel.js",
-                    "assets/jslib/slickback.min.js",
+                    "assets/jslib/slickback.min.js"
                 ],
                 dest: "dist/public/js/<%= pkg.name %>_libs.js"
             },
             dist_main: {
+                options: {
+                    process: function(src, filepath) {
+                        return '//####' + filepath + '\n' + src;
+                    },
+                    nonull: true
+                },
                 src: [
-                    "assets/js/models.js",
-                    "assets/js/views.js",
+                    "assets/js/model.cpuinfo.js",
+                    "assets/js/model.logcat.js",
+                    "assets/js/model.meminfo.js",
+                    "assets/js/model.options.js",
+                    "assets/js/model.process.js",
+                    "assets/js/view.chart.js",
+                    "assets/js/view.logcat.js",
+                    "assets/js/view.process.js",
                     "assets/js/pstree.js"
                 ],
                 dest: "dist/public/js/<%= pkg.name %>_main.js"
@@ -105,9 +117,12 @@ module.exports = function (grunt) {
 
         uglify: {
             dist: {
+                options: {
+                    sourceMap: true
+                },
                 files: {
-                    "dist/js/public/<%= pkg.name %>_libs.min.js": ["<%= concat.dist_libs.dest %>"],
-                    "dist/js/public/<%= pkg.name %>_main.min.js": ["<%= concat.dist_main.dest %>"]
+                    "dist/public/js/<%= pkg.name %>_libs.min.js": ["<%= concat.dist_libs.dest %>"],
+                    "dist/public/js/<%= pkg.name %>_main.min.js": ["<%= concat.dist_main.dest %>"]
                 }
             }
         },
@@ -116,7 +131,7 @@ module.exports = function (grunt) {
             dist: {
                 src: "<%= concat.dist_css.dest %>",
                 dest: "<%= concat.dist_css.dest %>"
-            }
+            },
         },
 
         exec: {
