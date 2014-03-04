@@ -94,24 +94,12 @@ var ProcessView = Backbone.View.extend({
 
     _onPsRowCountChanged: function () {
         var self = this;
-
         this._grid.updateRowCount();
-
-        /*$.debounce(500, function () {
-            self.autoResize();
-            self._grid.render();
-        })();(*/
     },
 
     _onPsRowsChanged: function () {
         var self = this;
-
         this._grid.invalidate();
-
-        /*$.debounce(500, function () {
-            self.autoResize();
-            self._grid.render();
-        })();*/
     },
 
     autoResize: function () {
@@ -126,12 +114,6 @@ var ProcessView = Backbone.View.extend({
     initialize: function (opts) {
         this._ps = opts.ps;
         this._options = opts.options;
-
-        // Add the options handlers.
-        this._options.getOption("pidFilterMode").on("change", function () {
-            if (!options.getOptionValue("pidFilterMode"))
-                logCatLines.clearPid();
-        });
 
         this._options.getOption("rowColorMode").on("change", function () {
             if (options.getOptionValue("rowColorMode"))

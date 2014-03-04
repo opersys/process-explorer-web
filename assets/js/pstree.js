@@ -181,10 +181,13 @@ $(document).ready(function () {
                         { type: "check",  id: "btnFilterByProcess", caption: "Filter", icon: "icon-long-arrow-down",
                           checked: options.getOptionValue("pidFilterMode")
                         },
-                        { type: "button", id: "btnClear",           caption: "Clear",  icon: "icon-remove" },
-                        { type: "check",  id: "btnColors",          caption: "Color",  icon: "icon-tint",
+                        { type: "button", id: "btnClear", caption: "Clear",  icon: "icon-remove" },
+                        { type: "check",  id: "btnColors", caption: "Color",  icon: "icon-tint",
                           checked: options.getOptionValue("rowColorMode")
                         },
+                        { type: "button", id: "btnEnd", caption: "", icon: "icon-double-angle-down" },
+                        { type: "break" },
+                        { type: "html",   id: "txtFiltered",html: "<div id='txtFiltered'></div>" },
                         { type: "spacer" },
                         { type: "button", id: "btnMinimize", icon: "icon-chevron-down" }
                     ],
@@ -200,6 +203,9 @@ $(document).ready(function () {
 
                         if (ev.target == "btnMinimize")
                             options.toggleOption("minimizeLogcat");
+
+                        if (ev.target == "btnEnd")
+                            logCatView.scrollToEnd();
                     }
                 }
             }
@@ -248,8 +254,14 @@ $(document).ready(function () {
     });
 
     procView.on("onProcessSelected", function (el) {
-        if (options.getOption("pidFilterMode"))
-            logCatLines.setPid(el.get("pid"));
+        if (options.getOptionValue("pidFilterMode"))
+            logCatView.filterByPid(el.get("pid"));
+    });
+
+    // Add the options handlers.
+    options.getOption("pidFilterMode").on("change", function () {
+        if (!options.getOptionValue("pidFilterMode"))
+            logCatView.clearFilter();
     });
 
     $(window).resize($.debounce(100, resizeWindow));

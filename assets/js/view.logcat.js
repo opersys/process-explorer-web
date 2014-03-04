@@ -16,8 +16,6 @@ var LogCatView = Backbone.View.extend({
     clearColors: function () {
         this._grid.removeCellCssStyles("warnings");
         this._grid.removeCellCssStyles("errors");
-
-        this.doApplyColors = false
     },
 
     applyColors: function () {
@@ -42,35 +40,39 @@ var LogCatView = Backbone.View.extend({
         this._grid.setCellCssStyles("errors", errorRows);
     },
 
+    filterByPid: function (pid) {
+        if (this._options.getOptionValue("pidFilterMode")) {
+            this._logcat.setPid(pid);
+
+            // FIXME: Cheating on the model.
+            $("#txtFiltered").text("Filtered for PID: " + pid);
+        }
+    },
+
+    clearFilter: function () {
+        this._logcat.clearPid();
+
+        // FIXME: Cheating on the model
+        $("#txtFiltered").text("");
+    },
+
+    scrollToEnd: function () {
+        this._grid.scrollRowToTop(this._logcat.models[this._logcat.models.length - 1].get("no"));
+    },
+
     _onPsRowCountChanged: function () {
         var self = this;
 
         this._grid.updateRowCount();
-
-        $.debounce(500, function () {
-            //    self.autoResize();
-            //   self._grid.render();
-            if (options.getOptionValue("rowColorMode"))
-                self.applyColors();
-        })();
+        if (self._options.getOptionValue("rowColorMode"))
+            self.applyColors();
     },
 
     _onPsRowsChanged: function () {
-        var self = this;
-
         this._grid.invalidate();
-
-        //$.debounce(500, function () {
-        //    self.autoResize();
-        //    //self._grid.render();
-        //})();
     },
 
     autoResize: function () {
-        /*if ($(this._grid.getCanvasNode()).width() == this.$el.width() &&
-         $(this._grid.getCanvasNode()).height() == this.$el.height())
-         return;*/
-
         this._grid.resizeCanvas();
         this._grid.autosizeColumns();
     },
@@ -84,12 +86,6 @@ var LogCatView = Backbone.View.extend({
 
     render: function () {
         var self = this;
-        var errorCss = {
-            "tag": "error", "pid": "error", "msg": "error"
-        };
-        var warningCss = {
-            "tag": "warning", "pid": "warning", "msg": "warning"
-        };
 
         this._grid = new Slick.Grid(this.$el, this._logcat, this._gridColumns, this._gridOptions);
 
