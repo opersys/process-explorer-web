@@ -107,9 +107,31 @@ $(document).ready(function () {
     options.initOption("delay", 5000);
     options.initOption("maximizeLogcat", false);
     options.initOption("minimizeLogcat", false);
+    options.initOption("filterError", true);
+    options.initOption("filterWarning", true);
+    options.initOption("filterInfo", true);
+    options.initOption("filterDebug", true);
+    options.initOption("filterVerbose", true);
 
     // Initialize the timer.
     updateTimer = $.timer(globalProcessUpdate, options.getOptionValue("delay"));
+
+    var toggleTagFilter = function (optName, tagVal) {
+        return function () {
+            var v = options.getOptionValue(optName);
+
+            if (v)
+                logCatView.addTagFilter(tagVal);
+            else
+                logCatView.clearTagFilter(tagVal);
+        };
+    };
+
+    options.getOption("filterError").on("change", toggleTagFilter("filterError", "E"));
+    options.getOption("filterWarning").on("change", toggleTagFilter("filterWarning", "W"));
+    options.getOption("filterInfo").on("change", toggleTagFilter("filterInfo", "I"));
+    options.getOption("filterDebug").on("change", toggleTagFilter("filterDebug", "D"));
+    options.getOption("filterVerbose").on("change", toggleTagFilter("filterVerbose", "V"));
 
     options.getOption("playing").on("change", function () {
         var v = options.getOptionValue("playing");
@@ -134,19 +156,25 @@ $(document).ready(function () {
     });
 
     options.getOption("minimizeLogcat").on("change", function () {
+        var buttonsToHide = [
+            "btnFilterByProcess", "btnClears", "btnColors", "btnMinimize",
+            "btnFilterError", "btnFilterWarning", "btnFilterInfo", "btnFilterDebug",
+            "btnFilterVerbose"
+        ];
+
         var panel = w2ui["mainLayout"].get("preview");
 
         if (options.getOptionValue("minimizeLogcat")) {
-            setButton(panel.toolbar, "btnFilterByProcess", {hidden: true});
-            setButton(panel.toolbar, "btnClear", {hidden: true});
-            setButton(panel.toolbar, "btnColors", {hidden: true});
+            _.each(buttonsToHide, function (btn) {
+                setButton(panel.toolbar, btn, {hidden: true});
+            });
             setButton(panel.toolbar, "btnMinimize", {icon: "icon-chevron-up"});
 
             w2ui["mainLayout"].set("preview", {size: 0});
         } else {
-            setButton(panel.toolbar, "btnFilterByProcess", {hidden: false});
-            setButton(panel.toolbar, "btnClear", {hidden: false});
-            setButton(panel.toolbar, "btnColors", {hidden: false});
+            _.each(buttonsToHide, function (btn) {
+                setButton(panel.toolbar, btn, {hidden: false});
+            });
             setButton(panel.toolbar, "btnMinimize", {icon: "icon-chevron-down"});
 
             w2ui["mainLayout"].set("preview", {size: 200});
@@ -207,6 +235,17 @@ $(document).ready(function () {
                         },
                         { type: "button", id: "btnEnd", caption: "", icon: "icon-double-angle-down" },
                         { type: "break" },
+                        { type: "check", id: "btnFilterError", caption: "E",
+                          checked: options.getOptionValue("filterError") },
+                        { type: "check", id: "btnFilterWarning", caption: "W",
+                          checked: options.getOptionValue("filterWarning") },
+                        { type: "check", id: "btnFilterInfo", caption: "I",
+                          checked: options.getOptionValue("filterInfo") },
+                        { type: "check", id: "btnFilterDebug", caption: "D",
+                          checked: options.getOptionValue("filterDebug") },
+                        { type: "check", id: "btnFilterVerbose", caption: "V",
+                          checked: options.getOptionValue("filterVerbose") },
+                        { type: "break" },
                         { type: "html",   id: "txtFiltered",html: "<div id='txtFiltered'></div>" },
                         { type: "spacer" },
                         { type: "button", id: "btnMinimize", icon: "icon-chevron-down" }
@@ -226,6 +265,21 @@ $(document).ready(function () {
 
                         if (ev.target == "btnEnd")
                             logCatView.scrollToEnd();
+
+                        if (ev.target == "btnFilterError")
+                            options.toggleOption("filterError");
+
+                        if (ev.target == "btnFilterWarning")
+                            options.toggleOption("filterWarning");
+
+                        if (ev.target == "btnFilterInfo")
+                            options.toggleOption("filterInfo");
+
+                        if (ev.target == "btnFilterDebug")
+                            options.toggleOption("filterDebug");
+
+                        if (ev.target == "btnFilterVerbose")
+                            options.toggleOption("filterVerbose");
                     }
                 }
             }
@@ -281,7 +335,7 @@ $(document).ready(function () {
     // Add the options handlers.
     options.getOption("pidFilterMode").on("change", function () {
         if (!options.getOptionValue("pidFilterMode"))
-            logCatView.clearFilter();
+            logCatView.clearPidFilter();
     });
 
     $(window).resize($.debounce(100, resizeWindow));

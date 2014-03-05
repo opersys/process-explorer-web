@@ -40,17 +40,32 @@ var LogCatView = Backbone.View.extend({
         this._grid.setCellCssStyles("errors", errorRows);
     },
 
+    addTagFilter: function (tag) {
+        var newfi, fi = this._logcat.getFilterItem("tag");
+
+        if (_.isArray(fi))
+            newfi = fi.concat([tag]);
+        else
+            newfi = [tag];
+
+        this._logcat.setFilterItem("tag", newfi);
+    },
+
+    clearTagFilter: function (tag) {
+        this._logcat.setFilterItem("tag", _.without(this._logcat.getFilterItem("tag"), tag));
+    },
+
     filterByPid: function (pid) {
         if (this._options.getOptionValue("pidFilterMode")) {
-            this._logcat.setPid(pid);
+            this._logcat.setFilterItem("pid", pid);
 
             // FIXME: Cheating on the model.
             $("#txtFiltered").text("Filtered for PID: " + pid);
         }
     },
 
-    clearFilter: function () {
-        this._logcat.clearPid();
+    clearPidFilter: function () {
+        this._logcat.clearFilterItem("pid");
 
         // FIXME: Cheating on the model
         $("#txtFiltered").text("");
