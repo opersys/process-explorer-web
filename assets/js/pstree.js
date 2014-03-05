@@ -61,6 +61,10 @@ var globalProcessUpdate = function () {
         memChart.serie("memUsed", "memUsed", memInfo);
         memChart.serie("memShared", "memShared", memInfo);
 
+        // Update the memory chart range if needed.
+        if (memChart.getRange().max != memInfo.get("memTotal"))
+            memChart.setRange({min: 0, max: memInfo.get("memTotal")});
+
         ps.each(function (proc) {
             proc.updateCpuPct(globalCpu.get("totalDeltaTime") / globalCpu.get("ncpu"));
             proc.updateMemPct(memInfo.get("memTotal"));
