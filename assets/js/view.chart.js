@@ -27,7 +27,21 @@ var ChartView = Backbone.View.extend({
         this.render();
     },
 
+    setRange: function (range) {
+        this._min = range.min;
+        this._max = range.max;
+    },
+
+    getRange: function () {
+        return {
+            min: this._min,
+            max: this._max
+        }
+    },
+
     render: function () {
+        var self = this;
+
         this._wrapper = $("<div></div>")
             .addClass("chartView")
             .width(this._width)
@@ -45,10 +59,13 @@ var ChartView = Backbone.View.extend({
 
         this._smoothie = new SmoothieChart({
             millisPerPixel: 90,
-            maxValue: this._max,
-            minValue: this._min,
+            //maxValue: this._max,
+            //minValue: this._min,
             grid: {
                 verticalSections: 5
+            },
+            yRangeFunction: function (range) {
+                return {min: self._min, max: self._max};
             }
         });
 
@@ -57,13 +74,15 @@ var ChartView = Backbone.View.extend({
 
     serie: function (skey, field, m) {
         var self = this;
+        var serOpts = {};
 
         if (!self._series[skey]) {
             self._series[skey] = new TimeSeries();
-            self._smoothie.addTimeSeries(self._series[skey], {
-                lineWidth: 2,
-                strokeStyle: this._colors[this._colorIdx++]
-            });
+
+            serOpts["lineWidth"] = 2;
+            serOpts["strokeStyle"] = this._colors[this._colorIdx++];
+
+            self._smoothie.addTimeSeries(self._series[skey], serOpts);
 
             m.on("change:" + field, function (m) {
                 self._series[skey].append(new Date().getTime(), m.get(field));
