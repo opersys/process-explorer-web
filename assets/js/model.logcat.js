@@ -28,45 +28,52 @@ var LogCatLines = Slickback.Collection.extend({
         var self = this;
 
         Backbone.Collection.prototype.set.apply(this, arguments);
+        this.refilter();
 
-        setTimeout(function () {
-            self.reindex.call(self);
-        }, 200);
+        //setTimeout(function () {
+        //    self.refilter.call(self);
+        //}, 200);
     },
 
-    setPid: function (pid) {
-        this.getItem = this._pid_getItem;
-        this.getLength = this._pid_getLength;
-        this._pid = pid;
-
-        this.reindex();
+    setFilterItem: function (filterItem, filterItemValue) {
+        this._filterData[filterItem] = filterItemValue;
+        this.refilter();
     },
 
-    clearPid: function () {
-        this.getItem = function (i) { return this.models[i]; };
-        this.getLength = function () { return this.models.length; }
-
-        this._pid = null;
-
-        this.reindex();
+    clearFilterItem: function (filterItem) {
+        delete this._filterData[filterItem];
+        this.refilter();
     },
 
-    reindex: function () {
+    getFilterItem: function (filterItem) {
+        return this._filterData[filterItem];
+    },
+
+    refilter: function () {
         var self = this;
 
         this._rows = _.filter(this.models, function (m) {
-            return m.get("pid") == self._pid;
+            var r = true;
+
+            _.each(_.keys(self._filterData), function (k) {
+                if (_.isArray(self._filterData[k]))
+                    r = _.contains(self._filterData[k], m.get(k)) && r;
+                else
+                    r = (self._filterData[k] == m.get(k)) && r
+            });
+
+            return r;
         });
 
         this.onRowCountChanged.notify();
         this.onRowsChanged.notify();
     },
 
-    _pid_getItem: function (i) {
+    getItem: function (i) {
         return this._rows[i];
     },
 
-    _pid_getLength: function () {
+    getLength: function () {
         return this._rows.length;
     },
 
@@ -77,6 +84,8 @@ var LogCatLines = Slickback.Collection.extend({
         var socket = io.connect("http://localhost:3000/logcat");
 
         self.no = 0;
+        self._rows = [];
+        self._filterData = {};
 
         socket.on("logcat", function (lcData) {
             // Split into lines
