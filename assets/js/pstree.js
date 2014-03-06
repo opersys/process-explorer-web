@@ -161,7 +161,7 @@ $(document).ready(function () {
 
     options.getOption("minimizeLogcat").on("change", function () {
         var buttonsToHide = [
-            "btnFilterByProcess", "btnClears", "btnColors", "btnMinimize",
+            "btnFilterByProcess", "btnClear", "btnColors", "btnEnd",
             "btnFilterError", "btnFilterWarning", "btnFilterInfo", "btnFilterDebug",
             "btnFilterVerbose"
         ];
