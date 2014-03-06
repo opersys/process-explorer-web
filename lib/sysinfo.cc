@@ -15,7 +15,6 @@ Handle<Value> MemInfo(const Arguments& args) {
 	jmem = Object::New();
 	jmem->Set(String::NewSymbol("memTotal"), Local<Value>::New(Number::New(mem.memTotal * 1024L)));
 	jmem->Set(String::NewSymbol("memFree"), Local<Value>::New(Number::New(mem.memFree * 1024L)));
-	jmem->Set(String::NewSymbol("memShared"), Local<Value>::New(Number::New(mem.memShared * 1024L)));
 	jmem->Set(String::NewSymbol("buffers"), Local<Value>::New(Number::New(mem.buffers * 1024L)));
 	jmem->Set(String::NewSymbol("cached"), Local<Value>::New(Number::New(mem.cached * 1024L)));
 	jmem->Set(String::NewSymbol("swapTotal"), Local<Value>::New(Number::New(mem.swapTotal * 1024L)));
