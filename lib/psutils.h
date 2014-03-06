@@ -12,7 +12,6 @@
 struct mem_info {
   	long unsigned memTotal;
   	long unsigned memFree;
-  	long unsigned memShared;
 	long unsigned buffers;
 	long unsigned cached;
 	long unsigned swapTotal;

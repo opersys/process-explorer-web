@@ -152,7 +152,6 @@ int mem_info(const char **err) {
 	while (fgets(line, sizeof(line), file)) {
 		sscanf(line, "MemTotal: %lu kB", &mem.memTotal);
         sscanf(line, "MemFree: %lu kB", &mem.memFree);
-        sscanf(line, "MemShared: %lu kB", &mem.memShared);
         sscanf(line, "Buffers: %lu kB", &mem.buffers);
         sscanf(line, "Cached: %lu kB", &mem.cached);
         sscanf(line, "SwapTotal: %lu kB", &mem.swapTotal);

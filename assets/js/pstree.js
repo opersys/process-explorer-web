@@ -53,17 +53,23 @@ var globalProcessUpdate = function () {
 
         ps.set(uncompress(sysinfo.ps));
 
-        // Update the CPU graph
+        // Initialize and update the CPU graph
         cpuInfo.each(function (ci) {
-            cpuChart.serie(ci.get("no"), "userPct", ci);
+            if (!cpuChart.hasSerie(ci.get("no")))
+                cpuChart.serie(ci.get("no"), "userPct", ci);
+
+            cpuChart.addSerieData(ci.get("no"), ci.get("userPct"));
         });
 
-        memChart.serie("memUsed", "memUsed", memInfo);
-        memChart.serie("memShared", "memShared", memInfo);
+        if (!memChart.hasSerie("memUsed"))
+            memChart.serie("memUsed");
 
         // Update the memory chart range if needed.
         if (memChart.getRange().max != memInfo.get("memTotal"))
             memChart.setRange({min: 0, max: memInfo.get("memTotal")});
+
+        // Update the memory graphs.
+        memChart.addSerieData("memUsed", memInfo.get("memUsed"));
 
         ps.each(function (proc) {
             proc.updateCpuPct(globalCpu.get("totalDeltaTime") / globalCpu.get("ncpu"));

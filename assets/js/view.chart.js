@@ -72,23 +72,23 @@ var ChartView = Backbone.View.extend({
         this._smoothie.streamTo(this._canvas[0], this._delay);
     },
 
+    addSerieData: function (skey, val) {
+        if (this.hasSerie(skey))
+            this._series[skey].append(new Date().getTime(), val);
+    },
+
+    hasSerie: function (skey) {
+        return _.has(this._series, skey);
+    },
+
     serie: function (skey, field, m) {
-        var self = this;
         var serOpts = {};
 
-        if (!self._series[skey]) {
-            self._series[skey] = new TimeSeries();
+        this._series[skey] = new TimeSeries();
 
-            serOpts["lineWidth"] = 2;
-            serOpts["strokeStyle"] = this._colors[this._colorIdx++];
+        serOpts["lineWidth"] = 2;
+        serOpts["strokeStyle"] = this._colors[this._colorIdx++];
 
-            self._smoothie.addTimeSeries(self._series[skey], serOpts);
-
-            m.on("change:" + field, function (m) {
-                self._series[skey].append(new Date().getTime(), m.get(field));
-            });
-
-            //this._smoothie.streamTo(this._canvas.one(), this._delay);
-        }
+        this._smoothie.addTimeSeries(this._series[skey], serOpts);
     }
 });
