@@ -1,21 +1,29 @@
 var ProcessView = Backbone.View.extend({
 
     _nameFormatter: function (row, cell, value, columnDef, proc) {
-        var v = proc.get(columnDef.field);
+        var pkg, v = proc.get(columnDef.field);
 
         if (!ps.treeView)
             return this._grid.getOptions().defaultFormatter(row, cell, v, columnDef, proc);
 
         var spacer = "<span style='display: inline-block; height: 1px; width: "
-            + (15 * proc.get("ui-indent")) + "px'></span>";
+            + (15 * proc.get("ui-indent") - 1) + "px'></span>";
+
+        if (proc.get("cmdline") && proc.get("cmdline") != "")
+            pkg = proc.get("cmdline").split(" ")[0];
+
+        var img = "<span style='display: inline-block; height: 15px; width: 15px; "
+            + "background-image: url(\"http://localhost:3001/icon/" + pkg + "\");"
+            + "background-size: 15px 15px"
+            + "'></span>";
 
         if (_.size(proc.get("ui-children")) > 0) {
             if (proc.get("ui-collapsed"))
-                return spacer + " <span class='toggle expand'></span>&nbsp;" + v;
+                return spacer + " <span class='toggle expand'></span>&nbsp;" + img + v;
             else
-                return spacer + " <span class='toggle collapse'></span>&nbsp;" + v;
+                return spacer + " <span class='toggle collapse'></span>&nbsp;" + img + v;
         } else
-            return spacer + " <span class='toggle'></span>&nbsp;" + v;
+            return spacer + " <span class='toggle'></span>&nbsp;" + img + v;
     },
 
     _memoryFormatter: function (row, cell, value, columnDef, proc) {
