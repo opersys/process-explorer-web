@@ -1,7 +1,17 @@
 var ProcessView = Backbone.View.extend({
 
     _nameFormatter: function (row, cell, value, columnDef, proc) {
-        var pkg, v = proc.get(columnDef.field);
+        var pkg, v, isPkg;
+
+        if (proc.get("cmdline") && proc.get("cmdline") != "")
+            pkg = proc.get("cmdline").split(" ")[0];
+
+        isPkg = pkg && pkg.indexOf(".") != -1 && pkg.indexOf("/")  == -1;
+
+        if (isPkg)
+            v = pkg;
+        else
+            v = proc.get(columnDef.field);
 
         if (!ps.treeView)
             return this._grid.getOptions().defaultFormatter(row, cell, v, columnDef, proc);
@@ -9,13 +19,10 @@ var ProcessView = Backbone.View.extend({
         var spacer = "<span style='display: inline-block; height: 1px; width: "
             + (15 * proc.get("ui-indent") - 1) + "px'></span>";
 
-        if (proc.get("cmdline") && proc.get("cmdline") != "")
-            pkg = proc.get("cmdline").split(" ")[0];
-
-        var img = "<span style='display: inline-block; height: 15px; width: 15px; "
+        var img = "<span style='display: inline-block; height: 15px; width: 15px; margin-right: 3px;"
             + "background-size: 15px 15px;";
 
-        if (pkg && pkg.indexOf(".") != -1 && pkg.indexOf("/") == -1)
+        if (isPkg)
             img += "background-image: url(\"http://localhost:3000/icon/" + pkg + "\");";
 
         img += "'></span>";
