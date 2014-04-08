@@ -13,9 +13,12 @@ var ProcessView = Backbone.View.extend({
             pkg = proc.get("cmdline").split(" ")[0];
 
         var img = "<span style='display: inline-block; height: 15px; width: 15px; "
-            + "background-image: url(\"http://localhost:3001/icon/" + pkg + "\");"
-            + "background-size: 15px 15px"
-            + "'></span>";
+            + "background-size: 15px 15px;";
+
+        if (pkg && pkg.indexOf(".") != -1 && pkg.indexOf("/") == -1)
+            img += "background-image: url(\"http://localhost:3000/icon/" + pkg + "\");";
+
+        img += "'></span>";
 
         if (_.size(proc.get("ui-children")) > 0) {
             if (proc.get("ui-collapsed"))

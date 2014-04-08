@@ -1,10 +1,12 @@
 var express = require("express");
-var routes = require("./routes");
-var sysinfo = require("./routes/sysinfo");
 var http = require("http");
 var path = require("path");
 var socketio = require("socket.io");
 var spawn = require("child_process").spawn;
+
+var routes = require("./routes");
+var sysinfo = require("./routes/sysinfo");
+var icon = require("./routes/icon");
 
 var app = express();
 
@@ -26,6 +28,7 @@ if ("development" == app.get("env")) {
 
 app.get("/", routes.index);
 app.get("/sysinfo", sysinfo.sysinfo);
+app.get("/icon/:app", icon.get);
 
 var server = http.createServer(app);
 var ws = socketio.listen(server);
