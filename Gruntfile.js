@@ -20,7 +20,8 @@ module.exports = function (grunt) {
                         "dist/public/css",
                         "dist/public/js",
                         "dist/routes",
-                        "dist/views"
+                        "dist/views",
+                        "out"
                     ]
                 }
             }
@@ -140,6 +141,9 @@ module.exports = function (grunt) {
                 stdout: false,
                 stderr: false,
                 cwd: "dist"
+            },
+            md5sum: {
+                command: "md5sum out/system-explorer.zip | cut -f 1 -d ' ' > out/system-explorer.zip.md5sum"
             }
         },
 
@@ -153,17 +157,26 @@ module.exports = function (grunt) {
             }
         },
 
+        chmod: {
+            options: {
+                mode: "755"
+            },
+            node: {
+                src: ["dist/node"]
+            }
+        },
+
         compress: {
             dist: {
                 options: {
-                    archive: "system-explorer.tgz"
+                    archive: "out/system-explorer.zip",
+                    mode: 0
                 },
                 files: [
-                    { cwd: "dist", src: ["**"] }
+                    { expand: true, cwd: "./dist", src: ["./**"] }
                 ]
             }
         }
-
     });
 
     grunt.loadNpmTasks("grunt-mkdir");
@@ -175,7 +188,9 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks("grunt-jade");
     grunt.loadNpmTasks("grunt-exec");
     grunt.loadNpmTasks("grunt-pack");
+    grunt.loadNpmTasks("grunt-chmod");
 
-    grunt.registerTask("default", ["mkdir", "copyto", "concat", "uglify", "cssmin", "jade", "exec"]);
+    grunt.registerTask("default", ["mkdir", "copyto", "concat", "uglify", "cssmin", "jade", "exec:npm_install"]);
+    grunt.registerTask("pack", ["default", "chmod", "compress", "exec:md5sum"]);
 }
 
