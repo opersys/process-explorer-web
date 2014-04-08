@@ -20,6 +20,7 @@
         "grunt-copy-to": "*",   
         "grunt-mkdir": "*",
         "grunt-jade": "*",
-        "grunt-exec": "*"
+        "grunt-exec": "*",
+        "grunt-chmod": "*"
     }
 }
