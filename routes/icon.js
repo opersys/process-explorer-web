@@ -57,7 +57,14 @@ exports.get = function(req, res) {
                     res.end();
                 });
             }
-        });
+        }).on("error",
+            function () {
+                imgBuf = imgCache.get("default");
+                res.set("Content-length", imgBuf.length);
+                res.write(imgBuf, function () {
+                    res.end();
+                });
+            });
     }
     else {
         console.log("Icon for " + req.params.app + " found in cache.");
