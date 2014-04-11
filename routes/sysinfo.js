@@ -27,6 +27,14 @@ function compress(objlist) {
     return {ctab: ctab, list: r};
 }
 
+exports.cpuinfo = function (req, res) {
+    res.json(sysinfo.cpuinfo());
+};
+
+exports.meminfo = function (req, res) {
+    res.json(sysinfo.meminfo());
+};
+
 exports.sysinfo = function(req, res) {
     var info = { ps: [] };
     var pslist = [];

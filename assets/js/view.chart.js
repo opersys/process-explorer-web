@@ -7,7 +7,6 @@ var ChartView = Backbone.View.extend({
         "#c0c0c0", "#808080", "#000000", "#ffa500", "#a52a2a",
         "#800000", "#008000", "#808000"
     ],
-    _series: {},
 
     initialize: function (opts) {
         this._delay = opts.delay;
@@ -19,6 +18,7 @@ var ChartView = Backbone.View.extend({
         this._caption = opts.caption;
         this._width = opts.width;
         this._height = opts.height;
+        this._series = {};
 
         this.$el.css("display", "inline-block");
         //this.$el.width(opts.width);
@@ -37,6 +37,32 @@ var ChartView = Backbone.View.extend({
             min: this._min,
             max: this._max
         }
+    },
+
+    resetDelay: function (newDelay) {
+        var self = this;
+
+        if (this._delay == newDelay)
+            return;
+
+        this._delay = newDelay;
+
+        this._smoothie.stop();
+        this._smoothie = new SmoothieChart({
+            millisPerPixel: 90,
+            grid: {
+                verticalSections: 5
+            },
+            yRangeFunction: function (range) {
+                return {min: self._min, max: self._max};
+            }
+        });
+        this._smoothie.streamTo(this._canvas[0], this._delay);
+
+        _.each(_.keys(this._series), function (skey) {
+            self._series[skey].serie.data = [];
+            self._smoothie.addTimeSeries(self._series[skey].serie, self._series[skey].options);
+        });
     },
 
     render: function () {
@@ -59,8 +85,6 @@ var ChartView = Backbone.View.extend({
 
         this._smoothie = new SmoothieChart({
             millisPerPixel: 90,
-            //maxValue: this._max,
-            //minValue: this._min,
             grid: {
                 verticalSections: 5
             },
@@ -74,21 +98,24 @@ var ChartView = Backbone.View.extend({
 
     addSerieData: function (skey, val) {
         if (this.hasSerie(skey))
-            this._series[skey].append(new Date().getTime(), val);
+            this._series[skey].serie.append(new Date().getTime(), val);
     },
 
     hasSerie: function (skey) {
         return _.has(this._series, skey);
     },
 
-    serie: function (skey, field, m) {
+    serie: function (skey) {
         var serOpts = {};
-
-        this._series[skey] = new TimeSeries();
 
         serOpts["lineWidth"] = 2;
         serOpts["strokeStyle"] = this._colors[this._colorIdx++];
 
-        this._smoothie.addTimeSeries(this._series[skey], serOpts);
+        this._series[skey] = {
+            serie: new TimeSeries(),
+            options: serOpts
+        };
+
+        this._smoothie.addTimeSeries(this._series[skey].serie, this._series[skey].options);
     }
 });
