@@ -28,6 +28,8 @@ if ("development" == app.get("env")) {
 
 app.get("/", routes.index);
 app.get("/sysinfo", sysinfo.sysinfo);
+app.get("/meminfo", sysinfo.meminfo);
+app.get("/cpuinfo", sysinfo.cpuinfo);
 app.get("/icon/:app", icon.get);
 
 var server = http.createServer(app);

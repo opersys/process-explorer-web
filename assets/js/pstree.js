@@ -41,6 +41,34 @@ function uncompress(clist) {
     return r;
 }
 
+var graphUpdate = function () {
+    $.ajax("/cpuinfo").done(function (cpuinfo) {
+        cpuInfo.set(cpuinfo.cpus);
+
+        // Initialize and update the CPU graph
+        cpuInfo.each(function (ci) {
+            if (!cpuChart.hasSerie(ci.get("no")))
+                cpuChart.serie(ci.get("no"), "userPct", ci);
+
+            cpuChart.addSerieData(ci.get("no"), ci.get("userPct"));
+        });
+    });
+
+    $.ajax("/meminfo").done(function (meminfo) {
+        memInfo.set(meminfo);
+
+        if (!memChart.hasSerie("memUsed"))
+            memChart.serie("memUsed");
+
+        // Update the memory chart range if needed.
+        if (memChart.getRange().max != memInfo.get("memTotal"))
+            memChart.setRange({min: 0, max: memInfo.get("memTotal")});
+
+        // Update the memory graphs.
+        memChart.addSerieData("memUsed", memInfo.get("memUsed"));
+    });
+};
+
 var globalProcessUpdate = function () {
     $.ajax("/sysinfo").done(function (sysinfo) {
         var totalDeltaTime;
@@ -52,24 +80,6 @@ var globalProcessUpdate = function () {
         memInfo.set(sysinfo.meminfo);
 
         ps.set(uncompress(sysinfo.ps));
-
-        // Initialize and update the CPU graph
-        cpuInfo.each(function (ci) {
-            if (!cpuChart.hasSerie(ci.get("no")))
-                cpuChart.serie(ci.get("no"), "userPct", ci);
-
-            cpuChart.addSerieData(ci.get("no"), ci.get("userPct"));
-        });
-
-        if (!memChart.hasSerie("memUsed"))
-            memChart.serie("memUsed");
-
-        // Update the memory chart range if needed.
-        if (memChart.getRange().max != memInfo.get("memTotal"))
-            memChart.setRange({min: 0, max: memInfo.get("memTotal")});
-
-        // Update the memory graphs.
-        memChart.addSerieData("memUsed", memInfo.get("memUsed"));
 
         ps.each(function (proc) {
             proc.updateCpuPct(globalCpu.get("totalDeltaTime") / globalCpu.get("ncpu"));
@@ -108,13 +118,14 @@ function setButton(toolbar, btnId, value) {
 }
 
 $(document).ready(function () {
-    var updateTimer;
+    var updateTimer, graphUpdateTimer;
 
     options.fetch();
     options.initOption("pidFilterMode", false);
     options.initOption("rowColorMode", false);
     options.initOption("playing", true);
     options.initOption("delay", 5000);
+    options.initOption("graphDelay", 2000);
     options.initOption("maximizeLogcat", false);
     options.initOption("minimizeLogcat", false);
     options.initOption("filterError", true);
@@ -125,6 +136,7 @@ $(document).ready(function () {
 
     // Initialize the timer.
     updateTimer = $.timer(globalProcessUpdate, options.getOptionValue("delay"));
+    graphUpdateTimer = $.timer(graphUpdate, options.getOptionValue("graphDelay"));
 
     var toggleTagFilter = function (optName, tagVal) {
         return function () {
@@ -146,10 +158,14 @@ $(document).ready(function () {
     options.getOption("playing").on("change", function () {
         var v = options.getOptionValue("playing");
 
-        if (v)
+        if (v) {
             updateTimer.play();
-        else
+            graphUpdateTimer.play();
+        }
+        else {
             updateTimer.pause();
+            graphUpdateTimer.play();
+        }
     });
 
     options.getOption("delay").on("change", function () {
@@ -158,11 +174,27 @@ $(document).ready(function () {
         updateTimer.set({ time: v });
 
         // Update the toolbar text.
-        setButton(w2ui["mainLayout"].get("main").toolbar, "mnuDelay", {
+        setButton(w2ui["mainLayout"].get("top").toolbar, "mnuDelay", {
             caption: (v / 1000) + " " + Humanize.pluralize(v / 1000, "second", "seconds")
         });
 
-        w2ui["mainLayout"].get("main").toolbar.refresh();
+        w2ui["mainLayout"].get("top").toolbar.refresh();
+    });
+
+    options.getOption("graphDelay").on("change", function () {
+        var v = options.getOptionValue("graphDelay");
+
+        graphUpdateTimer.set({ time: v });
+
+        cpuChart.resetDelay(v);
+        memChart.resetDelay(v);
+
+        // Update the toolbar text.
+        setButton(w2ui["mainLayout"].get("top").toolbar, "mnuGraphDelay", {
+            caption: (v / 1000) + " " + Humanize.pluralize(v / 1000, "second", "seconds")
+        });
+
+        w2ui["mainLayout"].get("top").toolbar.refresh();
     });
 
     options.getOption("minimizeLogcat").on("change", function () {
@@ -201,17 +233,23 @@ $(document).ready(function () {
         panels: [
             {
                 type: "top",
-                size: 105,
-                content: "<div id='cpuGraph'></div><div id='memGraph'></div>"
-            },
-            {
-                type: "main",
+                size: 140,
+                content: "</div><div id='cpuGraph'></div><div id='memGraph'></div>",
                 toolbar: {
                     items: [
                         { type: "check", id: "btnPlay", caption: "Run", icon: "icon-play",
-                          checked: options.getOptionValue("playing")
+                            checked: options.getOptionValue("playing")
                         },
+                        { type: "html", html: "<span style='margin-left: 1em'>Process delay:</span>" },
                         { type: "menu",  id: "mnuDelay", caption: "", img: "icon-time", items: [
+                            { id: "1000", text: "1 sec" },
+                            { id: "2000", text: "2 sec" },
+                            { id: "5000", text: "5 sec" },
+                            { id: "10000", text: "10 sec" }
+                        ]},
+                        { type: "break" },
+                        { type: "html", html: "<span style='margin-left: 1em'>Graph delay:</span>" },
+                        { type: "menu",  id: "mnuGraphDelay", caption: "", img: "icon-time", items: [
                             { id: "1000", text: "1 sec" },
                             { id: "2000", text: "2 sec" },
                             { id: "5000", text: "5 sec" },
@@ -224,8 +262,14 @@ $(document).ready(function () {
 
                         if (ev.target == "mnuDelay" && ev.subItem)
                             options.setOptionValue("delay", ev.subItem.id);
+
+                        if (ev.target == "mnuGraphDelay" && ev.subItem)
+                            options.setOptionValue("graphDelay", ev.subItem.id);
                     }
                 }
+            },
+            {
+                type: "main"
             },
             {
                 type: "preview",
@@ -309,7 +353,7 @@ $(document).ready(function () {
         el: $("#cpuGraph"),
         max: 100,
         min: 0,
-        delay: 5000,
+        delay: options.getOptionValue("graphDelay"),
         width: 300,
         height: 101,
         caption: "CPU"
@@ -317,7 +361,7 @@ $(document).ready(function () {
     memChart = new ChartView({
         el: $("#memGraph"),
         min: 0,
-        delay: 5000,
+        delay: options.getOptionValue("graphDelay"),
         width: 300,
         height: 101,
         caption: "Memory"
