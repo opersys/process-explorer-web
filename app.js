@@ -26,7 +26,7 @@ if ("development" == app.get("env")) {
   app.use(express.errorHandler());
 }
 
-app.get("/", routes.index);
+app.get("/", function (req, res) { res.redirect("/index.html"); });
 app.get("/sysinfo", sysinfo.sysinfo);
 app.get("/meminfo", sysinfo.meminfo);
 app.get("/cpuinfo", sysinfo.cpuinfo);
