@@ -110,12 +110,12 @@ var LogCatView = Backbone.View.extend({
             }
         ));
 
-        // FIXME: SlickBack style events, we don't really need that.
-        this._logcat.onRowCountChanged.subscribe(function () {
-            self._onPsRowCountChanged.apply(self);
+        this._logcat.on("add", function () {
+            self._grid.updateRowCount();
         });
-        this._logcat.onRowsChanged.subscribe(function () {
-            self._onPsRowsChanged.apply(self)
+
+        this._logcat.on("remove", function () {
+            self._grid.updateRowCount();
         });
 
         // Options

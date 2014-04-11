@@ -24,57 +24,57 @@ var LogCatLines = Slickback.Collection.extend({
     model: LogCat,
     url: "/sysinfo", // NOT USED
 
-    set: function () {
+    applyFilter: function (items) {
         var self = this;
 
-        Backbone.Collection.prototype.set.apply(this, arguments);
-        this.refilter();
-
-        //setTimeout(function () {
-        //    self.refilter.call(self);
-        //}, 200);
-    },
-
-    setFilterItem: function (filterItem, filterItemValue) {
-        this._filterData[filterItem] = filterItemValue;
-        this.refilter();
-    },
-
-    clearFilterItem: function (filterItem) {
-        delete this._filterData[filterItem];
-        this.refilter();
-    },
-
-    getFilterItem: function (filterItem) {
-        return this._filterData[filterItem];
-    },
-
-    refilter: function () {
-        var self = this;
-
-        this._rows = _.filter(this.models, function (m) {
+        return _.filter(items, function (m) {
             var r = true;
 
             _.each(_.keys(self._filterData), function (k) {
                 if (_.isArray(self._filterData[k]))
                     r = _.contains(self._filterData[k], m.get(k)) && r;
                 else
-                    r = (self._filterData[k] == m.get(k)) && r
+                    r = (self._filterData[k] == m.get(k)) && r;
             });
 
             return r;
         });
+    },
 
-        this.onRowCountChanged.notify();
-        this.onRowsChanged.notify();
+    addRaw: function (models) {
+        var newItems = [];
+
+        for (var i = 0; i < models.length; i++)
+            newItems.push(new LogCat(models[i], {parse: true}));
+
+        this._rawItems = this._rawItems.concat(newItems);
+        this.add(this.applyFilter(newItems));
+    },
+
+    setFilterItem: function (filterItem, filterItemValue) {
+        this._filterData[filterItem] = filterItemValue;
+
+        this.reset();
+        this.add(this.applyFilter(this._rawItems));
+    },
+
+    clearFilterItem: function (filterItem) {
+        delete this._filterData[filterItem];
+
+        this.reset();
+        this.add(this.applyFilter(this._rawItems));
+    },
+
+    getFilterItem: function (filterItem) {
+        return this._filterData[filterItem];
     },
 
     getItem: function (i) {
-        return this._rows[i];
+        return this.at(i);
     },
 
     getLength: function () {
-        return this._rows.length;
+        return this.length;
     },
 
     constructor: function () {
@@ -86,6 +86,7 @@ var LogCatLines = Slickback.Collection.extend({
         self.no = 0;
         self._rows = [];
         self._filterData = {};
+        self._rawItems = [];
 
         socket.on("logcat", function (lcData) {
             // Split into lines
@@ -106,7 +107,7 @@ var LogCatLines = Slickback.Collection.extend({
             }
 
             // Add all the models in a single call.
-            self.add(lcModels, {parse: true});
+            self.addRaw(lcModels, {parse: true});
         });
     }
 });
