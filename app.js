@@ -46,18 +46,20 @@ ws.configure("development", function () {
 ws.of("/logcat").on("connection", function (socket) {
     var logcat;
 
-    try {
-        logcat = spawn("logcat");
-    } catch (e) {
-        logcat = span("false");
+    // If we can't execute logcat, the socket will forever remain silent.
+
+    logcat = spawn("logcat").on("error", function() {
+        console.log("Could not execute logcat");
+    });
+
+    if (logcat) {
+        logcat.stdout.on("data", function (data) {
+            socket.emit("logcat", data.toString());
+        });
+
+        socket.on("disconnect", function () {
+            logcat.kill();
+        });
     }
-
-    logcat.stdout.on("data", function (data) {
-        socket.emit("logcat", data.toString());
-    });
-
-    socket.on("disconnect", function () {
-        logcat.kill();
-    });
 });
 
