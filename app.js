@@ -44,7 +44,13 @@ ws.configure("development", function () {
 });
 
 ws.of("/logcat").on("connection", function (socket) {
-    var logcat = spawn("logcat");
+    var logcat;
+
+    try {
+        logcat = spawn("logcat");
+    } catch (e) {
+        logcat = span("false");
+    }
 
     logcat.stdout.on("data", function (data) {
         socket.emit("logcat", data.toString());
