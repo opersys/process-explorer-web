@@ -81,7 +81,7 @@ var LogCatLines = Slickback.Collection.extend({
         Backbone.Collection.apply(this, arguments);
 
         var self = this;
-        var socket = io.connect("http://localhost:3000/logcat");
+        var socket = io.connect("http://" + window.location.host + "/logcat");
 
         self.no = 0;
         self._rows = [];

@@ -23,7 +23,7 @@ var ProcessView = Backbone.View.extend({
             + "background-size: 15px 15px;";
 
         if (isPkg)
-            img += "background-image: url(\"http://localhost:3000/icon/" + pkg + "\");";
+            img += "background-image: url(\"http://" + window.location.host + "/icon/" + pkg + "\");";
 
         img += "'></span>";
 
