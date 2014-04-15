@@ -87,16 +87,13 @@ var globalProcessUpdate = function () {
             proc.updateCpuPct(globalCpu.get("totalDeltaTime") / globalCpu.get("ncpu"));
             proc.updateMemPct(memInfo.get("memTotal"));
 
-            _.each(_.filter(
-                _.keys(proc.get("ui-children")),
-                // Return the list of process that are still alive.
-                function (cprocPid) {
-                    return (ps.get(cprocPid) != null);
-                }),
-                // Rebuild the hash of process.
-                function (cprocPid) {
+            _.each(_.keys(proc.get("ui-children")), function (cprocPid) {
+                if (!ps.get(cprocPid)) {
+                    proc.get("ui-children")[cprocPid].set("ui-dead", true);
+                    newChildren[cprocPid] = proc.get("ui-children")[cprocPid];
+                } else
                     newChildren[cprocPid] = ps.get(cprocPid);
-                });
+            });
             proc.set("ui-children", newChildren);
         });
 
@@ -290,7 +287,6 @@ $(document).ready(function () {
                 size: 200,
                 resizer: 5,
                 resizable: true,
-                class: "logcatview",
                 toolbar: {
                     name: "tbPreview",
                     items: [
@@ -381,7 +377,7 @@ $(document).ready(function () {
         caption: "Memory"
     });
     procView = new ProcessView({
-        el: $(w2ui["mainLayout"].el("main")),
+        el: $(w2ui["mainLayout"].el("main")).addClass("processview"),
         ps: ps,
         options: options
     });

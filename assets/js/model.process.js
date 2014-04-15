@@ -7,6 +7,7 @@ var Process = Backbone.Model.extend({
         this.attributes["ui-indent"] = 0;
         this.attributes["ui-row"] = 0;
         this.attributes["ui-collapsed"] = false;
+        this.attributes["ui-dead"] = false;
 
         // Calculated.
         this.attributes["cpuPct"] = 0;

@@ -84,6 +84,23 @@ var ProcessView = Backbone.View.extend({
         forceFitColumns: true
     },
 
+    applyColors: function () {
+        var deadRows = {};
+        var deadCss = {
+            "name": "dead", "pid": "dead", "state": "dead", "prio": "dead", "cpuPct": "dead",
+            "memPct": "dead", "vss": "dead", "rss": "dead", "shm": "dead", "time": "dead",
+            "cmdline": "dead"
+        };
+
+        for (var i = 0; i < this._grid.getDataLength(); i++) {
+            var row = this._grid.getDataItem(i);
+            if (row.get("ui-dead"))
+                deadRows[i] = deadCss;
+        }
+
+        this._grid.setCellCssStyles("dead", deadRows);
+    },
+
     _updateProcess: function (fname, proc, v, opts) {
         var colIdx, rowIdx, self = this;
 
@@ -127,13 +144,6 @@ var ProcessView = Backbone.View.extend({
     initialize: function (opts) {
         this._ps = opts.ps;
         this._options = opts.options;
-
-        this._options.getOption("rowColorMode").on("change", function () {
-            if (options.getOptionValue("rowColorMode"))
-                logCatView.applyColors();
-            else
-                logCatView.clearColors();
-        });
 
         this.render();
     },
@@ -206,20 +216,24 @@ var ProcessView = Backbone.View.extend({
             self._grid.updateRowCount();
 
             self._grid.render();
+            self.applyColors();
         });
 
         this._ps.on("remove", function (rmModel) {
-            this.reindex(rmModel);
+            this.reindex();
 
             self._grid.invalidate();
             self._grid.updateRowCount();
 
             self._grid.render();
+            self.applyColors();
         });
 
         this._ps.on("change", function (m) {
             self._grid.invalidateRow(m.get("ui-row"));
+
             self._grid.render();
+            self.applyColors();
         });
 
         this._grid.setSelectionModel(new Slick.RowSelectionModel());

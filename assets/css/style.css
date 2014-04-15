@@ -36,6 +36,10 @@ a {
 
 /* PROCESS VIEW SPECIFICS */
 
+.processview .slick-cell.dead {
+    color: #666666 ;
+}
+
 /* Process view treeview feature. */
 .toggle.expand {
 	background: url(../images/expand.gif) no-repeat center center;
