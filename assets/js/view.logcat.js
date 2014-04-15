@@ -7,8 +7,15 @@ var LogCatView = Backbone.View.extend({
     ],
 
     _gridOptions: {
+        formatterFactory:{
+            getFormatter: function (column) {
+                return function(row,cell,value,col,data) {
+                    return data.get(col.field);
+                };
+            }
+        },
+
         enableColumnReorder: false,
-        formatterFactory: Slickback.BackboneModelFormatterFactory,
         enableCellNavigation: true,
         forceFitColumns: true
     },
@@ -75,18 +82,6 @@ var LogCatView = Backbone.View.extend({
         this._grid.scrollRowToTop(this._logcat.models[this._logcat.models.length - 1].get("no"));
     },
 
-    _onPsRowCountChanged: function () {
-        var self = this;
-
-        this._grid.updateRowCount();
-        if (self._options.getOptionValue("rowColorMode"))
-            self.applyColors();
-    },
-
-    _onPsRowsChanged: function () {
-        this._grid.invalidate();
-    },
-
     autoResize: function () {
         this._grid.resizeCanvas();
         this._grid.autosizeColumns();
@@ -112,6 +107,10 @@ var LogCatView = Backbone.View.extend({
 
         this._logcat.on("add", function () {
             self._grid.updateRowCount();
+
+            // Options
+            if (self._options.getOptionValue("rowColorMode"))
+                self.applyColors();
         });
 
         this._logcat.on("remove", function () {
