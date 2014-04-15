@@ -82,8 +82,22 @@ var globalProcessUpdate = function () {
         ps.set(uncompress(sysinfo.ps));
 
         ps.each(function (proc) {
+            var newChildren = {};
+
             proc.updateCpuPct(globalCpu.get("totalDeltaTime") / globalCpu.get("ncpu"));
             proc.updateMemPct(memInfo.get("memTotal"));
+
+            _.each(_.filter(
+                _.keys(proc.get("ui-children")),
+                // Return the list of process that are still alive.
+                function (cprocPid) {
+                    return (ps.get(cprocPid) != null);
+                }),
+                // Rebuild the hash of process.
+                function (cprocPid) {
+                    newChildren[cprocPid] = ps.get(cprocPid);
+                });
+            proc.set("ui-children", newChildren);
         });
 
         // Calculate the process tree

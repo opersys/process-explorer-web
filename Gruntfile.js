@@ -89,8 +89,7 @@ module.exports = function (grunt) {
                     "assets/jslib/slickgrid/slick.core.js",
                     "assets/jslib/slickgrid/slick.grid.js",
                     "assets/jslib/slickgrid/slick.formatters.js",
-                    "assets/jslib/slickgrid/plugins/slick.rowselectionmodel.js",
-                    "assets/jslib/slickback.min.js"
+                    "assets/jslib/slickgrid/plugins/slick.rowselectionmodel.js"
                 ],
                 dest: "dist/public/js/<%= pkg.name %>_libs.js"
             },

@@ -60,11 +60,10 @@ var Process = Backbone.Model.extend({
     }
 });
 
-var ProcessCollection = Slickback.Collection.extend({
+var ProcessCollection = Backbone.Collection.extend({
     model: Process,
     url: "/sysinfo", // NOT USED
     comparator: "ui-row",
-    _holdreindex: false,
     _rows: [],
 
     set: function () {
@@ -87,22 +86,21 @@ var ProcessCollection = Slickback.Collection.extend({
 
     _comparator_reindex: function () {},
 
-    _uirow_reindex: function () {
+    _uirow_reindex: function (rmModel) {
         this._rows = [];
 
         // Iterate through the collection depth first to attribute row numbers
         var e, r = 0, iin = [this.get(0)];
 
         while ((e = iin.shift())) {
-            if (!e.get("ui-collapsed"))
-                iin = _.values(e.get("ui-children")).concat(iin);
+            if (!(rmModel && rmModel.get("pid") == e.get("pid"))) {
+                if (!e.get("ui-collapsed"))
+                    iin = _.values(e.get("ui-children")).concat(iin);
 
-            e.set("ui-row", r++);
-            this._rows.push(e);
+                e.set("ui-row", r++);
+                this._rows.push(e);
+            }
         }
-
-        this.onRowCountChanged.notify();
-        this.onRowsChanged.notify();
     },
 
     sortPs: function (stype, isAsc) {
@@ -119,22 +117,24 @@ var ProcessCollection = Slickback.Collection.extend({
             this.sort();
 
             this.reindex = this._comparator_reindex;
-            this.getItem = function (i) { return this.models[i]; };
-            this.getLength = function (i) { return this.models.length; };
+            this.getItem = function (i) {
+                return this.models[i];
+            };
+            this.getLength = function () {
+                return this.models.length;
+            };
             this.treeView = false;
          }
     },
 
     constructor: function () {
+        Backbone.Collection.apply(this, arguments);
+
         this.reindex = this._uirow_reindex;
         this.getItem = this._uirow_getItem;
         this.getLength = this._uirow_getLength;
         this.treeView = true;
 
-        Backbone.Collection.apply(this, arguments);
-
-        //this.on("add", this.reindex);
-        //this.on("remove", this.reindex);
         this.on("change:ui-collapsed", this.reindex);
     }
 });

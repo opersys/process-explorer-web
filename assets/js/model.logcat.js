@@ -20,7 +20,7 @@ var LogCat = Backbone.Model.extend({
     }
 });
 
-var LogCatLines = Slickback.Collection.extend({
+var LogCatLines = Backbone.Collection.extend({
     model: LogCat,
     url: "/sysinfo", // NOT USED
 
@@ -54,7 +54,9 @@ var LogCatLines = Slickback.Collection.extend({
     setFilterItem: function (filterItem, filterItemValue) {
         this._filterData[filterItem] = filterItemValue;
 
-        this.reset();
+        if (this.models)
+            this.reset();
+
         this.add(this.applyFilter(this._rawItems));
     },
 
@@ -78,11 +80,11 @@ var LogCatLines = Slickback.Collection.extend({
     },
 
     constructor: function () {
+        var self = this, socket;
+
         Backbone.Collection.apply(this, arguments);
 
-        var self = this;
-        var socket = io.connect("http://" + window.location.host + "/logcat");
-
+        socket = io.connect("http://" + window.location.host + "/logcat");
         self.no = 0;
         self._rows = [];
         self._filterData = {};

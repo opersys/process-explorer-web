@@ -71,8 +71,15 @@ var ProcessView = Backbone.View.extend({
     ],
 
     _gridOptions: {
+        formatterFactory:{
+            getFormatter: function (column) {
+                return function(row,cell,value,col,data) {
+                    return data.get(col.field);
+                };
+            }
+        },
+
         enableColumnReorder: false,
-        formatterFactory: Slickback.BackboneModelFormatterFactory,
         enableCellNavigation: true,
         forceFitColumns: true
     },
@@ -110,21 +117,7 @@ var ProcessView = Backbone.View.extend({
         this._grid.render();
     },
 
-    _onPsRowCountChanged: function () {
-        var self = this;
-        this._grid.updateRowCount();
-    },
-
-    _onPsRowsChanged: function () {
-        var self = this;
-        this._grid.invalidate();
-    },
-
     autoResize: function () {
-        /*if ($(this._grid.getCanvasNode()).width() == this.$el.innerWidth() &&
-            $(this._grid.getCanvasNode()).height() == this.$el.innerHeight())
-            return;*/
-
         this._grid.resizeCanvas();
         this._grid.autosizeColumns();
     },
@@ -204,12 +197,27 @@ var ProcessView = Backbone.View.extend({
             self._updateProcess("rss", m, v, opts)
         });
 
-        // FIXME: SlickBack style events, we don't really need that.
-        this._ps.onRowCountChanged.subscribe(function () {
-            self._onPsRowCountChanged.apply(self);
+        this._ps.on("add", function () {
+            this.reindex();
+
+            self._grid.invalidate();
+            self._grid.updateRowCount();
+
+            self._grid.render();
         });
-        this._ps.onRowsChanged.subscribe(function () {
-            self._onPsRowsChanged.apply(self)
+
+        this._ps.on("remove", function (rmModel) {
+            this.reindex(rmModel);
+
+            self._grid.invalidate();
+            self._grid.updateRowCount();
+
+            self._grid.render();
+        });
+
+        this._ps.on("change", function (m) {
+            self._grid.invalidateRow(m.get("ui-row"));
+            self._grid.render();
         });
 
         this._grid.setSelectionModel(new Slick.RowSelectionModel());
