@@ -2,17 +2,21 @@ var LogCat = Backbone.Model.extend({
     url: "/sysinfo", // NOT USED
     idAttribute: "no",
 
-    // Parse the brief logcat format.
+    // Parse the time logcat format.
     parse: function (input) {
-        var ls, tag, pid, msg;
+        var ls, tag, pid, msg, tim;
 
-        tag = input.line[0];
         ls = input.line.split(":");
+        sc = input.line.split(" ");
+        tim = sc[1];
+        tag = sc[2][0];
+        ls.shift(); ls.shift();
         pid = /\(\s*([0-9]*)\s*\)/.exec(ls.shift())[1];
-        msg = ls.join(":");
+        msg = ls.join(":").trim();
 
         return {
             no: input.no,
+            tim: tim,
             tag: tag,
             pid: pid,
             msg: msg

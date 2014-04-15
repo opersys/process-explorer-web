@@ -48,7 +48,7 @@ ws.of("/logcat").on("connection", function (socket) {
 
     // If we can't execute logcat, the socket will forever remain silent.
 
-    logcat = spawn("logcat").on("error", function() {
+    logcat = spawn("logcat", ["-v", "time"]).on("error", function() {
         console.log("Could not execute logcat");
     });
 

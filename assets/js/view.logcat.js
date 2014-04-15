@@ -2,6 +2,7 @@ var LogCatView = Backbone.View.extend({
 
     _gridColumns: [
         { id: "tag", name: "T", field: "tag", minWidth: 20, maxWidth: 20 },
+        { id: "tim", name: "time", field: "tim", midWidth: 60, maxWidth: 90 },
         { id: "pid", name: "PID", field: "pid", minWidth: 50, maxWidth: 50 },
         { id: "msg", name: "Message", field: "msg", minWidth: 300 }
     ],
@@ -28,10 +29,10 @@ var LogCatView = Backbone.View.extend({
     applyColors: function () {
         var errorRows = [], warningRows = [];
         var errorCss = {
-            "tag": "error", "pid": "error", "msg": "error"
+            "tag": "error", "tim": "error", "pid": "error", "msg": "error"
         };
         var warningCss = {
-            "tag": "warning", "pid": "warning", "msg": "warning"
+            "tag": "warning", "tim": "warning", "pid": "warning", "msg": "warning"
         };
 
         //
