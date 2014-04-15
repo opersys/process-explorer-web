@@ -82,7 +82,6 @@ module.exports = function (grunt) {
                     "assets/jslib/backbone.js",
                     "assets/jslib/backbone.localStorage-min.js",
                     "assets/jslib/humanize.min.js",
-                    "assets/jslib/Queue.js",
                     "assets/jslib/moment.min.js",
                     "assets/jslib/smoothie.js",
                     "assets/jslib/w2ui-1.3.1.min.js",
