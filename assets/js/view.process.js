@@ -85,12 +85,14 @@ var ProcessView = Backbone.View.extend({
     },
 
     _updateProcess: function (fname, proc, v, opts) {
-        var colIdx, rowIdx;
+        var colIdx, rowIdx, self = this;
 
         colIdx = this._grid.getColumnIndex(fname);
         rowIdx = proc.get("ui-row");
 
-        this._grid.flashCell(rowIdx, colIdx, 750);
+        setTimeout(function () {
+            self._grid.flashCell(rowIdx, colIdx, 750);
+        }, 100);
     },
 
     _onGridClick: function (e, args) {
