@@ -6,8 +6,18 @@ var LogCat = Backbone.Model.extend({
     parse: function (input) {
         var ls, tag, pid, msg, tim;
 
+        if (!input || input.length == 0)
+            return null;
+
         ls = input.line.split(":");
         sc = input.line.split(" ");
+
+        // Prevent bad lines.
+        if (!ls || ls.length == 1)
+            return null;
+        if (!sc || sc.length == 1)
+            return null;
+
         tim = sc[1];
         tag = sc[2][0];
         ls.shift(); ls.shift();
@@ -46,22 +56,32 @@ var LogCatLines = Backbone.Collection.extend({
     },
 
     addRaw: function (models) {
-        var newItems = [];
+        var newItems = [], fnewItems;
 
         for (var i = 0; i < models.length; i++)
             newItems.push(new LogCat(models[i], {parse: true}));
 
         this._rawItems = this._rawItems.concat(newItems);
-        this.add(this.applyFilter(newItems));
+        fnewItems = this.applyFilter(newItems);
+        this.add(fnewItems)
     },
 
     setFilterItem: function (filterItem, filterItemValue) {
+        var fitems;
+
         this._filterData[filterItem] = filterItemValue;
 
         if (this.models)
             this.reset();
 
-        this.add(this.applyFilter(this._rawItems));
+        fitems = this.applyFilter(this._rawItems);
+
+        if (fitems && fitems.length > 0)
+            this.add(fitems);
+        else
+        // Special event to make sure the clients of this model
+        // get informed when the grid is empty.
+            this.trigger("empty");
     },
 
     clearFilterItem: function (filterItem) {

@@ -35,7 +35,6 @@ var LogCatView = Backbone.View.extend({
             "tag": "warning", "tim": "warning", "pid": "warning", "msg": "warning"
         };
 
-        //
         for (var i = 0; i < this._grid.getDataLength(); i++) {
             var row = this._grid.getDataItem(i);
             if (row.get("tag") == "E")
@@ -122,6 +121,10 @@ var LogCatView = Backbone.View.extend({
         });
 
         this._logcat.on("remove", function () {
+            self._grid.updateRowCount();
+        });
+
+        this._logcat.on("empty", function () {
             self._grid.updateRowCount();
         });
 
