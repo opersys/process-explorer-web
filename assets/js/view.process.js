@@ -131,7 +131,19 @@ var ProcessView = Backbone.View.extend({
     },
 
     _onGridSort: function (e, args) {
+        var colText, colIdx;
+
         this._ps.sortPs(args.sortCol.field, args.sortAsc);
+        this._grid.invalidate();
+        this._grid.render();
+
+        colIdx = this._grid.getColumnIndex(args.sortCol.field);
+        colText = this._grid.getColumns()[colIdx].name;
+        this.trigger("sort", args.sortCol.field, colText);
+    },
+
+    treeSort: function () {
+        this._ps.sortPs("ui-row");
         this._grid.invalidate();
         this._grid.render();
     },
