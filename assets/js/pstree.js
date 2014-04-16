@@ -251,6 +251,7 @@ $(document).ready(function () {
                         { type: "check", id: "btnPlay", caption: "Run", icon: "icon-play",
                             checked: options.getOptionValue("playing")
                         },
+                        { type: "break" },
                         { type: "html", html: "<span style='margin-left: 1em'>Process delay:</span>" },
                         { type: "menu",  id: "mnuDelay", caption: "", img: "icon-time", items: [
                             { id: "1000", text: "1 sec" },
@@ -265,17 +266,27 @@ $(document).ready(function () {
                             { id: "2000", text: "2 sec" },
                             { id: "5000", text: "5 sec" },
                             { id: "10000", text: "10 sec" }
-                        ]}
+                        ]},
+                        { type: "break" },
+                        { type: "html", html: "<span id='txtSortType' style='margin-left: 1em'>No sorting</span>" },
+                        { type: "button", id: "btnCancelSort", caption: "Cancel", disabled: true }
                     ],
                     onClick: function (ev) {
                         if (ev.target == "btnPlay")
                             options.toggleOption("playing");
+
+                        if (ev.target == "btnCancelSort") {
+                            procView.treeSort();
+                            $("#txtSortType").text("No sorting");
+                            w2ui["mainLayout"].get("top").toolbar.disable("btnCancelSort");
+                        }
 
                         if (ev.target == "mnuDelay" && ev.subItem)
                             options.setOptionValue("delay", ev.subItem.id);
 
                         if (ev.target == "mnuGraphDelay" && ev.subItem)
                             options.setOptionValue("graphDelay", ev.subItem.id);
+
                     }
                 }
             },
@@ -389,6 +400,12 @@ $(document).ready(function () {
 
     ps.on("remove", function (proc) {
         console.log("Process " + proc.get("name") + "[" + proc.get("pid") + "] removed.");
+    });
+
+    procView.on("sort", function (sortField, sortFieldText) {
+        console.log("Sorting by: " + sortFieldText);
+        $("#txtSortType").text("Sorting by: " + sortFieldText);
+        w2ui["mainLayout"].get("top").toolbar.enable("btnCancelSort");
     });
 
     procView.on("onProcessSelected", function (el) {
