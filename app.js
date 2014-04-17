@@ -63,3 +63,9 @@ ws.of("/logcat").on("connection", function (socket) {
     }
 });
 
+// Handle receiving the "quit" command from the UI.
+process.stdin.on("data", function (chunk) {
+    if (chunk.toString().split("\n")[0].trim().toLowerCase() == "quit")
+        process.exit();
+});
+
