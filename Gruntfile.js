@@ -59,7 +59,7 @@ module.exports = function (grunt) {
         },
 
         concat: {
-            options: { separator: ";" },
+            options: { separator: "\n\n/* ******** */\n\n" },
             dist_css: {
                 // Font Awesome is not included since it seems it has to be
                 // loaded alone for the web font to be properly loaded in Chrome.
