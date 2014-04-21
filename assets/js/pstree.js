@@ -410,7 +410,6 @@ $(document).ready(function () {
     });
 
     procView.on("sort", function (sortField, sortFieldText) {
-        console.log("Sorting by: " + sortFieldText);
         $("#txtSortType").text("Sorting by: " + sortFieldText);
         w2ui["mainLayout"].get("top").toolbar.enable("btnCancelSort");
     });
@@ -424,6 +423,10 @@ $(document).ready(function () {
     options.getOption("pidFilterMode").on("change", function () {
         if (!options.getOptionValue("pidFilterMode"))
             logCatView.clearPidFilter();
+        else {
+            if (procView.getSelectedProcess())
+                logCatView.filterByPid(procView.getSelectedProcess().get("pid"));
+        }
     });
 
     $(window).resize($.debounce(100, resizeWindow));

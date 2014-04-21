@@ -130,6 +130,14 @@ var ProcessView = Backbone.View.extend({
             this.trigger("onProcessSelected", this._grid.getDataItem(sel.row));
     },
 
+    getSelectedProcess: function () {
+        var sel = this._grid.getActiveCell();
+        if (sel)
+            return this._grid.getDataItem(sel.row);
+        else
+            return null;
+    },
+
     _onGridSort: function (e, args) {
         var colText, colIdx;
 
