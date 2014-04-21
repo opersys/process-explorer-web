@@ -268,6 +268,7 @@ $(document).ready(function () {
                         { type: "break" },
                         { type: "html", html: "<span style='margin-left: 1em'>Graph delay:</span>" },
                         { type: "menu",  id: "mnuGraphDelay", caption: "", img: "icon-time", items: [
+                            { id: "500", text: "500 msec"},
                             { id: "1000", text: "1 sec" },
                             { id: "2000", text: "2 sec" },
                             { id: "5000", text: "5 sec" },
