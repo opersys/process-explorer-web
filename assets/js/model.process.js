@@ -135,7 +135,7 @@ var ProcessCollection = Backbone.Collection.extend({
         this.treeView = true;
 
         this.on("change:ui-collapsed", function (m) {
-            this.reindex;
+            this.reindex();
 
             if (m && !m.get("ui-collapsed"))
                 this.trigger("add");
