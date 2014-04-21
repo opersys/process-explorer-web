@@ -87,20 +87,18 @@ var ProcessCollection = Backbone.Collection.extend({
 
     _comparator_reindex: function () {},
 
-    _uirow_reindex: function (rmModel) {
+    _uirow_reindex: function () {
         this._rows = [];
 
         // Iterate through the collection depth first to attribute row numbers
         var e, r = 0, iin = [this.get(0)];
 
         while ((e = iin.shift())) {
-            if (!(rmModel && rmModel.get("pid") == e.get("pid"))) {
-                if (!e.get("ui-collapsed"))
-                    iin = _.values(e.get("ui-children")).concat(iin);
+            if (!e.get("ui-collapsed"))
+                iin = _.values(e.get("ui-children")).concat(iin);
 
-                e.set("ui-row", r++);
-                this._rows.push(e);
-            }
+            e.set("ui-row", r++);
+            this._rows.push(e);
         }
     },
 
@@ -136,6 +134,13 @@ var ProcessCollection = Backbone.Collection.extend({
         this.getLength = this._uirow_getLength;
         this.treeView = true;
 
-        this.on("change:ui-collapsed", this.reindex);
+        this.on("change:ui-collapsed", function (m) {
+            this.reindex;
+
+            if (m && !m.get("ui-collapsed"))
+                this.trigger("add");
+            else
+                this.trigger("remove");
+        });
     }
 });
