@@ -105,6 +105,14 @@ var ChartView = Backbone.View.extend({
         return _.has(this._series, skey);
     },
 
+    start: function () {
+        this._smoothie.start();
+    },
+
+    stop: function () {
+        this._smoothie.stop();
+    },
+
     serie: function (skey) {
         var serOpts = {};
 

@@ -134,7 +134,7 @@ $(document).ready(function () {
     options.fetch();
     options.initOption("pidFilterMode", false);
     options.initOption("rowColorMode", false);
-    options.initOption("playing", true);
+    options.initOption("paused", false);
     options.initOption("delay", 5000);
     options.initOption("graphDelay", 2000);
     options.initOption("maximizeLogcat", false);
@@ -166,16 +166,22 @@ $(document).ready(function () {
     options.getOption("filterDebug").on("change", toggleTagFilter("filterDebug", "D"));
     options.getOption("filterVerbose").on("change", toggleTagFilter("filterVerbose", "V"));
 
-    options.getOption("playing").on("change", function () {
-        var v = options.getOptionValue("playing");
+    options.getOption("paused").on("change", function () {
+        var v = options.getOptionValue("paused");
 
-        if (v) {
+        if (!v) {
             updateTimer.play();
             graphUpdateTimer.play();
+
+            if (cpuChart) cpuChart.start();
+            if (memChart) memChart.start();
         }
         else {
             updateTimer.pause();
-            graphUpdateTimer.play();
+            graphUpdateTimer.pause();
+
+            if (cpuChart) cpuChart.stop();
+            if (memChart) memChart.stop();
         }
     });
 
@@ -248,8 +254,8 @@ $(document).ready(function () {
                 content: "</div><div id='cpuGraph'></div><div id='memGraph'></div>",
                 toolbar: {
                     items: [
-                        { type: "check", id: "btnPlay", caption: "Run", icon: "icon-play",
-                            checked: options.getOptionValue("playing")
+                        { type: "check", id: "btnPause", caption: "Pause", icon: "icon-pause",
+                            checked: options.getOptionValue("paused")
                         },
                         { type: "break" },
                         { type: "html", html: "<span style='margin-left: 1em'>Process delay:</span>" },
@@ -272,8 +278,8 @@ $(document).ready(function () {
                         { type: "button", id: "btnCancelSort", caption: "Cancel", disabled: true }
                     ],
                     onClick: function (ev) {
-                        if (ev.target == "btnPlay")
-                            options.toggleOption("playing");
+                        if (ev.target == "btnPause")
+                            options.toggleOption("paused");
 
                         if (ev.target == "btnCancelSort") {
                             procView.treeSort();
