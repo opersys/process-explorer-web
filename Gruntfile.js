@@ -64,10 +64,10 @@ module.exports = function (grunt) {
                 // Font Awesome is not included since it seems it has to be
                 // loaded alone for the web font to be properly loaded in Chrome.
                 src: [
-                    "assets/css/style.css",
                     "assets/css/slick.grid.css",
                     "assets/css/slick-default-theme.css",
                     "assets/css/w2ui-1.3.1.min.css",
+                    "assets/css/style.css"
                 ],
                 dest: "dist/public/css/<%= pkg.name %>_styles.css"
             },
