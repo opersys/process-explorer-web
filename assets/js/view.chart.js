@@ -1,6 +1,8 @@
+// Static color index.
+var _colorIdx = 0;
+
 var ChartView = Backbone.View.extend({
 
-    _colorIdx: 0,
     _colors: [
         "#ff0000", "#00ffff", "#0000ff", "#0000a0", "#add8e6",
         "#800080", "#ffff00", "#00ff00", "#ff00ff", "#ffffff",
@@ -117,7 +119,7 @@ var ChartView = Backbone.View.extend({
         var serOpts = {};
 
         serOpts["lineWidth"] = 2;
-        serOpts["strokeStyle"] = this._colors[this._colorIdx++];
+        serOpts["strokeStyle"] = this._colors[_colorIdx++ % this._colors.length];
 
         this._series[skey] = {
             serie: new TimeSeries(),
