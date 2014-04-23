@@ -73,8 +73,6 @@ var globalProcessUpdate = function () {
     $.ajax("/sysinfo").done(function (sysinfo) {
         var totalDeltaTime;
 
-        console.log("Process list update.");
-
         globalCpu.set(sysinfo.cpuinfo.global);
         cpuInfo.set(sysinfo.cpuinfo.cpus);
         memInfo.set(sysinfo.meminfo);
@@ -334,7 +332,7 @@ $(document).ready(function () {
                     ],
                     onClick: function (ev) {
                         if (ev.target == "btnClear")
-                            logCatLines.reset();
+                            logCatLines.clearAll();
 
                         if (ev.target == "btnFilterByProcess")
                             options.toggleOption("pidFilterMode");

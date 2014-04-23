@@ -4,7 +4,7 @@ var LogCat = Backbone.Model.extend({
 
     // Parse the time logcat format.
     parse: function (input) {
-        var ls, tag, pid, msg, tim;
+        var ls, tag, spid, pid, msg, tim;
 
         if (!input || input.length == 0)
             return null;
@@ -21,7 +21,9 @@ var LogCat = Backbone.Model.extend({
         tim = sc[1];
         tag = sc[2][0];
         ls.shift(); ls.shift();
-        pid = /\(\s*([0-9]*)\s*\)/.exec(ls.shift())[1];
+        spid = /\(\s*([0-9]*)\s*\)/.exec(ls.shift());
+        if (!spid) return null;
+        pid = spid[1];
         msg = ls.join(":").trim();
 
         return {
@@ -63,7 +65,8 @@ var LogCatLines = Backbone.Collection.extend({
 
         this._rawItems = this._rawItems.concat(newItems);
         fnewItems = this.applyFilter(newItems);
-        this.add(fnewItems)
+        this.add(fnewItems);
+        this.trigger("append");
     },
 
     setFilterItem: function (filterItem, filterItemValue) {
@@ -76,19 +79,19 @@ var LogCatLines = Backbone.Collection.extend({
 
         fitems = this.applyFilter(this._rawItems);
 
-        if (fitems && fitems.length > 0)
+        if (fitems && fitems.length > 0) {
             this.add(fitems);
-        else
-        // Special event to make sure the clients of this model
-        // get informed when the grid is empty.
-            this.trigger("empty");
+            this.trigger("append");
+        }
     },
 
     clearFilterItem: function (filterItem) {
         delete this._filterData[filterItem];
 
         this.reset();
+
         this.add(this.applyFilter(this._rawItems));
+        this.trigger("append");
     },
 
     getFilterItem: function (filterItem) {
@@ -103,6 +106,11 @@ var LogCatLines = Backbone.Collection.extend({
         return this.length;
     },
 
+    clearAll: function () {
+        this._rawItems = [];
+        this.reset();
+    },
+
     constructor: function () {
         var self = this, socket;
 
@@ -113,6 +121,10 @@ var LogCatLines = Backbone.Collection.extend({
         self._rows = [];
         self._filterData = {};
         self._rawItems = [];
+
+        this.on("reset", function () {
+            this.trigger("empty");
+        });
 
         socket.on("logcat", function (lcData) {
             // Split into lines

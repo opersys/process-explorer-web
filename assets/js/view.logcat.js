@@ -112,8 +112,9 @@ var LogCatView = Backbone.View.extend({
             }
         ));
 
-        this._logcat.on("add", function () {
+        this._logcat.on("append", function () {
             self._grid.updateRowCount();
+            self._grid.render();
 
             // Options
             if (self._options.getOptionValue("rowColorMode"))
@@ -122,10 +123,12 @@ var LogCatView = Backbone.View.extend({
 
         this._logcat.on("remove", function () {
             self._grid.updateRowCount();
+            self._grid.render();
         });
 
         this._logcat.on("empty", function () {
             self._grid.updateRowCount();
+            self._grid.render();
         });
 
         // Options
