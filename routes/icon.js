@@ -28,7 +28,6 @@ exports.get = function(req, res) {
     // Check in the disk cache.
     if (!(imgBuf = imgCache.get(req.params.app))) {
         // Stream a request.
-        console.log("Icon for " + req.params.app + " not found in cache.");
 
         http.get("http://localhost:3001/icon/" + req.params.app, function (r) {
             var newImgBuf, sz, idx = 0;
@@ -67,8 +66,6 @@ exports.get = function(req, res) {
             });
     }
     else {
-        console.log("Icon for " + req.params.app + " found in cache.");
-
         res.set("Content-length", imgBuf.length);
         res.write(imgBuf, function () {
             res.end();
