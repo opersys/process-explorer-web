@@ -399,14 +399,14 @@ $(document).ready(function () {
         max: 100,
         min: 0,
         delay: options.getOptionValue("graphDelay"),
-        width: 150,
+        width: 200,
         height: 50
     });
     memChart = new ChartView({
         el: $("#memGraph"),
         min: 0,
         delay: options.getOptionValue("graphDelay"),
-        width: 150,
+        width: 200,
         height:50
     });
     procView = new ProcessView({
