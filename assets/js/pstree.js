@@ -1,3 +1,24 @@
+/*
+ Copyright 2014 Opersys inc.
+
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+*/
+
 var procView, logCatView,
     // Options
     options = new Options(),
@@ -189,11 +210,11 @@ $(document).ready(function () {
         updateTimer.set({ time: v });
 
         // Update the toolbar text.
-        setButton(w2ui["mainLayout"].get("top").toolbar, "mnuDelay", {
-            caption: (v / 1000) + " " + Humanize.pluralize(v / 1000, "second", "seconds")
+        setButton(w2ui["mainLayout"].get("main").toolbar, "mnuDelay", {
+            caption: (v / 1000) + "s"
         });
 
-        w2ui["mainLayout"].get("top").toolbar.refresh();
+        w2ui["mainLayout"].get("main").toolbar.refresh("mnuDelay");
     });
 
     options.getOption("graphDelay").on("change", function () {
@@ -205,11 +226,11 @@ $(document).ready(function () {
         memChart.resetDelay(v);
 
         // Update the toolbar text.
-        setButton(w2ui["mainLayout"].get("top").toolbar, "mnuGraphDelay", {
-            caption: (v / 1000) + " " + Humanize.pluralize(v / 1000, "second", "seconds")
+        setButton(w2ui["mainLayout"].get("main").toolbar, "mnuGraphDelay", {
+            caption: (v / 1000) + "s"
         });
 
-        w2ui["mainLayout"].get("top").toolbar.refresh();
+        w2ui["mainLayout"].get("main").toolbar.refresh("mnuGraphDelay");
     });
 
     options.getOption("minimizeLogcat").on("change", function () {
@@ -247,12 +268,10 @@ $(document).ready(function () {
         padding: 4,
         panels: [
             {
-                type: "top",
-                size: 140,
-                content: "</div><div id='cpuGraph'></div><div id='memGraph'></div>",
+                type: "main",
                 toolbar: {
                     items: [
-                        { type: "check", id: "btnPause", caption: "Pause", icon: "icon-pause",
+                        { type: "check", id: "btnPause", icon: "icon-pause",
                             checked: options.getOptionValue("paused")
                         },
                         { type: "break" },
@@ -274,7 +293,11 @@ $(document).ready(function () {
                         ]},
                         { type: "break" },
                         { type: "html", html: "<span id='txtSortType' style='margin-left: 1em'>No sorting</span>" },
-                        { type: "button", id: "btnCancelSort", caption: "Cancel", disabled: true }
+                        { type: "button", id: "btnCancelSort", caption: "Cancel", disabled: true },
+                        { type: "spacer" },
+                        { type: "html", html: "<div id='cpuGraph'></div>" },
+                        { type: "html", html: "<div id='memGraph'></div>" },
+                        { type: "html", html: "<a href='http://www.opersys.com'><img src='/images/opersys_land_logo.png' /></a>" }
                     ],
                     onClick: function (ev) {
                         if (ev.target == "btnPause")
@@ -283,7 +306,7 @@ $(document).ready(function () {
                         if (ev.target == "btnCancelSort") {
                             procView.treeSort();
                             $("#txtSortType").text("No sorting");
-                            w2ui["mainLayout"].get("top").toolbar.disable("btnCancelSort");
+                            w2ui["mainLayout"].get("main").toolbar.disable("btnCancelSort");
                         }
 
                         if (ev.target == "mnuDelay" && ev.subItem)
@@ -291,12 +314,8 @@ $(document).ready(function () {
 
                         if (ev.target == "mnuGraphDelay" && ev.subItem)
                             options.setOptionValue("graphDelay", ev.subItem.id);
-
                     }
                 }
-            },
-            {
-                type: "main"
             },
             {
                 type: "preview",
@@ -326,7 +345,7 @@ $(document).ready(function () {
                         { type: "check", id: "btnFilterVerbose", caption: "V",
                           checked: options.getOptionValue("filterVerbose") },
                         { type: "break" },
-                        { type: "html",   id: "txtFiltered",html: "<div id='txtFiltered'></div>" },
+                        { type: "html",   id: "txtFiltered", html: "<div id='txtFiltered'></div>" },
                         { type: "spacer" },
                         { type: "button", id: "btnMinimize", icon: "icon-chevron-down" }
                     ],
@@ -380,17 +399,15 @@ $(document).ready(function () {
         max: 100,
         min: 0,
         delay: options.getOptionValue("graphDelay"),
-        width: 300,
-        height: 101,
-        caption: "CPU"
+        width: 150,
+        height: 50
     });
     memChart = new ChartView({
         el: $("#memGraph"),
         min: 0,
         delay: options.getOptionValue("graphDelay"),
-        width: 300,
-        height: 101,
-        caption: "Memory"
+        width: 150,
+        height:50
     });
     procView = new ProcessView({
         el: $(w2ui["mainLayout"].el("main")).addClass("processview"),
@@ -409,7 +426,7 @@ $(document).ready(function () {
 
     procView.on("sort", function (sortField, sortFieldText) {
         $("#txtSortType").text("Sorting by: " + sortFieldText);
-        w2ui["mainLayout"].get("top").toolbar.enable("btnCancelSort");
+        w2ui["mainLayout"].get("main").toolbar.enable("btnCancelSort");
     });
 
     procView.on("onProcessSelected", function (el) {
