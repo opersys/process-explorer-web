@@ -62,6 +62,14 @@ function uncompress(clist) {
     return r;
 }
 
+function showApropos() {
+    w2popup.load({
+        width: "640",
+        height: "480",
+        url: "/apropos"
+    });
+}
+
 var graphUpdate = function () {
     $.ajax("/cpuinfo").done(function (cpuinfo) {
         cpuInfo.set(cpuinfo.cpus);
@@ -297,7 +305,10 @@ $(document).ready(function () {
                         { type: "spacer" },
                         { type: "html", html: "<div id='cpuGraph'></div>" },
                         { type: "html", html: "<div id='memGraph'></div>" },
-                        { type: "html", html: "<a href='http://www.opersys.com'><img src='/images/opersys_land_logo.png' /></a>" }
+                        { type: "html", html:
+                            "<a href='http://www.opersys.com'><img alt='opersys logo' src='/images/opersys_land_logo.png' /></a>" },
+                        { type: "html", html:
+                            "<a href='javascript:showApropos()'><img alt='copyright icon' src='/images/copyright.png' /></a>" }
                     ],
                     onClick: function (ev) {
                         if (ev.target == "btnPause")
