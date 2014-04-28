@@ -49,6 +49,7 @@ if ("development" == app.get("env")) {
 }
 
 app.get("/", function (req, res) { res.redirect("/index.html"); });
+app.get("/apropos", function (req, res) { res.redirect("/apropos.html"); });
 app.get("/sysinfo", sysinfo.sysinfo);
 app.get("/meminfo", sysinfo.meminfo);
 app.get("/cpuinfo", sysinfo.cpuinfo);
