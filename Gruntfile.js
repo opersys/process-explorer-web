@@ -162,7 +162,7 @@ module.exports = function (grunt) {
                 cwd: "dist"
             },
             md5sum: {
-                command: "md5sum out/system-explorer.zip | cut -f 1 -d ' ' > out/system-explorer.zip.md5sum"
+                command: "md5sum out/process-explorer.zip | cut -f 1 -d ' ' > out/process-explorer.zip.md5sum"
             }
         },
 
@@ -188,7 +188,7 @@ module.exports = function (grunt) {
         compress: {
             dist: {
                 options: {
-                    archive: "out/system-explorer.zip",
+                    archive: "out/process-explorer.zip",
                     mode: 0
                 },
                 files: [
