@@ -1,7 +1,20 @@
-
    The majority of this software is Copyright (C) 2014, Opersys inc.
    Some parts are imported from 3rd parties. Please consult the specific
    files for specific licenses.
+
+   Terms:
+   We're happy to have you use, modify and distribute Process Explorer per the
+   Apache Software License 2.0 (ASL) under which it's licensed. HOWEVER, you may
+   *NOT* remove the Opersys inc. logo or the underlying hyperlink from Process
+   Explorer's display without prior written permission from Opersys inc. The
+   Opersys logo with a penguin and an Android robot in a box is a trademark of
+   Opersys inc. Display of the logo as part of Process Explorer's display as it
+   is distributed by Opersys inc. is considered acceptable use. Save for the
+   provisions of section 6 of the ASL, nothing herein shall be construed as
+   granting you any rights over any of Opersys inc.'s intellectual property,
+   including its logo.
+
+   ----------------------------------------------------------------------------
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
