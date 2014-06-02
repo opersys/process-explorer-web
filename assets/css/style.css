@@ -16,6 +16,8 @@
 
 body {
     margin: 0;
+    overflow-x: hidden;
+    overflow-y: hidden;
 }
 
 a {
@@ -146,4 +148,14 @@ li {
     height: 6px;
     -moz-border-radius: 3px;
     -webkit-border-radius: 3px;
+}
+
+.tab {
+    display: none;
+    overflow: auto;
+}
+
+#tabsContainer {
+    overflow-x: hidden;
+    overflow-y: hidden;
 }

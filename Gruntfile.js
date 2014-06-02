@@ -37,6 +37,9 @@ module.exports = function (grunt) {
                         "dist/public/js",
                         "dist/routes",
                         "dist/views",
+                        "dist/bin",
+                        "dist/bin/x64",
+                        "dist/bin/arm",
                         "out"
                     ]
                 }
@@ -46,30 +49,17 @@ module.exports = function (grunt) {
         copyto: {
             dist: {
                 files: [
-                    { cwd: "./bin/arm", dest: "dist/", src:
-                        [
-                            "node",
-                            "pswalk.node"
-                        ]
-                    },
-                    { cwd: ".", dest: "dist/", src:
-                        [
-                            "app.js",
-                            "package.json"
-                        ]
-                    },
-                    { cwd: "./", dest: "dist/", src:
-                        [
-                            "public/**/*",
-                            "routes/*.js",
-                            "app.js"
-                        ]
-                    },
-                    { cwd: "./assets/css", dest: "dist/public/css/", src:
-                        [
-                            "font-awesome.min.css"
-                        ]
-                    }
+                    { cwd: "./bin/arm", dest: "dist/", src: ["node"] },
+                    { cwd: "./bin/arm", dest: "dist/bin/arm/", src: ["pswalk.node"]},
+                    { cwd: "./bin/x64", dest: "dist/bin/x64/", src: ["pswalk.node"]},
+                    { cwd: ".", dest: "dist/",
+                        src: [
+                            "app.js", "package.json"
+                        ]},
+                    { cwd: "./", dest: "dist/",
+                        src: ["public/**/*", "routes/*.js", "app.js"] },
+                    { cwd: "./assets/css", dest: "dist/public/css/",
+                        src: ["font-awesome.min.css"] }
                 ]
             }
         },
@@ -119,12 +109,17 @@ module.exports = function (grunt) {
                     "assets/js/model.cpuinfo.js",
                     "assets/js/model.logcat.js",
                     "assets/js/model.meminfo.js",
+                    "assets/js/model.fs.js",
                     "assets/js/model.options.js",
                     "assets/js/model.process.js",
                     "assets/js/view.chart.js",
                     "assets/js/view.logcat.js",
                     "assets/js/view.process.js",
-                    "assets/js/pstree.js"
+                    "assets/js/view.fs.js",
+                    "assets/js/view.tab.fs.js",
+                    "assets/js/view.tab.ps.js",
+                    "assets/js/pstree.js",
+                    "assets/js/app.js"
                 ],
                 dest: "dist/public/js/<%= pkg.name %>_main.js"
             }

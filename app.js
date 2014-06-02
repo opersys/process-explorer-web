@@ -17,12 +17,13 @@
 var express = require("express");
 var http = require("http");
 var path = require("path");
-var socketio = require("socket.io");
 var spawn = require("child_process").spawn;
+var socketio = require("socket.io");
 
 var routes = require("./routes");
 var sysinfo = require("./routes/sysinfo");
 var icon = require("./routes/icon");
+var fs = require("./routes/fs");
 
 var app = express();
 
@@ -49,15 +50,12 @@ app.get("/sysinfo", sysinfo.sysinfo);
 app.get("/meminfo", sysinfo.meminfo);
 app.get("/cpuinfo", sysinfo.cpuinfo);
 app.get("/icon/:app", icon.get);
+app.get("/fs", fs.get);
 
 var server = http.createServer(app);
 var ws = socketio.listen(server);
 
 server.listen(app.get('port'), function() {});
-
-ws.configure("development", function () {
-    ws.set("log level", 1);
-});
 
 ws.of("/logcat").on("connection", function (socket) {
     var logcat;
