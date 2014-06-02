@@ -104,17 +104,19 @@ var LogCatView = Backbone.View.extend({
     },
 
     initialize: function (opts) {
-        this._logcat = opts.logcat;
-        this._options = opts.options;
+        var self = this;
 
-        this._options.getOption("rowColorMode").on("change", function () {
-            if (options.getOptionValue("rowColorMode"))
-                logCatView.applyColors();
+        self._logcat = opts.logcat;
+        self._options = opts.options;
+
+        self._options.getOption("rowColorMode").on("change", function () {
+            if (self._options.getOptionValue("rowColorMode"))
+                self.applyColors();
             else
-                logCatView.clearColors();
+                self.clearColors();
         });
 
-        this.render();
+        self.render();
     },
 
     render: function () {

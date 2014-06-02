@@ -29,7 +29,7 @@ var ProcessView = Backbone.View.extend({
         else
             v = proc.get(columnDef.field);
 
-        if (!ps.treeView)
+        if (!this._ps.treeView)
             return this._grid.getOptions().defaultFormatter(row, cell, v, columnDef, proc);
 
         var spacer = "<span style='display: inline-block; height: 1px; width: "
@@ -189,7 +189,7 @@ var ProcessView = Backbone.View.extend({
 
         // Create and initialize the grid as per:
         // https://github.com/mleibman/SlickGrid/blob/gh-pages/examples/example-explicit-initialization.html
-        this._grid = new Slick.Grid(this.$el, ps, this._gridColumns, this._gridOptions);
+        this._grid = new Slick.Grid(this.$el, this._ps, this._gridColumns, this._gridOptions);
 
         // Initialize the column formatters and call the formatters
         // in the context of the view.

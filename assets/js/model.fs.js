@@ -14,35 +14,19 @@
  * limitations under the License.
  */
 
-var fs = new FileSystem();
+var File = Backbone.Model.extend({
+    idAttribute: "path"
+});
 
-var resizeWindow = function () {
-/*    $("#psLayout")
-        .width($(window).width())
-        .height($(window).height());
-    w2ui["psLayout"].resize();*/
-};
+var FileSystem = Backbone.Collection.extend({
+    model: File,
+    url: "/fs",
 
-function uncompress(clist) {
-    var ctab = clist.ctab;
-    var lstlst = clist.list;
-    var r = [];
+    getItem: function (i) {
+        return this.at(i);
+    },
 
-    _.each(lstlst, function (lst) {
-        var obj = {};
-
-        _.each(ctab, function (k) {
-            obj[k] = lst.shift();
-        });
-        r.push(obj);
-    });
-    return r;
-}
-
-function showApropos() {
-    w2popup.load({
-        width: "640",
-        height: "480",
-        url: "/apropos"
-    });
-}
+    getLength: function () {
+        return this.length;
+    }
+});

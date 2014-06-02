@@ -16,11 +16,12 @@
 
 var _ = require("underscore");
 var sysinfo = null;
+var os = require("os");
 
 try {
     sysinfo = require("../build/Debug/pswalk");
 } catch (e) {
-    sysinfo = require("../pswalk");
+    sysinfo = require("../bin/" + os.arch() + "/pswalk");
 }
 
 var util = require("util");
