@@ -55,10 +55,6 @@ var ws = socketio.listen(server);
 
 server.listen(app.get('port'), function() {});
 
-ws.configure("development", function () {
-    ws.set("log level", 1);
-});
-
 ws.of("/logcat").on("connection", function (socket) {
     var logcat;
 
