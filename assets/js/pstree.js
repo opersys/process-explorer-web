@@ -66,35 +66,49 @@ function showApropos() {
 }
 
 var graphUpdate = function () {
-    $.ajax("/cpuinfo").done(function (cpuinfo) {
-        cpuInfo.set(cpuinfo.cpus);
+    $.ajax("/cpuinfo", {
+        timeout: 1000
+    }).done(function (cpuinfo) {
+            cpuInfo.set(cpuinfo.cpus);
 
-        // Initialize and update the CPU graph
-        cpuInfo.each(function (ci) {
-            if (!cpuChart.hasSerie(ci.get("no")))
-                cpuChart.serie(ci.get("no"), "userPct", ci);
+            // Initialize and update the CPU graph
+            cpuInfo.each(function (ci) {
+                if (!cpuChart.hasSerie(ci.get("no")))
+                    cpuChart.serie(ci.get("no"), "userPct", ci);
 
-            cpuChart.addSerieData(ci.get("no"), ci.get("userPct"));
-        });
-    });
+                cpuChart.addSerieData(ci.get("no"), ci.get("userPct"));
+            });
+        }
+    ).fail(function (jqXHR, txtStatus, err) {
+            console.log("Fetch of cpuinfo failed: " + err);
+        }
+    );
 
-    $.ajax("/meminfo").done(function (meminfo) {
-        memInfo.set(meminfo);
+    $.ajax("/meminfo", {
+        timeout: 1000
+    }).done(function (meminfo) {
+            memInfo.set(meminfo);
 
-        if (!memChart.hasSerie("memUsed"))
-            memChart.serie("memUsed");
+            if (!memChart.hasSerie("memUsed"))
+                memChart.serie("memUsed");
 
-        // Update the memory chart range if needed.
-        if (memChart.getRange().max != memInfo.get("memTotal"))
-            memChart.setRange({min: 0, max: memInfo.get("memTotal")});
+            // Update the memory chart range if needed.
+            if (memChart.getRange().max != memInfo.get("memTotal"))
+                memChart.setRange({min: 0, max: memInfo.get("memTotal")});
 
-        // Update the memory graphs.
-        memChart.addSerieData("memUsed", memInfo.get("memUsed"));
-    });
+            // Update the memory graphs.
+            memChart.addSerieData("memUsed", memInfo.get("memUsed"));
+        }
+    ).fail(function (jqXHR, txtStatus, err) {
+            console.log("Fetch of meminfo failed: " + err);
+        }
+    );
 };
 
 var globalProcessUpdate = function () {
-    $.ajax("/sysinfo").done(function (sysinfo) {
+    $.ajax("/sysinfo", {
+        timeout: 1000
+    }).done(function (sysinfo) {
         var totalDeltaTime;
 
         globalCpu.set(sysinfo.cpuinfo.global);
@@ -137,6 +151,8 @@ var globalProcessUpdate = function () {
                 });
             }
         });
+    }).fail(function (jqHXR, txtStatus, err) {
+        console.log("Fetch of sysinfo failed: " + err);
     });
 };
 
