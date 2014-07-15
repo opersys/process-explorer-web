@@ -38,6 +38,7 @@ var resizeWindow = function () {
     $("#mainLayout")
         .width($(window).width())
         .height($(window).height());
+
     w2ui["mainLayout"].resize();
 };
 
@@ -474,5 +475,5 @@ $(document).ready(function () {
     globalProcessUpdate();
 
     // Reformat the window content.
-    resizeWindow();
+    setTimeout(resizeWindow, 1000);
 });
