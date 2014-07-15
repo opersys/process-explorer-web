@@ -122,10 +122,10 @@ var LogCatView = Backbone.View.extend({
 
         this._grid = new Slick.Grid(this.$el, this._logcat, this._gridColumns, this._gridOptions);
 
-        this._logcat.on("add", $.debounce(250,
+        this._logcat.on("add", _.debounce(
             function (m) {
                 self._grid.scrollRowToTop(m.get("no"));
-            }
+            }, 250
         ));
 
         this._logcat.on("append", function () {

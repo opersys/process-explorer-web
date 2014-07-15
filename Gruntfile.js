@@ -92,7 +92,6 @@ module.exports = function (grunt) {
                 src: [
                     "assets/jslib/jquery-2.0.3.min.js",
                     "assets/jslib/jquery.event.drag-2.2.js",
-                    "assets/jslib/jquery.ba-throttle-debounce.min.js",
                     "assets/jslib/jquery.timer.js",
                     "assets/jslib/underscore-min.js",
                     "assets/jslib/backbone.js",

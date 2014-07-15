@@ -467,7 +467,7 @@ $(document).ready(function () {
         }
     });
 
-    $(window).resize($.debounce(100, resizeWindow));
+    $(window).resize(_.debounce(resizeWindow, 100));
 
     options.activate();
 
