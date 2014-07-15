@@ -255,7 +255,7 @@ var ProcessView = Backbone.View.extend({
             self.applyColors();
         });
 
-        this._ps.on("remove", function (rmModel) {
+        this._ps.on("remove", function () {
             this.reindex();
 
             self._grid.invalidate();
