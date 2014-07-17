@@ -79,12 +79,8 @@ var LogCatView = Backbone.View.extend({
     },
 
     filterByPid: function (pid) {
-        if (this._options.getOptionValue("pidFilterMode")) {
+        if (this._options.getOptionValue("pidFilterMode"))
             this._logcat.setFilterItem("pid", pid);
-
-            // FIXME: Cheating on the model.
-            $("#txtFiltered").text("Filtered for PID: " + pid);
-        }
     },
 
     clearPidFilter: function () {
