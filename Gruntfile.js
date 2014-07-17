@@ -33,6 +33,7 @@ module.exports = function (grunt) {
             dist: {
                 options: {
                     create: [
+                        "dist/_bin/",
                         "dist/public/css",
                         "dist/public/js",
                         "dist/routes",
@@ -44,14 +45,14 @@ module.exports = function (grunt) {
         },
 
         copyto: {
+            bins: {
+                files: [
+                    {  cwd: "bin", dest: "dist/_bin/", src: [ "**" ] }
+                ]
+            },
+
             dist: {
                 files: [
-                    { cwd: "./bin/arm", dest: "dist/", src:
-                        [
-                            "node",
-                            "pswalk.node"
-                        ]
-                    },
                     { cwd: ".", dest: "dist/", src:
                         [
                             "app.js",
@@ -92,7 +93,6 @@ module.exports = function (grunt) {
                 src: [
                     "assets/jslib/jquery-2.0.3.min.js",
                     "assets/jslib/jquery.event.drag-2.2.js",
-                    "assets/jslib/jquery.ba-throttle-debounce.min.js",
                     "assets/jslib/jquery.timer.js",
                     "assets/jslib/underscore-min.js",
                     "assets/jslib/backbone.js",

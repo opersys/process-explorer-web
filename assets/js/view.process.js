@@ -158,6 +158,7 @@ var ProcessView = Backbone.View.extend({
         var colText, colIdx;
 
         this._ps.sortPs(args.sortCol.field, args.sortAsc);
+
         this._grid.invalidate();
         this._grid.render();
 
@@ -168,6 +169,7 @@ var ProcessView = Backbone.View.extend({
 
     treeSort: function () {
         this._ps.sortPs("ui-row");
+
         this._grid.invalidate();
         this._grid.render();
     },
@@ -250,25 +252,29 @@ var ProcessView = Backbone.View.extend({
 
             self._grid.invalidate();
             self._grid.updateRowCount();
-
             self._grid.render();
+
             self.applyColors();
+
+            setTimeout(function () {
+                self.autoResize();
+            }, 500);
         });
 
-        this._ps.on("remove", function (rmModel) {
+        this._ps.on("remove", function () {
             this.reindex();
 
             self._grid.invalidate();
             self._grid.updateRowCount();
-
             self._grid.render();
+
             self.applyColors();
         });
 
         this._ps.on("change", function (m) {
             self._grid.invalidateRow(m.get("ui-row"));
-
             self._grid.render();
+
             self.applyColors();
         });
 

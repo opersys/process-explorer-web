@@ -79,12 +79,8 @@ var LogCatView = Backbone.View.extend({
     },
 
     filterByPid: function (pid) {
-        if (this._options.getOptionValue("pidFilterMode")) {
+        if (this._options.getOptionValue("pidFilterMode"))
             this._logcat.setFilterItem("pid", pid);
-
-            // FIXME: Cheating on the model.
-            $("#txtFiltered").text("Filtered for PID: " + pid);
-        }
     },
 
     clearPidFilter: function () {
@@ -122,10 +118,10 @@ var LogCatView = Backbone.View.extend({
 
         this._grid = new Slick.Grid(this.$el, this._logcat, this._gridColumns, this._gridOptions);
 
-        this._logcat.on("add", $.debounce(250,
+        this._logcat.on("add", _.debounce(
             function (m) {
                 self._grid.scrollRowToTop(m.get("no"));
-            }
+            }, 250
         ));
 
         this._logcat.on("append", function () {

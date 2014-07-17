@@ -38,8 +38,17 @@ var resizeWindow = function () {
     $("#mainLayout")
         .width($(window).width())
         .height($(window).height());
+
     w2ui["mainLayout"].resize();
 };
+
+function leftfill(n, str) {
+    var a = n - str.toString().length, r = str.toString();
+    if (a > 0)
+        for (var i = 0; i < a; i++)
+            r = "\240" + r
+    return r;
+}
 
 function uncompress(clist) {
     var ctab = clist.ctab;
@@ -350,6 +359,9 @@ $(document).ready(function () {
                         { type: "check",  id: "btnFilterByProcess", caption: "Filter", icon: "icon-long-arrow-down",
                           checked: options.getOptionValue("pidFilterMode")
                         },
+                        { type: "break" },
+                        { type: "html",   id: "txtFiltered", html: "<div id='txtFiltered'></div>" },
+                        { type: "break" },
                         { type: "button", id: "btnClear", caption: "Clear",  icon: "icon-remove" },
                         { type: "check",  id: "btnColors", caption: "Color",  icon: "icon-tint",
                           checked: options.getOptionValue("rowColorMode")
@@ -366,8 +378,6 @@ $(document).ready(function () {
                           checked: options.getOptionValue("filterDebug") },
                         { type: "check", id: "btnFilterVerbose", caption: "V",
                           checked: options.getOptionValue("filterVerbose") },
-                        { type: "break" },
-                        { type: "html",   id: "txtFiltered", html: "<div id='txtFiltered'></div>" },
                         { type: "spacer" },
                         { type: "button", id: "btnMinimize", icon: "icon-chevron-down" }
                     ],
@@ -452,21 +462,32 @@ $(document).ready(function () {
     });
 
     procView.on("onProcessSelected", function (el) {
-        if (options.getOptionValue("pidFilterMode"))
+        if (options.getOptionValue("pidFilterMode")) {
             logCatView.filterByPid(el.get("pid"));
+            var selPid = leftfill(5, el.get("pid"));
+            w2ui["mainLayout"].get("preview").toolbar.items[2].html = "Filtered for PID: " + selPid;
+            w2ui["mainLayout"].get("preview").toolbar.refresh();
+        }
     });
 
     // Add the options handlers.
     options.getOption("pidFilterMode").on("change", function () {
+        var selPid = "&nbsp;None";
+
         if (!options.getOptionValue("pidFilterMode"))
             logCatView.clearPidFilter();
         else {
-            if (procView.getSelectedProcess())
+            if (procView.getSelectedProcess()) {
                 logCatView.filterByPid(procView.getSelectedProcess().get("pid"));
+                selPid = leftfill(5, procView.getSelectedProcess().get("pid"));
+            }
         }
+
+        w2ui["mainLayout"].get("preview").toolbar.items[2].html = "Filtered for PID: " + selPid;
+        w2ui["mainLayout"].get("preview").toolbar.refresh();
     });
 
-    $(window).resize($.debounce(100, resizeWindow));
+    $(window).resize(_.debounce(resizeWindow, 100));
 
     options.activate();
 
@@ -474,5 +495,5 @@ $(document).ready(function () {
     globalProcessUpdate();
 
     // Reformat the window content.
-    resizeWindow();
+    setTimeout(resizeWindow, 1000);
 });
