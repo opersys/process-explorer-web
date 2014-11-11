@@ -153,7 +153,7 @@ module.exports = function (grunt) {
 
         exec: {
             npm_install: {
-                command: "npm --production install",
+                command: "npm --python=/usr/bin/python2 --production install",
                 stdout: false,
                 stderr: false,
                 cwd: "dist"
