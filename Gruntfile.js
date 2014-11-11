@@ -49,17 +49,24 @@ module.exports = function (grunt) {
         copyto: {
             dist: {
                 files: [
-                    { cwd: "./bin/arm", dest: "dist/", src: ["node"] },
-                    { cwd: "./bin/arm", dest: "dist/bin/arm/", src: ["pswalk.node"]},
-                    { cwd: "./bin/x64", dest: "dist/bin/x64/", src: ["pswalk.node"]},
-                    { cwd: ".", dest: "dist/",
-                        src: [
-                            "app.js", "package.json"
-                        ]},
-                    { cwd: "./", dest: "dist/",
-                        src: ["public/**/*", "routes/*.js", "app.js"] },
-                    { cwd: "./assets/css", dest: "dist/public/css/",
-                        src: ["font-awesome.min.css"] }
+                    { expand: true, cwd: "./bin/arm",
+                        src: ["node"],
+                        dest: "dist/"},
+                    { expand: true, cwd: "./bin/arm",
+                        src: ["pswalk.node"],
+                        dest: "dist/bin/arm/"},
+                    { expand: true, cwd: "./bin/x64",
+                        src: ["pswalk.node"],
+                        dest: "dist/bin/x64/"},
+                    { expand: true, cwd: ".",
+                        src: ["app.js", "package.json"],
+                        dest: "dist/"},
+                    { expand: true, cwd: ".",
+                        src: ["public/**/*", "routes/*.js", "app.js"],
+                        dest: "dist/"},
+                    { expand: true, cwd: "./assets/css",
+                        src: ["font-awesome.min.css"],
+                        dest: "dist/public/css/"},
                 ]
             }
         },
