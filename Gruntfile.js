@@ -58,6 +58,9 @@ module.exports = function (grunt) {
                     { expand: true, cwd: "./bin/x64",
                         src: ["pswalk.node"],
                         dest: "dist/bin/x64/"},
+                    { expand: true, cwd: "./bin/ia32",
+                        src: ["pswalk.node"],
+                        dest: "dist/bin/ia32/"},
                     { expand: true, cwd: ".",
                         src: ["app.js", "package.json"],
                         dest: "dist/"},
@@ -153,7 +156,7 @@ module.exports = function (grunt) {
 
         exec: {
             npm_install: {
-                command: "npm --python=/usr/bin/python2 --production install",
+                command: "npm --python=$(which python2) --production install",
                 stdout: false,
                 stderr: false,
                 cwd: "dist"
