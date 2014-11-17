@@ -12,15 +12,14 @@ Installation
 Required node packages
 ----------------------
 
-You'll need grunt:
+You'll need grunt-cli:
 
     npm install --global grunt-cli
 
-Then in order to `grunt pack`, you will need the following packages:
+Then in order to `grunt pack`, you will need to install the dependencies
+locally:
 
-    npm install grunt grunt-chmod grunt-copy-to grunt-css grunt-exec grunt-mkdir
-        grunt-contrib-concat grunt-contrib-uglify grunt-contrib-compress
-        grunt-jade grunt-pack
+    npm install
 
 Binary files
 ------------
@@ -34,11 +33,11 @@ binaries, check the `bin/arm/README.md` for more information.
 
 In the root directory, run the following to install required makefiles:
 
-    npm-gyp --python=$(env python2) configure
+    npm-gyp configure
 
 Then, build the application:
 
-    npm-gyp --python=$(env python2) build
+    npm-gyp build
 
 Resulting binary will be installed in `build/Release/pswalk.node`.
 
