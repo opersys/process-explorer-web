@@ -24,6 +24,7 @@ var routes = require("./routes");
 var sysinfo = require("./routes/sysinfo");
 var icon = require("./routes/icon");
 var fs = require("./routes/fs");
+var libos = require("./routes/os");
 
 var app = express();
 
@@ -51,6 +52,8 @@ app.get("/meminfo", sysinfo.meminfo);
 app.get("/cpuinfo", sysinfo.cpuinfo);
 app.get("/icon/:app", icon.get);
 app.get("/fs", fs.get);
+app.get("/os/kill", libos.kill);
+app.get("/os/renice", libos.renice);
 
 var server = http.createServer(app);
 var ws = socketio.listen(server);
