@@ -82,7 +82,7 @@ module.exports = function (grunt) {
                 src: [
                     "assets/css/slick.grid.css",
                     "assets/css/slick-default-theme.css",
-                    "assets/css/w2ui-1.3.1.min.css",
+                    "assets/css/w2ui-1.4.2.min.css",
                     "assets/css/style.css"
                 ],
                 dest: "dist/public/css/<%= pkg.name %>_styles.css"
@@ -100,7 +100,7 @@ module.exports = function (grunt) {
                     "assets/jslib/humanize.min.js",
                     "assets/jslib/moment.min.js",
                     "assets/jslib/smoothie.js",
-                    "assets/jslib/w2ui-1.3.1.min.js",
+                    "assets/jslib/w2ui-1.4.2.min.js",
                     "assets/jslib/slickgrid/slick.core.js",
                     "assets/jslib/slickgrid/slick.grid.js",
                     "assets/jslib/slickgrid/slick.formatters.js",
