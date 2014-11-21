@@ -155,6 +155,65 @@ var ProcessView = Backbone.View.extend({
             this.trigger("onProcessSelected", this._grid.getDataItem(sel.row));
     },
 
+    _onGridContextMenu: function (e, args) {
+        var ev = args[0];
+
+        // Prevent the default context menu...
+        ev.preventDefault();
+
+        // ... and display our own context menu
+        $(ev.target).w2menu({
+            items: [
+                {
+                    id: 'signal-sigterm', text: 'Terminate process (SIGTERM)',
+                    icon: "icon-remove",
+                    onSelect: function (e) { console.log(e) },
+                },
+                {
+                    id: 'signal-sigkill', text: 'Kill process (SIGKILL)',
+                    icon: "icon-ban-circle",
+                    onSelect: function(e) { console.log(e) },
+                },
+                {
+                    id: 'signall-sighup', text: 'Restart process (SIGHUP)',
+                    icon: "icon-refresh",
+                    onSelect: function(e) { console.log(e) },
+                },
+                { id: 'separator', text: '--'},
+                {
+                    id: 'signal-sigstop', text: 'Pause process (SIGSTOP)',
+                    icon: "icon-pause",
+                    onSelect: function(e) { console.log(e) },
+                },
+                {
+                    id: 'signal-sigcont',
+                    text: 'Continue process (SIGCONT)',
+                    icon: "icon-play",
+                    onSelect: function(e) { console.log(e) },
+                },
+                { id: 'separator', text: '--'},
+                {
+                    id: 'signal-send', text: 'Send signal',
+                    onSelect: function(e) { console.log(e) },
+                },
+                {
+                    id: 'priority-set', text: 'Set priority',
+                    onSelect: function(e) { console.log(e) },
+                },
+                { id: 'separator', text: '--' },
+                {
+                    id: 'details', text: 'Details', icon: "icon-info",
+                    onSelect: function(e) { console.log(e) },
+                },
+            ],
+            onSelect: function (e) {
+                if ('onSelect' in e.item && typeof e.item.onSelect === 'function') {
+                    e.item.onSelect(e)
+                }
+            }
+        });
+    },
+
     getSelectedProcess: function () {
         var sel = this._grid.getActiveCell();
         if (sel)
@@ -239,6 +298,9 @@ var ProcessView = Backbone.View.extend({
         });
         this._grid.onSelectedRowsChanged.subscribe(function (e, args) {
             self._onGridSelectedRowsChange(self, [e, args]);
+        });
+        this._grid.onContextMenu.subscribe(function (e, args) {
+            self._onGridContextMenu(self, [e, args]);
         });
 
         this._ps.on("change:cpuPct", function (m, v, opts) {
