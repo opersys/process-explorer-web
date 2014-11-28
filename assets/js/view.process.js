@@ -156,13 +156,13 @@ var ProcessView = Backbone.View.extend({
     },
 
     _onGridContextMenu: function (e, args) {
-        var ev = args[0];
+        var self = this;
 
         // Prevent the default context menu...
-        ev.preventDefault();
+        e.preventDefault();
 
         // ... and display our own context menu
-        $(ev.target).w2menu({
+        $(e.target).w2menu({
             items: [
                 {
                     id: 'signal-sigterm', text: 'Terminate process (SIGTERM)',
@@ -300,7 +300,7 @@ var ProcessView = Backbone.View.extend({
             self._onGridSelectedRowsChange(self, [e, args]);
         });
         this._grid.onContextMenu.subscribe(function (e, args) {
-            self._onGridContextMenu(self, [e, args]);
+            self._onGridContextMenu.apply(self, [e, args]);
         });
 
         this._ps.on("change:cpuPct", function (m, v, opts) {
