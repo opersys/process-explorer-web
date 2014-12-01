@@ -99,6 +99,7 @@ module.exports = function (grunt) {
                     "assets/jslib/backbone.localStorage-min.js",
                     "assets/jslib/humanize.min.js",
                     "assets/jslib/moment.min.js",
+                    "assets/jslib/notify.min.js",
                     "assets/jslib/smoothie.js",
                     "assets/jslib/w2ui-1.4.2.min.js",
                     "assets/jslib/slickgrid/slick.core.js",
