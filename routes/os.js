@@ -23,16 +23,18 @@ var util = require("util");
  * signal: signal name (as string, e.g. SIGKILL)
  */
 exports.kill = function (req, res) {
-    var pid = req.query.pid;
-    var signal = req.query.signal;
+    var pid = req.body.pid;
+    var signal = req.body.signal;
+
+    console.log("os::kill(" + pid + ", " + signal + ")");
 
     try {
         process.kill(pid, signal);
-        res.json({ pid: pid, signal: signal, status: "success" });
+        res.json({ status: "success", pid: pid, signal: signal });
     }
     catch (e) {
-        console.log("os::kill(" pid + ", " + signal + ") error: " + e);
-        res.json({ pid: pid, signal: signal, status: "error", error: e.code});
+        console.warn("Exception while sending " + signal + " to PID " + pid + ": " + e);
+        res.json({ status: "error", pid: pid, signal: signal, error: e.code});
     }
 };
 
