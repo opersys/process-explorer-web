@@ -169,7 +169,7 @@ var ProcessView = Backbone.View.extend({
         .done(function(data) {
             if (data.status == "success") {
                 // Successfully sent the requested signal to the pid
-                alert("Success sending " + signal + " to " + name + " (" + pid + ")")
+                $.notify("Sent " + signal + " to " + name + " (" + pid + ")", "success");
             }
             else if (data.status == "error") {
                 // An error occured
@@ -186,12 +186,12 @@ var ProcessView = Backbone.View.extend({
                         error_msg += "unknown error"
                 }
 
-                alert(signal + " to " + name + " (" + pid + ") - " + error_msg);
+                $.notify("Error sending " + signal + " to " + name + " (" + pid + "):\n" + error_msg, "error");
             }
         })
         .fail(function(jqXHR, textStatus, errorThrown) {
             // The AJAX query failed somehow
-            alert("server error: " + errorThrown)
+            $.notify("Error sending " + signal + " to " + name + " (" + pid + "):\n" + errorThrown, "error");
         });
 
         return true;
