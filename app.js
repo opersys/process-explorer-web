@@ -53,7 +53,6 @@ app.get("/cpuinfo", sysinfo.cpuinfo);
 app.get("/icon/:app", icon.get);
 app.get("/fs", fs.get);
 app.post("/os/kill", libos.kill);
-app.put("/os/renice", libos.renice);
 
 var server = http.createServer(app);
 var ws = socketio.listen(server);

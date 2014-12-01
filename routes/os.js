@@ -38,10 +38,3 @@ exports.kill = function (req, res) {
     }
 };
 
-/*
- * change priority of a process
- */
-exports.renice = function (req, res) {
-    console.log("os::renice()");
-};
-

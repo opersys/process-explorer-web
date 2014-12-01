@@ -322,10 +322,6 @@ var ProcessView = Backbone.View.extend({
                     id: 'signal-send', text: 'Send signal',
                     onSelect: function(e) { return self._displaySignalForm(proc); },
                 },
-                {
-                    id: 'priority-set', text: 'Set priority',
-                    onSelect: function(e) { console.log(e) },
-                },
                 { id: 'separator', text: '--' },
                 {
                     id: 'details', text: 'Details', icon: "icon-info",
