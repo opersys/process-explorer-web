@@ -155,8 +155,54 @@ var ProcessView = Backbone.View.extend({
             this.trigger("onProcessSelected", this._grid.getDataItem(sel.row));
     },
 
+    _send_signal: function (e, proc, signal) {
+        var name = proc.get("name");
+        var pid = proc.get("pid");
+
+        console.log("send_signal(" + e + "," + pid + "," + signal + ")");
+
+        $.ajax({
+            url: "/os/kill",
+            type: "post",
+            data: {pid: pid, signal: signal},
+        })
+        .done(function(data) {
+            if (data.status == "success") {
+                // Successfully sent the requested signal to the pid
+                alert("Success sending " + signal + " to " + name + " (" + pid + ")")
+            }
+            else if (data.status == "error") {
+                // An error occured
+                error_msg = data.error + " : "
+
+                switch (data.error) {
+                    case "EPERM":
+                        error_msg += "operation not permitted";
+                        break;
+                    case "ESRCH":
+                        error_msg += "no such process"
+                        break;
+                    default:
+                        error_msg += "unknown error"
+                }
+
+                alert(signal + " to " + name + " (" + pid + ") - " + error_msg);
+            }
+        })
+        .fail(function(jqXHR, textStatus, errorThrown) {
+            // The AJAX query failed somehow
+            alert("server error: " + errorThrown)
+        });
+
+        return true;
+    },
+
     _onGridContextMenu: function (e, args) {
         var self = this;
+        // SlickGrid doesn't pass the cell in the 'onContextMenu' event arguments
+        // unlike the onClick event.
+        var cell = this._grid.getCellFromEvent(e);
+        var proc = this._grid.getDataItem(cell.row);
 
         // Prevent the default context menu...
         e.preventDefault();
@@ -167,29 +213,29 @@ var ProcessView = Backbone.View.extend({
                 {
                     id: 'signal-sigterm', text: 'Terminate process (SIGTERM)',
                     icon: "icon-remove",
-                    onSelect: function (e) { console.log(e) },
+                    onSelect: function (e) { return self._send_signal(e, proc, "SIGTERM"); },
                 },
                 {
                     id: 'signal-sigkill', text: 'Kill process (SIGKILL)',
                     icon: "icon-ban-circle",
-                    onSelect: function(e) { console.log(e) },
+                    onSelect: function(e) { return self._send_signal(e, proc, "SIGKILL"); },
                 },
                 {
                     id: 'signall-sighup', text: 'Restart process (SIGHUP)',
                     icon: "icon-refresh",
-                    onSelect: function(e) { console.log(e) },
+                    onSelect: function(e) { return self._send_signal(e, proc, "SIGHUP"); },
                 },
                 { id: 'separator', text: '--'},
                 {
                     id: 'signal-sigstop', text: 'Pause process (SIGSTOP)',
                     icon: "icon-pause",
-                    onSelect: function(e) { console.log(e) },
+                    onSelect: function(e) { return self._send_signal(e, proc, "SIGSTOP"); },
                 },
                 {
                     id: 'signal-sigcont',
                     text: 'Continue process (SIGCONT)',
                     icon: "icon-play",
-                    onSelect: function(e) { console.log(e) },
+                    onSelect: function(e) { return self._send_signal(e, proc, "SIGCONT"); },
                 },
                 { id: 'separator', text: '--'},
                 {
