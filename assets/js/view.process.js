@@ -197,6 +197,86 @@ var ProcessView = Backbone.View.extend({
         return true;
     },
 
+    _displaySignalForm: function(proc) {
+        var self = this;
+
+        var signal_list = [
+            {id: 'SIGHUP', text: 'SIGHUP (1) - Hangup detected on controlling terminal or death of controlling process'},
+            {id: 'SIGINT', text: 'SIGINT (2) - Interrupt from keyboard'},
+            {id: 'SIGQUIT', text: 'SIGQUIT (3) - Quit from keyboard'},
+            {id: 'SIGILL', text: 'SIGILL (4) - Illegal Instruction'},
+            {id: 'SIGABRT', text: 'SIGABRT (6) - Abort signal from abort(3)'},
+            {id: 'SIGFPE', text: 'SIGFPE (8) - Floating point exception'},
+            {id: 'SIGKILL', text: 'SIGKILL (9) - Kill signal'},
+            {id: 'SIGSEGV', text: 'SIGSEGV (11) - Invalid memory reference'},
+            {id: 'SIGPIPE', text: 'SIGPIPE (13) - Broken pipe: write to pipe with no readers'},
+            {id: 'SIGALRM', text: 'SIGALRM (14) - Timer signal from alarm(2)'},
+            {id: 'SIGTERM', text: 'SIGTERM (15) - Termination signal'},
+            {id: 'SIGUSR1', text: 'SIGUSR1 (10) - User-defined signal 1'},
+            {id: 'SIGUSR2', text: 'SIGUSR2 (12) - User-defined signal 2'},
+            {id: 'SIGHLD', text: 'SIGHLD (17) - Child stopped or terminated'},
+            {id: 'SIGCONT', text: 'SIGCONT (18) - Continue if stopped'},
+            {id: 'SIGSTOP', text: 'SIGSTOP (19) - Stop process'},
+            {id: 'SIGSTP', text: 'SIGTSTP (20) - Stop typed at terminal'},
+            {id: 'SIGTTIN', text: 'SIGTTIN (21) - Terminal input for background process'},
+            {id: 'SIGTTOU', text: 'SIGTTOU (22) - Terminal output for background process'}
+        ];
+
+        if (!w2ui.sendSignalForm) {
+            $().w2form({
+                name: 'sendSignalForm',
+                url: '#',
+                fields: [
+                    { field: 'process', type: 'text', required: true, html: { caption: 'Process', attr: 'style="width: 300px" readonly'} },
+                    { field: 'signal',
+                        type: 'list',
+                        options: {match: 'contains', items: signal_list },
+                        required: true,
+                        html: { caption: 'Signal', attr: 'style="width: 300px"' } },
+                ],
+                actions: {
+                    "cancel": function () { w2popup.close(); },
+                    "send": function () {
+                        // validate() returns an array of errors
+                        if (this.validate().length == 0) {
+                            self._sendSignal(proc, this.record.signal.id);
+                            w2popup.close();
+                        }
+                    },
+                }
+            });
+
+        }
+
+        w2ui.sendSignalForm.record = {
+            process    : proc.get("name") + " (" + proc.get("pid") + ")",
+            signal     : '',
+        };
+
+        w2ui.sendSignalForm.refresh();
+
+        $().w2popup('open', {
+            title   : 'Send a signal...',
+            body    : '<div id="form" style="width: 100%; height: 100%;"></div>',
+            style   : 'padding: 15px 0px 0px 0px',
+            width   : 500,
+            height  : 300,
+            showMax : true,
+            onToggle: function (event) {
+                $(w2ui.sendSignalForm.box).hide();
+                event.onComplete = function () {
+                    $(w2ui.sendSignalForm.box).show();
+                    w2ui.sendSignalForm.resize();
+                }
+            },
+            onOpen: function (event) {
+                event.onComplete = function () {
+                    $('#w2ui-popup #form').w2render('sendSignalForm');
+                }
+            }
+        });
+    },
+
     _onGridContextMenu: function (e, args) {
         var self = this;
         // SlickGrid doesn't pass the cell in the 'onContextMenu' event arguments
@@ -240,7 +320,7 @@ var ProcessView = Backbone.View.extend({
                 { id: 'separator', text: '--'},
                 {
                     id: 'signal-send', text: 'Send signal',
-                    onSelect: function(e) { console.log(e) },
+                    onSelect: function(e) { return self._displaySignalForm(proc); },
                 },
                 {
                     id: 'priority-set', text: 'Set priority',
