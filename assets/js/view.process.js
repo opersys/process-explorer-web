@@ -155,11 +155,11 @@ var ProcessView = Backbone.View.extend({
             this.trigger("onProcessSelected", this._grid.getDataItem(sel.row));
     },
 
-    _send_signal: function (e, proc, signal) {
+    _sendSignal: function (proc, signal) {
         var name = proc.get("name");
         var pid = proc.get("pid");
 
-        console.log("send_signal(" + e + "," + pid + "," + signal + ")");
+        console.log("_sendSignal(" + pid + "," + signal + ")");
 
         $.ajax({
             url: "/os/kill",
@@ -213,29 +213,29 @@ var ProcessView = Backbone.View.extend({
                 {
                     id: 'signal-sigterm', text: 'Terminate process (SIGTERM)',
                     icon: "icon-remove",
-                    onSelect: function (e) { return self._send_signal(e, proc, "SIGTERM"); },
+                    onSelect: function (e) { return self._sendSignal(proc, "SIGTERM"); },
                 },
                 {
                     id: 'signal-sigkill', text: 'Kill process (SIGKILL)',
                     icon: "icon-ban-circle",
-                    onSelect: function(e) { return self._send_signal(e, proc, "SIGKILL"); },
+                    onSelect: function(e) { return self._sendSignal(proc, "SIGKILL"); },
                 },
                 {
                     id: 'signall-sighup', text: 'Restart process (SIGHUP)',
                     icon: "icon-refresh",
-                    onSelect: function(e) { return self._send_signal(e, proc, "SIGHUP"); },
+                    onSelect: function(e) { return self._sendSignal(proc, "SIGHUP"); },
                 },
                 { id: 'separator', text: '--'},
                 {
                     id: 'signal-sigstop', text: 'Pause process (SIGSTOP)',
                     icon: "icon-pause",
-                    onSelect: function(e) { return self._send_signal(e, proc, "SIGSTOP"); },
+                    onSelect: function(e) { return self._sendSignal(proc, "SIGSTOP"); },
                 },
                 {
                     id: 'signal-sigcont',
                     text: 'Continue process (SIGCONT)',
                     icon: "icon-play",
-                    onSelect: function(e) { return self._send_signal(e, proc, "SIGCONT"); },
+                    onSelect: function(e) { return self._sendSignal(proc, "SIGCONT"); },
                 },
                 { id: 'separator', text: '--'},
                 {
