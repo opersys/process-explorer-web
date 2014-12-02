@@ -272,15 +272,22 @@ var ProcessTab = Backbone.View.extend({
                                 selfoptions.toggleOption("filterVerbose");
                         }
                     }
+                },
+                {
+                    type: "right",
+                    size: 200,
+                    resizer: 5,
+                    resizable: true,
+                    style: "opacity: 0.5;",
                 }
             ],
             onResize: function (ev) {
-                // Thanks, w2ui. This thing is elegant but rather confusing...
+                var main_panel = $(this.el("main").parentElement);
+
                 ev.onComplete = function () {
-                    if (self.procView)
-                        self.procView.autoResize();
-                    if (self.logCatView)
-                        self.logCatView.autoResize();
+                    // Avoid resizing the main panel so that we can have an
+                    // overlay panel on the right. Keep 20px for the scrollbar.
+                    main_panel.width($(window).width() - 20);
                 };
             }
         });
