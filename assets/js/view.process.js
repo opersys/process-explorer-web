@@ -155,6 +155,187 @@ var ProcessView = Backbone.View.extend({
             this.trigger("onProcessSelected", this._grid.getDataItem(sel.row));
     },
 
+    _sendSignal: function (proc, signal) {
+        var name = proc.get("name");
+        var pid = proc.get("pid");
+
+        console.log("_sendSignal(" + pid + "," + signal + ")");
+
+        $.ajax({
+            url: "/os/kill",
+            type: "post",
+            data: {pid: pid, signal: signal},
+        })
+        .done(function(data) {
+            if (data.status == "success") {
+                // Successfully sent the requested signal to the pid
+                $.notify("Sent " + signal + " to " + name + " (" + pid + ")", "success");
+            }
+            else if (data.status == "error") {
+                // An error occured
+                error_msg = data.error + " : "
+
+                switch (data.error) {
+                    case "EPERM":
+                        error_msg += "operation not permitted";
+                        break;
+                    case "ESRCH":
+                        error_msg += "no such process"
+                        break;
+                    default:
+                        error_msg += "unknown error"
+                }
+
+                $.notify("Error sending " + signal + " to " + name + " (" + pid + "):\n" + error_msg, "error");
+            }
+        })
+        .fail(function(jqXHR, textStatus, errorThrown) {
+            // The AJAX query failed somehow
+            $.notify("Error sending " + signal + " to " + name + " (" + pid + "):\n" + errorThrown, "error");
+        });
+
+        return true;
+    },
+
+    _displaySignalForm: function(proc) {
+        var self = this;
+
+        var signal_list = [
+            {id: 'SIGHUP', text: 'SIGHUP (1) - Hangup detected on controlling terminal or death of controlling process'},
+            {id: 'SIGINT', text: 'SIGINT (2) - Interrupt from keyboard'},
+            {id: 'SIGQUIT', text: 'SIGQUIT (3) - Quit from keyboard'},
+            {id: 'SIGILL', text: 'SIGILL (4) - Illegal Instruction'},
+            {id: 'SIGABRT', text: 'SIGABRT (6) - Abort signal from abort(3)'},
+            {id: 'SIGFPE', text: 'SIGFPE (8) - Floating point exception'},
+            {id: 'SIGKILL', text: 'SIGKILL (9) - Kill signal'},
+            {id: 'SIGSEGV', text: 'SIGSEGV (11) - Invalid memory reference'},
+            {id: 'SIGPIPE', text: 'SIGPIPE (13) - Broken pipe: write to pipe with no readers'},
+            {id: 'SIGALRM', text: 'SIGALRM (14) - Timer signal from alarm(2)'},
+            {id: 'SIGTERM', text: 'SIGTERM (15) - Termination signal'},
+            {id: 'SIGUSR1', text: 'SIGUSR1 (10) - User-defined signal 1'},
+            {id: 'SIGUSR2', text: 'SIGUSR2 (12) - User-defined signal 2'},
+            {id: 'SIGHLD', text: 'SIGHLD (17) - Child stopped or terminated'},
+            {id: 'SIGCONT', text: 'SIGCONT (18) - Continue if stopped'},
+            {id: 'SIGSTOP', text: 'SIGSTOP (19) - Stop process'},
+            {id: 'SIGSTP', text: 'SIGTSTP (20) - Stop typed at terminal'},
+            {id: 'SIGTTIN', text: 'SIGTTIN (21) - Terminal input for background process'},
+            {id: 'SIGTTOU', text: 'SIGTTOU (22) - Terminal output for background process'}
+        ];
+
+        if (!w2ui.sendSignalForm) {
+            $().w2form({
+                name: 'sendSignalForm',
+                url: '#',
+                fields: [
+                    { field: 'process', type: 'text', required: true, html: { caption: 'Process', attr: 'style="width: 300px" readonly'} },
+                    { field: 'signal',
+                        type: 'list',
+                        options: {match: 'contains', items: signal_list },
+                        required: true,
+                        html: { caption: 'Signal', attr: 'style="width: 300px"' } },
+                ],
+                actions: {
+                    "cancel": function () { w2popup.close(); },
+                    "send": function () {
+                        // validate() returns an array of errors
+                        if (this.validate().length == 0) {
+                            self._sendSignal(proc, this.record.signal.id);
+                            w2popup.close();
+                        }
+                    },
+                }
+            });
+
+        }
+
+        w2ui.sendSignalForm.record = {
+            process    : proc.get("name") + " (" + proc.get("pid") + ")",
+            signal     : '',
+        };
+
+        w2ui.sendSignalForm.refresh();
+
+        $().w2popup('open', {
+            title   : 'Send a signal...',
+            body    : '<div id="form" style="width: 100%; height: 100%;"></div>',
+            style   : 'padding: 15px 0px 0px 0px',
+            width   : 500,
+            height  : 300,
+            showMax : true,
+            onToggle: function (event) {
+                $(w2ui.sendSignalForm.box).hide();
+                event.onComplete = function () {
+                    $(w2ui.sendSignalForm.box).show();
+                    w2ui.sendSignalForm.resize();
+                }
+            },
+            onOpen: function (event) {
+                event.onComplete = function () {
+                    $('#w2ui-popup #form').w2render('sendSignalForm');
+                }
+            }
+        });
+    },
+
+    _onGridContextMenu: function (e, args) {
+        var self = this;
+        // SlickGrid doesn't pass the cell in the 'onContextMenu' event arguments
+        // unlike the onClick event.
+        var cell = this._grid.getCellFromEvent(e);
+        var proc = this._grid.getDataItem(cell.row);
+
+        // Prevent the default context menu...
+        e.preventDefault();
+
+        // ... and display our own context menu
+        $(e.target).w2menu({
+            items: [
+                {
+                    id: 'signal-sigterm', text: 'Terminate process (SIGTERM)',
+                    icon: "icon-remove",
+                    onSelect: function (e) { return self._sendSignal(proc, "SIGTERM"); },
+                },
+                {
+                    id: 'signal-sigkill', text: 'Kill process (SIGKILL)',
+                    icon: "icon-ban-circle",
+                    onSelect: function(e) { return self._sendSignal(proc, "SIGKILL"); },
+                },
+                {
+                    id: 'signall-sighup', text: 'Restart process (SIGHUP)',
+                    icon: "icon-refresh",
+                    onSelect: function(e) { return self._sendSignal(proc, "SIGHUP"); },
+                },
+                { id: 'separator', text: '--'},
+                {
+                    id: 'signal-sigstop', text: 'Pause process (SIGSTOP)',
+                    icon: "icon-pause",
+                    onSelect: function(e) { return self._sendSignal(proc, "SIGSTOP"); },
+                },
+                {
+                    id: 'signal-sigcont',
+                    text: 'Continue process (SIGCONT)',
+                    icon: "icon-play",
+                    onSelect: function(e) { return self._sendSignal(proc, "SIGCONT"); },
+                },
+                { id: 'separator', text: '--'},
+                {
+                    id: 'signal-send', text: 'Send signal',
+                    onSelect: function(e) { return self._displaySignalForm(proc); },
+                },
+                { id: 'separator', text: '--' },
+                {
+                    id: 'details', text: 'Details', icon: "icon-info",
+                    onSelect: function(e) { console.log(e) },
+                },
+            ],
+            onSelect: function (e) {
+                if ('onSelect' in e.item && typeof e.item.onSelect === 'function') {
+                    e.item.onSelect(e)
+                }
+            }
+        });
+    },
+
     getSelectedProcess: function () {
         var sel = this._grid.getActiveCell();
         if (sel)
@@ -239,6 +420,9 @@ var ProcessView = Backbone.View.extend({
         });
         this._grid.onSelectedRowsChanged.subscribe(function (e, args) {
             self._onGridSelectedRowsChange(self, [e, args]);
+        });
+        this._grid.onContextMenu.subscribe(function (e, args) {
+            self._onGridContextMenu.apply(self, [e, args]);
         });
 
         this._ps.on("change:cpuPct", function (m, v, opts) {
