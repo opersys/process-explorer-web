@@ -325,7 +325,9 @@ var ProcessView = Backbone.View.extend({
                 { id: 'separator', text: '--' },
                 {
                     id: 'details', text: 'Details', icon: "icon-info",
-                    onSelect: function(e) { console.log(e) },
+                    onSelect: function(e) {
+                        w2ui['ps_layout'].sizeTo('right', 250);
+                    },
                 },
             ],
             onSelect: function (e) {
