@@ -275,10 +275,10 @@ var ProcessTab = Backbone.View.extend({
                 },
                 {
                     type: "right",
-                    size: 200,
+                    size: 40,
                     resizer: 5,
                     resizable: true,
-                    style: "opacity: 0.5;",
+                    style: "opacity: 0.92;",
                 }
             ],
             onResize: function (ev) {
@@ -287,7 +287,7 @@ var ProcessTab = Backbone.View.extend({
                 ev.onComplete = function () {
                     // Avoid resizing the main panel so that we can have an
                     // overlay panel on the right. Keep 20px for the scrollbar.
-                    main_panel.width($(window).width() - 20);
+                    main_panel.width($(window).width() - 50);
                 };
             }
         });
@@ -326,6 +326,12 @@ var ProcessTab = Backbone.View.extend({
         self.procView.on("onProcessSelected", function (el) {
             if (self.options.getOptionValue("pidFilterMode"))
                 self.logCatView.filterByPid(el.get("pid"));
+        });
+
+        self.procDetailsView = new ProcessDetailsView({
+            el: $(w2ui["ps_layout"].el("right")),
+            proc: null,
+            options: self.options,
         });
 
         // Initialize the timer.
