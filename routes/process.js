@@ -88,3 +88,48 @@ exports.maps = function (req, res) {
         res.json({ status: "error", pid: pid, error: e.code});
     }
 };
+
+exports.files = function (req, res) {
+    var pid = req.query.pid;
+
+    console.log("process::files(" + pid + ")");
+
+    var path = "/proc/" + pid + "/fd/"
+
+    try {
+        var result = [ ];
+
+        files = fs.readdirSync(path);
+
+        files.forEach(function(file) {
+            var object = {
+                fd: file,
+                path: "",
+            };
+
+            switch (file) {
+                case "0":
+                    object.path = "stdin";
+                    break;
+                case "1":
+                    object.path = "stdout";
+                    break;
+                case "2":
+                    object.path = "stderr";
+                    break;
+                default:
+                    object.path = fs.readlinkSync(path + file);
+                    break;
+            }
+
+            result.push(object);
+        });
+
+        res.json({ status: "success", pid: pid, files: result});
+    }
+    catch (e) {
+        console.warn("Exception while reading " + path + " from PID " + pid + ": " + e);
+        res.json({ status: "error", pid: pid, error: e.code});
+    }
+
+};
