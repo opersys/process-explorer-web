@@ -53,6 +53,47 @@ var ProcessDetailsView = Backbone.View.extend({
         return table;
     },
 
+    getMemoryMaps: function(data) {
+        var table = document.createElement('table');
+        var table_header =document.createElement('thead');
+        var table_body = document.createElement('tbody');
+
+        // Table header
+        var header = document.createElement('tr');
+        var header_address = document.createElement('th');
+        var header_permissions = document.createElement('th');
+        var header_path = document.createElement('th');
+        header_address.appendChild(document.createTextNode('Address'));
+        header_permissions.appendChild(document.createTextNode('Permissions'));
+        header_path.appendChild(document.createTextNode('Path'));
+        header.appendChild(header_address);
+        header.appendChild(header_permissions);
+        header.appendChild(header_path);
+        table_header.appendChild(header);
+
+        data.maps.forEach(function(map){
+            var row = document.createElement('tr');
+            var cell_address = document.createElement('td');
+            var cell_permissions = document.createElement('td');
+            var cell_path = document.createElement('td');
+            cell_address.appendChild(document.createTextNode(map.address));
+            row.appendChild(cell_address);
+
+            cell_permissions.appendChild(document.createTextNode(map.permissions));
+            row.appendChild(cell_permissions);
+
+            cell_path.appendChild(document.createTextNode(map.pathname));
+            row.appendChild(cell_path);
+
+            table_body.appendChild(row);
+        });
+
+        table.appendChild(table_header);
+        table.appendChild(table_body);
+
+        return table;
+    },
+
     initialize: function (opts) {
         var self = this;
 
@@ -82,6 +123,13 @@ var ProcessDetailsView = Backbone.View.extend({
                                     url: "/process/environ?pid=" + self._process.get("pid"),
                                 }).done(function(data) {
                                     $('#processdetails_content').html(self.getEnvironment(data));
+                                });
+                            }
+                            else if (event.target == "memory") {
+                                $.ajax({
+                                    url: "/process/maps?pid=" + self._process.get("pid"),
+                                }).done(function(data) {
+                                    $('#processdetails_content').html(self.getMemoryMaps(data));
                                 });
                             }
                             else {
