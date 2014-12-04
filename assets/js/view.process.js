@@ -326,7 +326,7 @@ var ProcessView = Backbone.View.extend({
                 {
                     id: 'details', text: 'Details', icon: "icon-info",
                     onSelect: function(e) {
-                        w2ui['ps_layout'].sizeTo('right', 250);
+                        self.trigger("onContextMenuDetailsClick");
                     },
                 },
             ],
@@ -372,6 +372,7 @@ var ProcessView = Backbone.View.extend({
     initialize: function (opts) {
         this._ps = opts.ps;
         this._options = opts.options;
+        this._toggleProcessDetails = opts.toggleProcessDetails;
 
         this.render();
     },

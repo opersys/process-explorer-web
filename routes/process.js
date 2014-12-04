@@ -19,9 +19,8 @@ var fs = require("fs");
 var util = require("util");
 
 /*
- * send signal to a process
+ * get the environment variables for the specified process
  * pid: process id (as int, e.g. 1)
- * signal: signal name (as string, e.g. SIGKILL)
  */
 exports.environ = function (req, res) {
     var pid = req.query.pid;
