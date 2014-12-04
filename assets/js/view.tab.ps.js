@@ -286,7 +286,7 @@ var ProcessTab = Backbone.View.extend({
 
                 ev.onComplete = function () {
                     // Avoid resizing the main panel so that we can have an
-                    // overlay panel on the right. Keep 20px for the scrollbar.
+                    // overlay panel on the right. Keep 50px for the scrollbar.
                     main_panel.width($(window).width() - 50);
                 };
             }
@@ -307,6 +307,10 @@ var ProcessTab = Backbone.View.extend({
             width: 200,
             height:50
         });
+        // Process details view
+        self.procDetailsView = new ProcessDetailsView({
+            el: $(w2ui["ps_layout"].el("right")),
+        });
         self.procView = new ProcessView({
             el: $(w2ui["ps_layout"].el("main")).addClass("processview"),
             ps: self.ps,
@@ -326,12 +330,8 @@ var ProcessTab = Backbone.View.extend({
         self.procView.on("onProcessSelected", function (el) {
             if (self.options.getOptionValue("pidFilterMode"))
                 self.logCatView.filterByPid(el.get("pid"));
-        });
 
-        self.procDetailsView = new ProcessDetailsView({
-            el: $(w2ui["ps_layout"].el("right")),
-            proc: null,
-            options: self.options,
+            self.procDetailsView.setProcess(el);
         });
 
         // Initialize the timer.
