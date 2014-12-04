@@ -334,6 +334,10 @@ var ProcessTab = Backbone.View.extend({
             self.procDetailsView.setProcess(el);
         });
 
+        self.procView.on("onContextMenuDetailsClick", function () {
+            self.procDetailsView.toggle();
+        });
+
         // Initialize the timer.
         self.updateTimer = $.timer(
             function () {
