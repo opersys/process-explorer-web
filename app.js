@@ -55,6 +55,7 @@ app.get("/icon/:app", icon.get);
 app.get("/fs", fs.get);
 app.post("/os/kill", libos.kill);
 app.get("/process/environ", proc.environ);
+app.get("/process/maps", proc.maps);
 
 var server = http.createServer(app);
 var ws = socketio.listen(server);

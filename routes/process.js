@@ -48,3 +48,43 @@ exports.environ = function (req, res) {
     }
 };
 
+/*
+ * get the memory maps for the specified process
+ * pid: process id (as int, e.g. 1)
+ */
+exports.maps = function (req, res) {
+    var pid = req.query.pid;
+
+    var path = "/proc/" + pid + "/maps"
+
+    console.log("process::maps(" + pid + ")");
+
+    try {
+        var result = [ ];
+
+        memory_maps = fs.readFileSync(path, { encoding: "utf8" } );
+        maps = memory_maps.split("\n");
+
+        maps.forEach(function(map) {
+            m = map.match(/\S+/g);
+            if (m != null) {
+                var object = {
+                    address: m[0],
+                    permissions: m[1],
+                    offset: m[2],
+                    device: m[3],
+                    inode: m[4],
+                    pathname: m[5],
+                };
+
+                result.push(object);
+            }
+        });
+
+        res.json({ status: "success", pid: pid, maps: result});
+    }
+    catch (e) {
+        console.warn("Exception while reading " + path + " from PID " + pid + ": " + e);
+        res.json({ status: "error", pid: pid, error: e.code});
+    }
+};
