@@ -332,6 +332,7 @@ var ProcessTab = Backbone.View.extend({
                 self.logCatView.filterByPid(el.get("pid"));
 
             self.procDetailsView.setProcess(el);
+            self.procDetailsView.refresh();
         });
 
         self.procView.on("onContextMenuDetailsClick", function () {
