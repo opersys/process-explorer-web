@@ -208,6 +208,9 @@ var ProcessDetailsView = Backbone.View.extend({
                     self.toggle.apply(self);
                 },
             });
+
+        // The panel is initially toggled
+        $(self.$el).addClass("collapsed");
     },
 
     toggle: function() {
