@@ -94,6 +94,40 @@ var ProcessDetailsView = Backbone.View.extend({
         return table;
     },
 
+    getFiles: function(data) {
+        var table = document.createElement('table');
+        var table_header =document.createElement('thead');
+        var table_body = document.createElement('tbody');
+
+        // Table header
+        var header = document.createElement('tr');
+        var header_fd = document.createElement('th');
+        var header_path = document.createElement('th');
+        header_fd.appendChild(document.createTextNode('File descriptor'));
+        header_path.appendChild(document.createTextNode('Path'));
+        header.appendChild(header_fd);
+        header.appendChild(header_path);
+        table_header.appendChild(header);
+
+        data.files.forEach(function(file){
+            var row = document.createElement('tr');
+            var cell_fd = document.createElement('td');
+            var cell_path = document.createElement('td');
+            cell_fd.appendChild(document.createTextNode(file.fd));
+            row.appendChild(cell_fd);
+
+            cell_path.appendChild(document.createTextNode(file.path));
+            row.appendChild(cell_path);
+
+            table_body.appendChild(row);
+        });
+
+        table.appendChild(table_header);
+        table.appendChild(table_body);
+
+        return table;
+    },
+
     initialize: function (opts) {
         var self = this;
 
@@ -130,6 +164,13 @@ var ProcessDetailsView = Backbone.View.extend({
                                     url: "/process/maps?pid=" + self._process.get("pid"),
                                 }).done(function(data) {
                                     $('#processdetails_content').html(self.getMemoryMaps(data));
+                                });
+                            }
+                            else if (event.target == "files") {
+                                $.ajax({
+                                    url: "/process/files?pid=" + self._process.get("pid"),
+                                }).done(function(data) {
+                                    $('#processdetails_content').html(self.getFiles(data));
                                 });
                             }
                             else {
