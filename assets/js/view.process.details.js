@@ -128,6 +128,34 @@ var ProcessDetailsView = Backbone.View.extend({
         return table;
     },
 
+    fetchProcessDetails: function(url, parser) {
+        self = this;
+
+        $.ajax({
+            url: url,
+        }).done(function(data) {
+            if (data.status == "success") {
+                $('#processdetails_content').html(parser(data));
+            }
+            else {
+                error_msg = "Unable to load process details for " + self._process.get("name") + " (" + self._process.get("pid") + ")\n";
+
+                switch (data.error) {
+                    case "EACCES":
+                        error_msg += "You don't have the permission. (permission denied)";
+                        break;
+                    case "ENOENT":
+                        error_msg += "The process doesn't seem to exist anymore. (no such file or directory)";
+                        break;
+                    default:
+                        error_msg += ":( (unknown error)";
+                }
+
+                $.notify(error_msg, "error");
+            }
+        });
+    },
+
     initialize: function (opts) {
         var self = this;
 
@@ -153,25 +181,13 @@ var ProcessDetailsView = Backbone.View.extend({
                         ],
                         onClick: function (event) {
                             if (event.target == "environment") {
-                                $.ajax({
-                                    url: "/process/environ?pid=" + self._process.get("pid"),
-                                }).done(function(data) {
-                                    $('#processdetails_content').html(self.getEnvironment(data));
-                                });
+                                self.fetchProcessDetails.apply(self, ["/process/environ?pid=" + self._process.get("pid"), self.getEnvironment]);
                             }
                             else if (event.target == "memory") {
-                                $.ajax({
-                                    url: "/process/maps?pid=" + self._process.get("pid"),
-                                }).done(function(data) {
-                                    $('#processdetails_content').html(self.getMemoryMaps(data));
-                                });
+                                self.fetchProcessDetails.apply(self, ["/process/maps?pid=" + self._process.get("pid"), self.getMemoryMaps]);
                             }
                             else if (event.target == "files") {
-                                $.ajax({
-                                    url: "/process/files?pid=" + self._process.get("pid"),
-                                }).done(function(data) {
-                                    $('#processdetails_content').html(self.getFiles(data));
-                                });
+                                self.fetchProcessDetails.apply(self, ["/process/files?pid=" + self._process.get("pid"), self.getFiles]);
                             }
                             else {
                                 $('#processdetails_content').html('Tab: ' + event.target);
