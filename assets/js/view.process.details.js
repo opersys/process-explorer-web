@@ -212,6 +212,10 @@ var ProcessDetailsView = Backbone.View.extend({
         return;
     },
 
+    refresh: function() {
+        w2ui['processdetails_layout_main_tabs'].click(w2ui['processdetails_layout_main_tabs'].active);
+    },
+
     setProcess: function(process) {
         this._process = process;
     },
