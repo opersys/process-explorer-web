@@ -16,6 +16,8 @@
 
 var ProcessDetailsView = Backbone.View.extend({
 
+    _expand_width: $(window).width() * 0.35,
+
     getEnvironment: function(data) {
         var table = document.createElement('table');
         var table_header =document.createElement('thead');
@@ -218,10 +220,11 @@ var ProcessDetailsView = Backbone.View.extend({
 
         if ($(self.$el).hasClass("collapsed")) {
             w2ui["processdetails_collapse"].get("collapse").icon = "icon-chevron-right";
-            w2ui["ps_layout"].sizeTo("right", $(window).width() * 0.35);
+            w2ui["ps_layout"].sizeTo("right", self._expand_width);
         }
         else {
             w2ui["processdetails_collapse"].get("collapse").icon = "icon-chevron-left";
+            self._expand_width = w2ui["ps_layout"].get("right").width;
             w2ui["ps_layout"].sizeTo("right", 40);
         }
 
