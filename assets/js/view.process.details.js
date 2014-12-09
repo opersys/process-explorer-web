@@ -235,6 +235,7 @@ var ProcessDetailsView = Backbone.View.extend({
     },
 
     refresh: function() {
+        $('#processdetails_content').html("");
         w2ui['processdetails_layout_main_tabs'].click(w2ui['processdetails_layout_main_tabs'].active);
     },
 
