@@ -126,6 +126,7 @@ module.exports = function (grunt) {
                     "assets/js/view.chart.js",
                     "assets/js/view.logcat.js",
                     "assets/js/view.process.js",
+                    "assets/js/view.process.details.js",
                     "assets/js/view.fs.js",
                     "assets/js/view.tab.fs.js",
                     "assets/js/view.tab.ps.js",
