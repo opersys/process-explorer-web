@@ -159,3 +159,8 @@ li {
     overflow-x: hidden;
     overflow-y: hidden;
 }
+
+#processdetails_content {
+    height: 100%;
+    border-left: 1px solid silver;
+}

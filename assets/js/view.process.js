@@ -325,7 +325,9 @@ var ProcessView = Backbone.View.extend({
                 { id: 'separator', text: '--' },
                 {
                     id: 'details', text: 'Details', icon: "icon-info",
-                    onSelect: function(e) { console.log(e) },
+                    onSelect: function(e) {
+                        self.trigger("onContextMenuDetailsClick");
+                    },
                 },
             ],
             onSelect: function (e) {
@@ -370,6 +372,7 @@ var ProcessView = Backbone.View.extend({
     initialize: function (opts) {
         this._ps = opts.ps;
         this._options = opts.options;
+        this._toggleProcessDetails = opts.toggleProcessDetails;
 
         this.render();
     },
