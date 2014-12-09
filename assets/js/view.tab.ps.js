@@ -272,15 +272,22 @@ var ProcessTab = Backbone.View.extend({
                                 selfoptions.toggleOption("filterVerbose");
                         }
                     }
+                },
+                {
+                    type: "right",
+                    size: 40,
+                    resizer: 5,
+                    resizable: true,
+                    style: "opacity: 0.92;",
                 }
             ],
             onResize: function (ev) {
-                // Thanks, w2ui. This thing is elegant but rather confusing...
+                var main_panel = $(this.el("main").parentElement);
+
                 ev.onComplete = function () {
-                    if (self.procView)
-                        self.procView.autoResize();
-                    if (self.logCatView)
-                        self.logCatView.autoResize();
+                    // Avoid resizing the main panel so that we can have an
+                    // overlay panel on the right. Keep 50px for the scrollbar.
+                    main_panel.width($(window).width() - 50);
                 };
             }
         });
@@ -299,6 +306,10 @@ var ProcessTab = Backbone.View.extend({
             delay: self.options.getOptionValue("graphDelay"),
             width: 200,
             height:50
+        });
+        // Process details view
+        self.procDetailsView = new ProcessDetailsView({
+            el: $(w2ui["ps_layout"].el("right")),
         });
         self.procView = new ProcessView({
             el: $(w2ui["ps_layout"].el("main")).addClass("processview"),
@@ -319,6 +330,13 @@ var ProcessTab = Backbone.View.extend({
         self.procView.on("onProcessSelected", function (el) {
             if (self.options.getOptionValue("pidFilterMode"))
                 self.logCatView.filterByPid(el.get("pid"));
+
+            self.procDetailsView.setProcess(el);
+            self.procDetailsView.refresh();
+        });
+
+        self.procView.on("onContextMenuDetailsClick", function () {
+            self.procDetailsView.toggle();
         });
 
         // Initialize the timer.

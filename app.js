@@ -25,6 +25,7 @@ var sysinfo = require("./routes/sysinfo");
 var icon = require("./routes/icon");
 var fs = require("./routes/fs");
 var libos = require("./routes/os");
+var proc = require("./routes/process");
 
 var app = express();
 
@@ -53,6 +54,9 @@ app.get("/cpuinfo", sysinfo.cpuinfo);
 app.get("/icon/:app", icon.get);
 app.get("/fs", fs.get);
 app.post("/os/kill", libos.kill);
+app.get("/process/environ", proc.environ);
+app.get("/process/maps", proc.maps);
+app.get("/process/files", proc.files);
 
 var server = http.createServer(app);
 var ws = socketio.listen(server);
