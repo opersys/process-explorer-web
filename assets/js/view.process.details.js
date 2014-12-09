@@ -179,7 +179,6 @@ var ProcessDetailsView = Backbone.View.extend({
                             { id: 'files', caption: 'Files', closable: false },
                             { id: 'memory', caption: 'Memory', closable: false },
                             { id: 'environment', caption: 'Environment', closable: false },
-                            { id: 'network', caption: 'Network', closable: false },
                         ],
                         onClick: function (event) {
                             if (event.target == "environment") {
