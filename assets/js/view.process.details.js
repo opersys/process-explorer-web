@@ -18,106 +18,80 @@ var ProcessDetailsView = Backbone.View.extend({
 
     _expand_width: $(window).width() * 0.35,
 
-    getEnvironment: function(data) {
-        var table = document.createElement('table');
-        var table_header =document.createElement('thead');
-        var table_body = document.createElement('tbody');
+    handleEnvironment: function(element, data) {
+        var self = this;
 
-        // Table header
-        var header = document.createElement('tr');
-        var header_name = document.createElement('th');
-        var header_value = document.createElement('th');
-        header_name.appendChild(document.createTextNode('Name'));
-        header_value.appendChild(document.createTextNode('Value'));
-        header.appendChild(header_name);
-        header.appendChild(header_value);
-        table_header.appendChild(header);
+        // HTML layout
+        var environment_content = document.createElement('div');
+        var table_element = document.createElement('div');
 
-        // Table body
+        environment_content.appendChild(table_element)
+
+        element.html(environment_content);
+
+        // HTML content
+        var data_table = new google.visualization.DataTable();
+        var data_array = [];
+
         for (var name in data.variables) {
             if (data.variables.hasOwnProperty(name)) {
-                var row = document.createElement('tr');
-                var cell_name = document.createElement('td');
-                var cell_value = document.createElement('td');
-                cell_name.appendChild(document.createTextNode(name));
-                row.appendChild(cell_name);
-
-                cell_value.appendChild(document.createTextNode(data.variables[name]));
-                row.appendChild(cell_value);
-
-                table_body.appendChild(row);
+                data_array.push([name, data.variables[name]]);
             }
         }
 
-        table.appendChild(table_header);
-        table.appendChild(table_body);
+        data_table.addColumn("string", "Name");
+        data_table.addColumn("string", "Value");
+        data_table.addRows(data_array);
 
-        return table;
+        var table_chart = new google.visualization.Table(table_element);
+        table_chart.draw(data_table);
     },
 
-    getMemoryMaps: function(data) {
-        var table = document.createElement('table');
-        var table_header =document.createElement('thead');
-        var table_body = document.createElement('tbody');
-
-        // Table header
-        var header = document.createElement('tr');
-        var header_address = document.createElement('th');
-        var header_permissions = document.createElement('th');
-        var header_path = document.createElement('th');
-        header_address.appendChild(document.createTextNode('Address'));
-        header_permissions.appendChild(document.createTextNode('Permissions'));
-        header_path.appendChild(document.createTextNode('Path'));
-        header.appendChild(header_address);
-        header.appendChild(header_permissions);
-        header.appendChild(header_path);
-        table_header.appendChild(header);
-
-        data.maps.forEach(function(map){
-            var row = document.createElement('tr');
-            var cell_address = document.createElement('td');
-            var cell_permissions = document.createElement('td');
-            var cell_path = document.createElement('td');
-            cell_address.appendChild(document.createTextNode(map.address));
-            row.appendChild(cell_address);
-
-            cell_permissions.appendChild(document.createTextNode(map.permissions));
-            row.appendChild(cell_permissions);
-
-            cell_path.appendChild(document.createTextNode(map.pathname));
-            row.appendChild(cell_path);
-
-            table_body.appendChild(row);
-        });
-
-        table.appendChild(table_header);
-        table.appendChild(table_body);
-
-        return table;
-    },
-
-    getMemoryUsage: function(data) {
+    handleMemoryMaps: function(element, data) {
         var self = this;
 
-        var memory_usage_content = document.createElement('div');
+        // HTML layout
+        var memorymaps_content = document.createElement('div');
+        var table_element = document.createElement('div');
 
+        memorymaps_content.appendChild(table_element);
+
+        element.html(memorymaps_content);
+
+        // HTML content
+        var data_table = new google.visualization.DataTable();
+        var data_array = [];
+
+        data.maps.forEach(function(map) {
+            data_array.push([map.address, map.permissions, map.pathname]);
+        });
+
+        data_table.addColumn("string", "Address");
+        data_table.addColumn("string", "Permissions");
+        data_table.addColumn("string", "Path");
+        data_table.addRows(data_array);
+
+        var table_chart = new google.visualization.Table(table_element);
+        table_chart.draw(data_table);
+    },
+
+    handleMemoryUsage: function(element, data) {
+        var self = this;
+
+        // HTML layout
+        var memory_usage_content = document.createElement('div');
         var chart_element = document.createElement('div');
         var table_element = document.createElement('div');
 
         memory_usage_content.appendChild(chart_element);
         memory_usage_content.appendChild(table_element);
 
-        // FIXME - bv @ 2014-12-19
-        // some issues with Google chart, they will take the parent container
-        // size to get draw, and since the HTML is not yet generated, the chart
-        // will default to 400px by 200px.
-        // By drawing the HTML *before* generating the chart, they will use
-        // 100% of the width / height.
-        $('#processdetails_content').html(memory_usage_content);
+        element.html(memory_usage_content);
 
+        // HTML content
         var data_table = new google.visualization.DataTable();
         var data_array = [];
-        var data_max = 0;
+        var data_max = 0; // max value, to limit the upper bound of the graph
 
         for (var heap_type in data.memusage) {
             if (data.memusage.hasOwnProperty(heap_type)) {
@@ -165,52 +139,43 @@ var ProcessDetailsView = Backbone.View.extend({
 
         var table_chart = new google.visualization.Table(table_element);
         table_chart.draw(data_table);
-
-        return memory_usage_content;
     },
 
-    getFiles: function(data) {
-        var table = document.createElement('table');
-        var table_header =document.createElement('thead');
-        var table_body = document.createElement('tbody');
+    handleFiles: function(element, data) {
+        var self = this;
 
-        // Table header
-        var header = document.createElement('tr');
-        var header_fd = document.createElement('th');
-        var header_path = document.createElement('th');
-        header_fd.appendChild(document.createTextNode('File descriptor'));
-        header_path.appendChild(document.createTextNode('Path'));
-        header.appendChild(header_fd);
-        header.appendChild(header_path);
-        table_header.appendChild(header);
+        // HTML layout
+        var files_content = document.createElement('div');
+        var table_element = document.createElement('div');
+
+        files_content.appendChild(table_element);
+
+        element.html(files_content);
+
+        // HTML content
+        var data_table = new google.visualization.DataTable();
+        var data_array = [];
 
         data.files.forEach(function(file){
-            var row = document.createElement('tr');
-            var cell_fd = document.createElement('td');
-            var cell_path = document.createElement('td');
-            cell_fd.appendChild(document.createTextNode(file.fd));
-            row.appendChild(cell_fd);
-
-            cell_path.appendChild(document.createTextNode(file.path));
-            row.appendChild(cell_path);
-
-            table_body.appendChild(row);
+            data_array.push([parseInt(file.fd), file.path]);
         });
 
-        table.appendChild(table_header);
-        table.appendChild(table_body);
+        data_table.addColumn("number", "File Descriptor");
+        data_table.addColumn("string", "Path");
+        data_table.addRows(data_array);
 
-        return table;
+        var table_chart = new google.visualization.Table(table_element);
+        table_chart.draw(data_table);
     },
 
-    fetchProcessDetails: function(url, parser) {
+    fetchProcessDetails: function(url, handler) {
         self = this;
 
         $.ajax({
             url: url,
         }).done(function(data) {
             if (data.status == "success") {
-                $('#processdetails_content').html(parser.apply(self, [data]));
+                handler.apply(self, [$('#processdetails_content'), data]);
             }
             else {
                 error_msg = "Unable to load process details for " + self._process.get("name") + " (" + self._process.get("pid") + ")\n";
@@ -261,19 +226,20 @@ var ProcessDetailsView = Backbone.View.extend({
                         ],
                         onClick: function (event) {
                             if (event.target == "environment") {
-                                self.fetchProcessDetails.apply(self, ["/process/environ?pid=" + self._process.get("pid"), self.getEnvironment]);
+                                self.fetchProcessDetails.apply(self,
+                                        ["/process/environ?pid=" + self._process.get("pid"), self.handleEnvironment]);
                             }
                             else if (event.target == "memory") {
-                                self.fetchProcessDetails.apply(self, ["/process/maps?pid=" + self._process.get("pid"), self.getMemoryMaps]);
+                                self.fetchProcessDetails.apply(self,
+                                        ["/process/maps?pid=" + self._process.get("pid"), self.handleMemoryMaps]);
                             }
                             else if (event.target == "files") {
-                                self.fetchProcessDetails.apply(self, ["/process/files?pid=" + self._process.get("pid"), self.getFiles]);
+                                self.fetchProcessDetails.apply(self,
+                                        ["/process/files?pid=" + self._process.get("pid"), self.handleFiles]);
                             }
                             else if (event.target == "memory_usage") {
-                                self.fetchProcessDetails.apply(self, ["/process/memusage?pid=" + self._process.get("pid"), self.getMemoryUsage]);
-                            }
-                            else {
-                                $('#processdetails_content').html('Tab: ' + event.target);
+                                self.fetchProcessDetails.apply(self,
+                                        ["/process/memusage?pid=" + self._process.get("pid"), self.handleMemoryUsage]);
                             }
                         }
                     }
