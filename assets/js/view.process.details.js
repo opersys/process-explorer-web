@@ -128,7 +128,7 @@ var ProcessDetailsView = Backbone.View.extend({
 
                 data_array.push([heap_type, priv, shared, pss]);
 
-                data_max = Math.max([data_max, priv, shared, pss]);
+                data_max = Math.max(data_max, priv, shared, pss);
             }
         }
 
