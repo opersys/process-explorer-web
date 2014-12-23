@@ -181,7 +181,7 @@ var ProcessDetailsView = Backbone.View.extend({
             url: url,
         }).done(function(data) {
             if (data.status == "success") {
-                $('#processdetails_content').html(parser(data));
+                $('#processdetails_content').html(parser.apply(self, [data]));
             }
             else {
                 error_msg = "Unable to load process details for " + self._process.get("name") + " (" + self._process.get("pid") + ")\n";
