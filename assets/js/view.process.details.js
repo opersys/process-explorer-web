@@ -96,6 +96,50 @@ var ProcessDetailsView = Backbone.View.extend({
         return table;
     },
 
+    getMemoryUsage: function(data) {
+        var table = document.createElement('table');
+        var table_header =document.createElement('thead');
+        var table_body = document.createElement('tbody');
+
+        // Table header
+        var header = document.createElement('tr');
+        var header_heap = document.createElement('th');
+        var header_pss = document.createElement('th');
+        header_heap.appendChild(document.createTextNode('Heap'));
+        header_pss.appendChild(document.createTextNode('PSS'));
+        header.appendChild(header_heap);
+        header.appendChild(header_pss);
+        table_header.appendChild(header);
+
+        for (var heap_type in data.memusage) {
+            if (data.memusage.hasOwnProperty(heap_type)) {
+                var heap_stats = data.memusage[heap_type];
+
+                var row = document.createElement('tr');
+                var cell_heap_type = document.createElement('td');
+
+                cell_heap_type.appendChild(document.createTextNode(heap_type));
+                row.appendChild(cell_heap_type);
+
+                for (var stats in heap_stats) {
+                    if (heap_stats.hasOwnProperty(stats)) {
+                        if (stats == "pss") {
+                            var cell_pss = document.createElement('td');
+                            cell_pss.appendChild(document.createTextNode(heap_stats[stats] + " kb"));
+                            row.appendChild(cell_pss);
+                        }
+                    }
+                }
+                table_body.appendChild(row);
+            }
+        }
+
+        table.appendChild(table_header);
+        table.appendChild(table_body);
+
+        return table;
+    },
+
     getFiles: function(data) {
         var table = document.createElement('table');
         var table_header =document.createElement('thead');
@@ -179,6 +223,7 @@ var ProcessDetailsView = Backbone.View.extend({
                             { id: 'files', caption: 'Files', closable: false },
                             { id: 'memory', caption: 'Memory', closable: false },
                             { id: 'environment', caption: 'Environment', closable: false },
+                            { id: 'memory_usage', caption: 'Memory usage', closable: false },
                         ],
                         onClick: function (event) {
                             if (event.target == "environment") {
@@ -189,6 +234,9 @@ var ProcessDetailsView = Backbone.View.extend({
                             }
                             else if (event.target == "files") {
                                 self.fetchProcessDetails.apply(self, ["/process/files?pid=" + self._process.get("pid"), self.getFiles]);
+                            }
+                            else if (event.target == "memory_usage") {
+                                self.fetchProcessDetails.apply(self, ["/process/memusage?pid=" + self._process.get("pid"), self.getMemoryUsage]);
                             }
                             else {
                                 $('#processdetails_content').html('Tab: ' + event.target);
