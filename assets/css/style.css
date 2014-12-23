@@ -163,4 +163,5 @@ li {
 #processdetails_content {
     height: 100%;
     border-left: 1px solid silver;
+    padding: 5px;
 }
