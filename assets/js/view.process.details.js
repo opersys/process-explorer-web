@@ -97,47 +97,76 @@ var ProcessDetailsView = Backbone.View.extend({
     },
 
     getMemoryUsage: function(data) {
-        var table = document.createElement('table');
-        var table_header =document.createElement('thead');
-        var table_body = document.createElement('tbody');
+        var self = this;
 
-        // Table header
-        var header = document.createElement('tr');
-        var header_heap = document.createElement('th');
-        var header_pss = document.createElement('th');
-        header_heap.appendChild(document.createTextNode('Heap'));
-        header_pss.appendChild(document.createTextNode('PSS'));
-        header.appendChild(header_heap);
-        header.appendChild(header_pss);
-        table_header.appendChild(header);
+        var memory_usage_content = document.createElement('div');
+
+        var chart_element = document.createElement('div');
+        var table_element = document.createElement('div');
+
+        memory_usage_content.appendChild(chart_element);
+        memory_usage_content.appendChild(table_element);
+
+        // FIXME - bv @ 2014-12-19
+        // some issues with Google chart, they will take the parent container
+        // size to get draw, and since the HTML is not yet generated, the chart
+        // will default to 400px by 200px.
+        // By drawing the HTML *before* generating the chart, they will use
+        // 100% of the width / height.
+        $('#processdetails_content').html(memory_usage_content);
+
+        var data_table = new google.visualization.DataTable();
+        var data_array = [];
+        var data_max = 0;
 
         for (var heap_type in data.memusage) {
             if (data.memusage.hasOwnProperty(heap_type)) {
                 var heap_stats = data.memusage[heap_type];
+                var priv = (heap_stats["private_clean"] + heap_stats["private_dirty"]) * 1024;
+                var shared = (heap_stats["shared_clean"] + heap_stats["shared_dirty"]) * 1024;
+                var pss = heap_stats["pss"] * 1024;
 
-                var row = document.createElement('tr');
-                var cell_heap_type = document.createElement('td');
+                data_array.push([heap_type, priv, shared, pss]);
 
-                cell_heap_type.appendChild(document.createTextNode(heap_type));
-                row.appendChild(cell_heap_type);
-
-                for (var stats in heap_stats) {
-                    if (heap_stats.hasOwnProperty(stats)) {
-                        if (stats == "pss") {
-                            var cell_pss = document.createElement('td');
-                            cell_pss.appendChild(document.createTextNode(heap_stats[stats] + " kb"));
-                            row.appendChild(cell_pss);
-                        }
-                    }
-                }
-                table_body.appendChild(row);
+                data_max = Math.max([data_max, priv, shared, pss]);
             }
         }
 
-        table.appendChild(table_header);
-        table.appendChild(table_body);
+        data_table.addColumn("string", "Heap");
+        data_table.addColumn("number", "Private");
+        data_table.addColumn("number", "Shared");
+        data_table.addColumn("number", "PSS");
+        data_table.addRows(data_array);
 
-        return table;
+        var options = {
+            title: 'Memory usage',
+            isStacked: true,
+            height: 500,
+            vAxis: {
+                title: 'Bytes',
+            },
+            vAxis: {
+                viewWindow: {
+                    max: data_max,
+                }
+            },
+            series: {
+                2: {
+                    targetAxisIndex: 1
+                },
+                3: {
+                    targetAxisIndex: 1
+                },
+            },
+        };
+
+        var chart = new google.charts.Bar(chart_element);
+        chart.draw(data_table, google.charts.Bar.convertOptions(options));
+
+        var table_chart = new google.visualization.Table(table_element);
+        table_chart.draw(data_table);
+
+        return memory_usage_content;
     },
 
     getFiles: function(data) {
@@ -194,7 +223,7 @@ var ProcessDetailsView = Backbone.View.extend({
                         error_msg += "The process doesn't seem to exist anymore. (no such file or directory)";
                         break;
                     default:
-                        error_msg += ":( (unknown error)";
+                        error_msg += ":( (" + data.error + ")";
                 }
 
                 $.notify(error_msg, "error");
@@ -208,6 +237,11 @@ var ProcessDetailsView = Backbone.View.extend({
         this._process = null;
 
         var pstyle = 'background-color: #F5F6F7; border: 1px solid #dfdfdf; padding: 5px;';
+
+        // Google Chart
+        google.load("visualization", "1.1", {packages:["corechart", "bar", "table"], callback: function() {
+            }
+        });
 
         // Create the layout
         self.$el.w2layout({
@@ -245,6 +279,16 @@ var ProcessDetailsView = Backbone.View.extend({
                     }
                 },
             ],
+            onResize: function(ev) {
+                ev.onComplete = function() {
+                    // FIXME - bv @ 2014-12-19
+                    // Fairly inefficient way to refresh the charts so that
+                    // they will use 100% of the new width.
+                    if (w2ui['processdetails_layout_main_tabs'].active == 'memory_usage') {
+                        w2ui['processdetails_layout_main_tabs'].click('memory_usage');
+                    }
+                };
+            },
         });
 
         $("#processdetails_title").w2toolbar({
