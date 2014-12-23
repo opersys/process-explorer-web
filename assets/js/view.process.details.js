@@ -18,7 +18,7 @@ var ProcessDetailsView = Backbone.View.extend({
 
     _expand_width: $(window).width() * 0.35,
 
-    getEnvironment: function(data) {
+    handleEnvironment: function(element, data) {
         var table = document.createElement('table');
         var table_header =document.createElement('thead');
         var table_body = document.createElement('tbody');
@@ -52,10 +52,10 @@ var ProcessDetailsView = Backbone.View.extend({
         table.appendChild(table_header);
         table.appendChild(table_body);
 
-        return table;
+        element.html(table);
     },
 
-    getMemoryMaps: function(data) {
+    handleMemoryMaps: function(element, data) {
         var table = document.createElement('table');
         var table_header =document.createElement('thead');
         var table_body = document.createElement('tbody');
@@ -93,10 +93,10 @@ var ProcessDetailsView = Backbone.View.extend({
         table.appendChild(table_header);
         table.appendChild(table_body);
 
-        return table;
+        element.html(table);
     },
 
-    getMemoryUsage: function(data) {
+    handleMemoryUsage: function(element, data) {
         var self = this;
 
         var memory_usage_content = document.createElement('div');
@@ -166,10 +166,10 @@ var ProcessDetailsView = Backbone.View.extend({
         var table_chart = new google.visualization.Table(table_element);
         table_chart.draw(data_table);
 
-        return memory_usage_content;
+        element.html(memory_usage_content);
     },
 
-    getFiles: function(data) {
+    handleFiles: function(element, data) {
         var table = document.createElement('table');
         var table_header =document.createElement('thead');
         var table_body = document.createElement('tbody');
@@ -200,17 +200,17 @@ var ProcessDetailsView = Backbone.View.extend({
         table.appendChild(table_header);
         table.appendChild(table_body);
 
-        return table;
+        element.html(table);
     },
 
-    fetchProcessDetails: function(url, parser) {
+    fetchProcessDetails: function(url, handler) {
         self = this;
 
         $.ajax({
             url: url,
         }).done(function(data) {
             if (data.status == "success") {
-                $('#processdetails_content').html(parser.apply(self, [data]));
+                handler.apply(self, [$('#processdetails_content'), data]);
             }
             else {
                 error_msg = "Unable to load process details for " + self._process.get("name") + " (" + self._process.get("pid") + ")\n";
@@ -261,19 +261,20 @@ var ProcessDetailsView = Backbone.View.extend({
                         ],
                         onClick: function (event) {
                             if (event.target == "environment") {
-                                self.fetchProcessDetails.apply(self, ["/process/environ?pid=" + self._process.get("pid"), self.getEnvironment]);
+                                self.fetchProcessDetails.apply(self,
+                                        ["/process/environ?pid=" + self._process.get("pid"), self.handleEnvironment]);
                             }
                             else if (event.target == "memory") {
-                                self.fetchProcessDetails.apply(self, ["/process/maps?pid=" + self._process.get("pid"), self.getMemoryMaps]);
+                                self.fetchProcessDetails.apply(self,
+                                        ["/process/maps?pid=" + self._process.get("pid"), self.handleMemoryMaps]);
                             }
                             else if (event.target == "files") {
-                                self.fetchProcessDetails.apply(self, ["/process/files?pid=" + self._process.get("pid"), self.getFiles]);
+                                self.fetchProcessDetails.apply(self,
+                                        ["/process/files?pid=" + self._process.get("pid"), self.handleFiles]);
                             }
                             else if (event.target == "memory_usage") {
-                                self.fetchProcessDetails.apply(self, ["/process/memusage?pid=" + self._process.get("pid"), self.getMemoryUsage]);
-                            }
-                            else {
-                                $('#processdetails_content').html('Tab: ' + event.target);
+                                self.fetchProcessDetails.apply(self,
+                                        ["/process/memusage?pid=" + self._process.get("pid"), self.handleMemoryUsage]);
                             }
                         }
                     }
