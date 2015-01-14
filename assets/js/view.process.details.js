@@ -168,6 +168,60 @@ var ProcessDetailsView = Backbone.View.extend({
         table_chart.draw(data_table);
     },
 
+    handleNetworkConnections: function(element, data) {
+        var self = this;
+
+        // HTML layout
+        var networkconnections_content = document.createElement('div');
+        var ip4_title = document.createElement('h3');
+        ip4_title.textContent = "inet";
+        var ip4_table_element = document.createElement('div');
+        var ip6_title = document.createElement('h3');
+        ip6_title.textContent = "inet6";
+        var ip6_table_element = document.createElement('div');
+
+        networkconnections_content.appendChild(ip4_title);
+        networkconnections_content.appendChild(ip4_table_element);
+        networkconnections_content.appendChild(ip6_title);
+        networkconnections_content.appendChild(ip6_table_element);
+
+        element.html(networkconnections_content);
+
+        // HTML content
+        var ip4_data_table = new google.visualization.DataTable();
+        var ip6_data_table = new google.visualization.DataTable();
+        var ip4_data_array = [];
+        var ip6_data_array = [];
+
+        data.networkconnections.forEach(function(conn){
+            if (conn.type == "tcp6" || conn.type == "udp6" ) {
+                ip6_data_array.push([conn.src_ip + ":" + conn.src_port, conn.dst_ip + ":" + conn.dst_port, conn.type, conn.status]);
+            }
+            else {
+                ip4_data_array.push([conn.src_ip + ":" + conn.src_port, conn.dst_ip + ":" + conn.dst_port, conn.type, conn.status]);
+            }
+        });
+
+        ip4_data_table.addColumn("string", "Source");
+        ip4_data_table.addColumn("string", "Destination");
+        ip4_data_table.addColumn("string", "Protocol");
+        ip4_data_table.addColumn("string", "Status");
+
+        ip6_data_table.addColumn("string", "Source");
+        ip6_data_table.addColumn("string", "Destination");
+        ip6_data_table.addColumn("string", "Protocol");
+        ip6_data_table.addColumn("string", "Status");
+
+        ip4_data_table.addRows(ip4_data_array);
+        ip6_data_table.addRows(ip6_data_array);
+
+        var ip4_table_chart = new google.visualization.Table(ip4_table_element);
+        ip4_table_chart.draw(ip4_data_table);
+
+        var ip6_table_chart = new google.visualization.Table(ip6_table_element);
+        ip6_table_chart.draw(ip6_data_table);
+    },
+
     fetchProcessDetails: function(url, handler) {
         self = this;
 
@@ -223,6 +277,7 @@ var ProcessDetailsView = Backbone.View.extend({
                             { id: 'memory', caption: 'Memory', closable: false },
                             { id: 'environment', caption: 'Environment', closable: false },
                             { id: 'memory_usage', caption: 'Memory usage', closable: false },
+                            { id: 'network_connections', caption: 'Network', closable: false },
                         ],
                         onClick: function (event) {
                             if (event.target == "environment") {
@@ -240,6 +295,10 @@ var ProcessDetailsView = Backbone.View.extend({
                             else if (event.target == "memory_usage") {
                                 self.fetchProcessDetails.apply(self,
                                         ["/process/memusage?pid=" + self._process.get("pid"), self.handleMemoryUsage]);
+                            }
+                            else if (event.target == "network_connections") {
+                                self.fetchProcessDetails.apply(self,
+                                        ["/process/networkconnections?pid=" + self._process.get("pid"), self.handleNetworkConnections]);
                             }
                         }
                     }
