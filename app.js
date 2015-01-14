@@ -58,6 +58,7 @@ app.get("/process/environ", proc.environ);
 app.get("/process/maps", proc.maps);
 app.get("/process/files", proc.files);
 app.get("/process/memusage", proc.memusage);
+app.get("/process/networkconnections", proc.networkconnections);
 
 var server = http.createServer(app);
 var ws = socketio.listen(server);
