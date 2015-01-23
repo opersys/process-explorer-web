@@ -355,3 +355,135 @@ exports.memusage = function (req, res) {
         res.json({ status: "error", pid: pid, error: e.code});
     }
 }
+
+var tcp_states = [
+    "NOT_USED",
+    "TCP_ESTABLISHED",
+    "TCP_SYN_SENT",
+    "TCP_SYN_RECV",
+    "TCP_FIN_WAIT1",
+    "TCP_FIN_WAIT2",
+    "TCP_TIME_WAIT",
+    "TCP_CLOSE",
+    "TCP_CLOSE_WAIT",
+    "TCP_LAST_ACK",
+    "TCP_LISTEN",
+    "TCP_CLOSING",
+];
+
+/*
+ * get the network connection for the specified process
+ * pid: process id (as int, e.g. 1)
+ */
+exports.networkconnections = function (req, res) {
+    var hex_is_ip4 = function _hex_is_ip4(ip) {
+        return (ip.length == 8);
+    };
+
+    var hex_to_ip4 = function _hex_to_ip4(ip){
+        var ip4 = ip.match(/[a-f0-9]{2}/gi).reverse().map(function (x) {
+            return parseInt("0x" + x);
+        }).join(".");
+
+        return ip4;
+    };
+
+    var hex_to_ip6 = function _hex_to_ip6(ip){
+        var ip6 = ip.match(/[a-f0-9]{8}/gi).map(function (x) {
+            return x.match(/[a-f0-9]{4}/gi).reverse().map(function (y){
+               var g = y.match(/[a-f0-9]{2}/gi).reverse().join("");
+                return (g == "0000" ? "" : g);
+            }).join(":");
+        }).join(":");
+
+        // Replace '::: ...' by '::'
+        ip6 = ip6.replace(/:{2,}/, "::");
+
+        return ip6;
+    };
+
+    var hex_to_ip = function _hex_to_ip(ip) {
+        return (hex_is_ip4(ip) ? hex_to_ip4(ip) : hex_to_ip6(ip));
+    };
+
+    var pid = req.query.pid;
+
+    console.log("process::networkconnections(" + pid + ")");
+
+    //
+    // Get all current sockets for the process
+    //
+    var fdPath = "/proc/" + pid + "/fd/";
+    var socketInodes = [ ];
+
+    try {
+        files = fs.readdirSync(fdPath);
+
+        files.forEach(function(file) {
+            var socketInode = fs.readlinkSync(fdPath + file).match(/socket:\[(\d+)\]/);
+            if (socketInode != null) {
+                socketInodes.push(socketInode[1]);
+            }
+        });
+    }
+    catch (e) {
+        console.warn("Exception while reading " + fdPath + " from PID " + pid + ": " + e);
+        res.json({ status: "error", pid: pid, error: e.code});
+    }
+
+    //
+    // Fetch every network connections for this process, based on the socket
+    // inode
+    //
+    try {
+        var result = [ ];
+        var netPath = "/proc/" + pid + "/net/";
+        var files = [
+            "tcp",
+            "udp",
+            "tcp6",
+            "udp6",
+        ];
+
+        files.forEach(function(file) {
+            connections = fs.readFileSync(netPath + file, {encoding: "utf-8"}).split("\n");
+
+            connections.forEach(function(connection) {
+                // 4: 6401A8C0:CF89 ACA67E4B:01BB 01 00000000:00000000 02:00000820 00000000  1000        0 11504825 2 e02b9600 25 3 1 4 -1
+                conn = connection.match(/\s+\d+:\s+([a-f0-9]+):([a-f0-9]+)\s+([a-f0-9]+):([a-f0-9]+)\s+([a-f0-9]+)\s+[a-f0-9]+:[a-f0-9]+\s+[a-f0-9]+:[a-f0-9]+\s+[a-f0-9]+\s+[a-f0-9]+\s+[a-f0-9]+\s+(\d+).*/i);
+                // conn
+                //  0: whole line
+                //  1: ip_src
+                //  2: port_src
+                //  3: ip_dst
+                //  4: port_dst
+                //  5: status
+                //  6: socket inode
+
+                if (conn != null && socketInodes.indexOf(conn[6]) !== -1) {
+                    var object = {
+                        type: file,
+                        src_ip: hex_to_ip(conn[1]),
+                        src_port: parseInt("0x"+conn[2]),
+                        dst_ip: hex_to_ip(conn[3]),
+                        dst_port: parseInt("0x"+conn[4]),
+                        status: "",
+                        inode: conn[6],
+                    };
+
+                    if (file == "tcp" || file == "tcp6") {
+                        object["status"] = tcp_states[parseInt("0x"+conn[5])];
+                    }
+
+                    result.push(object);
+                 }
+            });
+        });
+
+        res.json({ status: "success", pid: pid, networkconnections: result});
+    }
+    catch (e) {
+        console.warn("Exception while reading " + netPath + " from PID " + pid + ": " + e);
+        res.json({ status: "error", pid: pid, error: e.code});
+    }
+};
