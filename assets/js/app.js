@@ -105,18 +105,12 @@ $(document).ready(function () {
         name: "tabs",
         onClick: function (event) {
             activateApp(event.target);
-        }
+        },
+        style: "display: hidden"
     });
 
     createTabApp("Processes", options, function (targetObj, optObj) {
         return new ProcessTab({
-            target: targetObj,
-            options: optObj
-        });
-    });
-
-    createTabApp("Files", options, function (targetObj, optObj) {
-        return new FileSystemTab({
             target: targetObj,
             options: optObj
         });
