@@ -67,9 +67,16 @@ module.exports = function (grunt) {
                     { expand: true, cwd: ".",
                         src: ["public/**/*", "routes/*.js", "app.js"],
                         dest: "dist/"},
-                    { expand: true, cwd: "./assets/css",
-                        src: ["font-awesome.min.css"],
-                        dest: "dist/public/css/"},
+                ]
+            },
+            external: {
+                files: [
+                    // FontAwesome
+                    { src: [ "external/FontAwesome/font-awesome.min.css" ], dest: "dist/public/css/font-awesome.min.css" },
+                    { expand: true,
+                        cwd: "external/FontAwesome",
+                        src: ["*.otf", "*.eot", "*.svg", "*.ttf", "*.woff"],
+                        dest: "dist/public/font" }
                 ]
             }
         },
@@ -80,9 +87,9 @@ module.exports = function (grunt) {
                 // Font Awesome is not included since it seems it has to be
                 // loaded alone for the web font to be properly loaded in Chrome.
                 src: [
-                    "assets/css/slick.grid.css",
-                    "assets/css/slick-default-theme.css",
-                    "assets/css/w2ui-1.4.2.min.css",
+                    "external/slickgrid/slick.grid.css",
+                    "external/slickgrid/slick-default-theme.css",
+                    "external/w2ui/w2ui-1.4.2.min.css",
                     "assets/css/style.css"
                 ],
                 dest: "dist/public/css/<%= pkg.name %>_styles.css"
@@ -90,22 +97,22 @@ module.exports = function (grunt) {
             dist_libs: {
                 // Source files. Order matters.
                 src: [
-                    "assets/jslib/jquery-2.0.3.min.js",
-                    "assets/jslib/jquery.event.drag-2.2.js",
-                    "assets/jslib/jquery.ba-throttle-debounce.min.js",
-                    "assets/jslib/jquery.timer.js",
-                    "assets/jslib/underscore-min.js",
-                    "assets/jslib/backbone.js",
-                    "assets/jslib/backbone.localStorage-min.js",
-                    "assets/jslib/humanize.min.js",
-                    "assets/jslib/moment.min.js",
-                    "assets/jslib/notify.min.js",
-                    "assets/jslib/smoothie.js",
-                    "assets/jslib/w2ui-1.4.2.min.js",
-                    "assets/jslib/slickgrid/slick.core.js",
-                    "assets/jslib/slickgrid/slick.grid.js",
-                    "assets/jslib/slickgrid/slick.formatters.js",
-                    "assets/jslib/slickgrid/plugins/slick.rowselectionmodel.js"
+                    "external/jquery-2.0.3/jquery-2.0.3.min.js",
+                    "external/jquery.event.drag/jquery.event.drag-2.2.js",
+                    "external/jquery.debounce/jquery.ba-throttle-debounce.min.js",
+                    "external/jquery.timer/jquery.timer.js",
+                    "external/underscore/underscore-min.js",
+                    "external/backbone/backbone.js",
+                    "external/backbone.localstorage/backbone.localStorage-min.js",
+                    "external/humanize/humanize.min.js",
+                    "external/moment/moment.min.js",
+                    "external/notifynotify.min.js",
+                    "external/SmoothieCharts/smoothie.js",
+                    "external/w2ui/w2ui-1.4.2.min.js",
+                    "external/slickgrid/slick.core.js",
+                    "external/slickgrid/slick.grid.js",
+                    "external/slickgrid/slick.formatters.js",
+                    "external/slickgrid/plugins/slick.rowselectionmodel.js"
                 ],
                 dest: "dist/public/js/<%= pkg.name %>_libs.js"
             },
