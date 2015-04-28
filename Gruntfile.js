@@ -33,13 +33,11 @@ module.exports = function (grunt) {
             dist: {
                 options: {
                     create: [
+                        "dist/_bin",
                         "dist/public/css",
                         "dist/public/js",
                         "dist/routes",
                         "dist/views",
-                        "dist/bin",
-                        "dist/bin/x64",
-                        "dist/bin/arm",
                         "out"
                     ]
                 }
@@ -47,26 +45,19 @@ module.exports = function (grunt) {
         },
 
         copyto: {
+            bins: {
+                files: [
+                    {  cwd: "./bin/", dest: "dist/_bin/", src: [ "**" ], expand: true }
+                ]
+            },
             dist: {
                 files: [
-                    { expand: true, cwd: "./bin/arm",
-                        src: ["node"],
-                        dest: "dist/"},
-                    { expand: true, cwd: "./bin/arm",
-                        src: ["pswalk.node"],
-                        dest: "dist/bin/arm/"},
-                    { expand: true, cwd: "./bin/x64",
-                        src: ["pswalk.node"],
-                        dest: "dist/bin/x64/"},
-                    { expand: true, cwd: "./bin/ia32",
-                        src: ["pswalk.node"],
-                        dest: "dist/bin/ia32/"},
                     { expand: true, cwd: ".",
                         src: ["app.js", "package.json"],
                         dest: "dist/"},
                     { expand: true, cwd: ".",
                         src: ["public/**/*", "routes/*.js", "app.js"],
-                        dest: "dist/"},
+                        dest: "dist/"}
                 ]
             },
             external: {
