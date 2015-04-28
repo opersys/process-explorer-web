@@ -106,7 +106,7 @@ module.exports = function (grunt) {
                     "external/backbone.localstorage/backbone.localStorage-min.js",
                     "external/humanize/humanize.min.js",
                     "external/moment/moment.min.js",
-                    "external/notifynotify.min.js",
+                    "external/Notify/notify.min.js",
                     "external/SmoothieCharts/smoothie.js",
                     "external/w2ui/w2ui-1.4.2.min.js",
                     "external/slickgrid/slick.core.js",
