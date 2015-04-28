@@ -279,13 +279,17 @@ var ProcessView = Backbone.View.extend({
 
     _onGridContextMenu: function (e, args) {
         var self = this;
+
+        // Prevent the default context menu...
+        e.preventDefault();
+
         // SlickGrid doesn't pass the cell in the 'onContextMenu' event arguments
         // unlike the onClick event.
         var cell = this._grid.getCellFromEvent(e);
         var proc = this._grid.getDataItem(cell.row);
 
-        // Prevent the default context menu...
-        e.preventDefault();
+        // Highlight the newly right clicked row
+        this._grid.setActiveCell(cell.row, cell.cell);
 
         // ... and display our own context menu
         $(e.target).w2menu({
