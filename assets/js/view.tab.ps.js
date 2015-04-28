@@ -156,7 +156,8 @@ var ProcessTab = Backbone.View.extend({
             padding: 4,
             panels: [
                 {
-                    type: "main",
+                    type: "top",
+                    size: 50,
                     toolbar: {
                         items: [
                             { type: "check", id: "btnPause", icon: "icon-pause",
@@ -286,8 +287,8 @@ var ProcessTab = Backbone.View.extend({
 
                 ev.onComplete = function () {
                     // Avoid resizing the main panel so that we can have an
-                    // overlay panel on the right. Keep 50px for the scrollbar.
-                    main_panel.width($(window).width() - 50);
+                    // overlay panel on the right. Keep 40px for the scrollbar.
+                    main_panel.width($(window).width() - 40);
                 };
             }
         });
