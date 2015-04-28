@@ -21,7 +21,11 @@ var os = require("os");
 try {
     sysinfo = require("../build/Debug/pswalk");
 } catch (e) {
-    sysinfo = require("../bin/" + os.arch() + "/pswalk");
+    try {
+        sysinfo = require("../bin/" + os.arch() + "/pswalk");
+    } catch (e) {
+        sysinfo = require("../pswalk");
+    }
 }
 
 var util = require("util");
