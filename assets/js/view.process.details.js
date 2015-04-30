@@ -268,7 +268,7 @@ var ProcessDetailsView = Backbone.View.extend({
             panels: [
                 { type: 'main',
                     title: '<div id="processdetails_title"></div>',
-                    content: '<div id="processdetails_content"></div>',
+                    content: '<div id="processdetails_content"></div><div id="processdetails_label">Process Details</div>',
                     tabs: {
                         name: 'processDetailsTabs',
                         active: 'files',
@@ -329,6 +329,9 @@ var ProcessDetailsView = Backbone.View.extend({
 
         // The panel is initially toggled
         $(self.$el).addClass("collapsed");
+        $("#processdetails_content").css("display", "none");
+        $("#processdetails_label").css("display", "block");
+        w2ui["processdetails_layout"].hideTabs("main");
     },
 
     toggle: function() {
@@ -337,11 +340,21 @@ var ProcessDetailsView = Backbone.View.extend({
         if ($(self.$el).hasClass("collapsed")) {
             w2ui["processdetails_collapse"].get("collapse").icon = "icon-chevron-right";
             w2ui["ps_layout"].sizeTo("right", self._expand_width);
+
+            // Show the body of the layout.
+            $("#processdetails_content").css("display", "block");
+            $("#processdetails_label").css("display", "none");
+            w2ui["processdetails_layout"].showTabs("main");
         }
         else {
             w2ui["processdetails_collapse"].get("collapse").icon = "icon-chevron-left";
             self._expand_width = w2ui["ps_layout"].get("right").width;
             w2ui["ps_layout"].sizeTo("right", 40);
+
+            // Hide the body of the layout.
+            $("#processdetails_content").css("display", "none");
+            $("#processdetails_label").css("display", "block");
+            w2ui["processdetails_layout"].hideTabs("main");
         }
 
         w2ui["processdetails_collapse"].refresh();

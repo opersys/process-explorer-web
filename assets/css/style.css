@@ -165,3 +165,10 @@ li {
     border-left: 1px solid silver;
     padding: 5px;
 }
+
+#processdetails_label {
+    width: 250px;
+    font-size: large;
+     transform: rotate(-90deg) translate(-150px,10px);
+    transform-origin: left top -100px;
+}
