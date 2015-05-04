@@ -16,6 +16,9 @@
 
 var LogCatView = Backbone.View.extend({
 
+    _heuristicTimer: null,
+    _hasReadLogHeuristicDone: false,
+
     _gridColumns: [
         { id: "tag", name: "T", field: "tag", minWidth: 20, maxWidth: 20 },
         { id: "tim", name: "time", field: "tim", midWidth: 60, maxWidth: 90 },
@@ -106,6 +109,7 @@ var LogCatView = Backbone.View.extend({
     initialize: function (opts) {
         var self = this;
 
+        self._ps = opts.ps;
         self._logcat = opts.logcat;
         self._options = opts.options;
 
@@ -117,6 +121,49 @@ var LogCatView = Backbone.View.extend({
         });
 
         self.render();
+    },
+
+    /**
+     * This is meant as a best-effort heuristic to detect if the application was granted the
+     * READ_LOGS permission, which needs to be done manually on Android versions after 4.4.
+     *
+     * @private
+     */
+    _readLogsHeuristicCheck: function () {
+        var self = this;
+        var ss;
+
+        if (self._hasReadLogHeuristicDone) return;
+
+        // Get the PID of the system_server process.
+        ss = self._ps.findWhere({name: "system_server"});
+
+        // Not finding the system_server would be quite an odd situation but it could happen
+        // (I guess). So log it out and presume the user knows what it is doing.
+        if (!ss) {
+            console.log("Could not find system_server PID");
+        } else if (!self._logcat.findWhere({pid: ss.get("pid")})) {
+            // Show a popup explaining how to give the READ_LOGS permission to the app.
+            var tt;
+
+            tt = new Opentip(this.$el, {
+                title: "Not much to see there isn't it?",
+                target: this.$el,
+                style: "warnPopup",
+                targetJoint: "top left",
+                tipJoint: "bottom left",
+                showOn: null
+            });
+            tt.setContent(
+                '<p>On Android versions after 4.4, applications needs to be granted '+
+                'the READ_LOGS permission explicitly in the Android shell. </p>'+
+                '<p>Open an adb shell and type this'+
+                'command to grant Process Explorer this permission</p>'+
+                '<pre>pm grant com.opersys.processexplorer android.permission.READ_LOGS</pre>');
+            tt.show();
+        }
+
+        self._hasReadLogHeuristicDone = true;
     },
 
     render: function () {
@@ -133,6 +180,15 @@ var LogCatView = Backbone.View.extend({
         this._logcat.on("append", function () {
             self._grid.updateRowCount();
             self._grid.render();
+
+            if (!self._heuristicTimer && !self._hasReadLogHeuristicDone) {
+                self._heuristicTimer = $.timer(
+                    function () {
+                        self._readLogsHeuristicCheck();
+                    },
+                    4000);
+                self._heuristicTimer.once();
+            }
 
             // Options
             if (self._options.getOptionValue("rowColorMode"))

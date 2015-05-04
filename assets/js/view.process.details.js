@@ -222,8 +222,26 @@ var ProcessDetailsView = Backbone.View.extend({
         ip6_table_chart.draw(ip6_data_table);
     },
 
+    _hasWarnedAboutRunningAsRoot: false,
+
+    _rootTooltip: null,
+
     fetchProcessDetails: function(url, handler) {
-        self = this;
+        var self = this;
+
+        if (!self._rootTooltip) {
+            self._rootTooltip = new Opentip(self.$el, {
+                title: "Having access error?",
+                target: self.$el,
+                style: "warnPopup",
+                targetJoint: "top left",
+                tipJoint: "top right",
+                showOn: null
+            });
+            self._rootTooltip.setContent(
+                '<p>You won\'t be able to see process informations unless you run Process Explorer' +
+                'as root.</p>');
+        }
 
         $.ajax({
             url: url,
@@ -236,7 +254,15 @@ var ProcessDetailsView = Backbone.View.extend({
 
                 switch (data.error) {
                     case "EACCES":
+                    {
                         error_msg += "You don't have the permission. (permission denied)";
+
+                        if (!self._hasWarnedAboutRunningAsRoot) {
+                            self._rootTooltip.show();
+                            self._hasWarnedAboutRunningAsRoot = true;
+                        }
+                        else self._rootTooltip.hide();
+                    }
                         break;
                     case "ENOENT":
                         error_msg += "The process doesn't seem to exist anymore. (no such file or directory)";

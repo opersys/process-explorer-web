@@ -87,6 +87,15 @@ var activateApp = function (tabId) {
 $(document).ready(function () {
     var options = new Options();
 
+    Opentip.lastZIndex = 1000;
+    Opentip.styles.warnPopup = {
+        // Make it look like the alert style. If you omit this, it will default to "standard"
+        extends: "standard",
+        background: "#FF680D",
+        //shadow: false,
+        hideTriggers: ["closeButton"]
+    };
+
     options.fetch();
     options.initOption("pidFilterMode", false);
     options.initOption("rowColorMode", false);

@@ -320,6 +320,7 @@ var ProcessTab = Backbone.View.extend({
         self.logCatView = new LogCatView({
             el: $(w2ui["ps_layout"].el("preview")).addClass("logcatview"),
             logcat: self.logCatLines,
+            ps: self.ps,
             options: self.options
         });
 

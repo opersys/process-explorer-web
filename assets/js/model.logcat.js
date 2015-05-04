@@ -37,9 +37,14 @@ var LogCat = Backbone.Model.extend({
         tim = sc[1];
         tag = sc[2][0];
         ls.shift(); ls.shift();
-        spid = /\(\s*([0-9]*)\s*\)/.exec(ls.shift());
-        if (!spid) return null;
-        pid = spid[1];
+
+        try {
+            spid = /\(\s*([0-9]*)\s*\)/.exec(ls.shift());
+            if (!spid) return null;
+            pid = parseInt(spid[1]);
+        } catch (e) {
+            return null;
+        }
         msg = ls.join(":").trim();
 
         return {

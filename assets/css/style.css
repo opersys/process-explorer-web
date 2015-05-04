@@ -172,3 +172,36 @@ li {
      transform: rotate(-90deg) translate(-150px,10px);
     transform-origin: left top -100px;
 }
+
+/* Override Opentip default width */
+.opentip-container {
+    max-width: 500px;
+}
+
+.overlayWarning {
+    padding: 10px;
+    background-color: #FF680D;
+}
+
+.overlayWarning .overlayTitle {
+    font-size: large;
+}
+
+.overlayWarning .overlayBody {
+    margin: 1em;
+}
+
+.overlayWarning .overlayCmds {
+    font-size: smaller;
+    text-align: right;
+}
+
+.overlayWarning .overlayBody p {
+    padding-top: 0.5em;
+    padding-bottom: 0.5em;
+}
+
+.overlayWarning .overlayBody pre {
+    font-family: monospace;
+    padding: 1em;
+}
