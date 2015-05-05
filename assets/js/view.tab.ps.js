@@ -316,6 +316,7 @@ var ProcessTab = Backbone.View.extend({
         // Process details view
         self.procDetailsView = new ProcessDetailsView({
             el: $(w2ui["ps_layout"].el("right")),
+            options: self.options
         });
         self.procView = new ProcessView({
             el: $(w2ui["ps_layout"].el("main")).addClass("processview"),

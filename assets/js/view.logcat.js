@@ -133,7 +133,12 @@ var LogCatView = Backbone.View.extend({
         var self = this;
         var ss;
 
-        if (self._hasReadLogHeuristicDone) return;
+        if (self._hasReadLogHeuristicDone)
+            return;
+        if (self._options.getOptionValue("dontShowReadLogsTooltip")) {
+            console.log("Not showing READ_LOGS tooltip because the user doesn't want it.");
+            return;
+        }
 
         // Get the PID of the system_server process.
         ss = self._ps.findWhere({name: "system_server"});
@@ -143,8 +148,7 @@ var LogCatView = Backbone.View.extend({
         if (!ss) {
             console.log("Could not find system_server PID");
         } else if (!self._logcat.findWhere({pid: ss.get("pid")})) {
-            // Show a popup explaining how to give the READ_LOGS permission to the app.
-            var tt;
+            var tt, chkId = _.uniqueId("opentip");
 
             tt = new Opentip(this.$el, {
                 title: "Not much to see there isn't it?",
@@ -155,14 +159,24 @@ var LogCatView = Backbone.View.extend({
                 showOn: null
             });
             tt.setContent(
-                '<p>On Android versions after 4.4, applications needs to be granted '+
-                'the READ_LOGS permission explicitly in the Android shell. </p>'+
-                '<p>Open an adb shell and type this '+
+                '<p>On Android versions after 4.4, applications needs to be granted ' +
+                'the READ_LOGS permission explicitly in the Android shell. </p>' +
+                '<p>Open an adb shell and type this ' +
                 'command to grant Process Explorer this permission and then restart ' +
                 'the application completely</p>'+
-                '<pre>pm grant com.opersys.processexplorer android.permission.READ_LOGS</pre>');
+                '<pre>pm grant com.opersys.processexplorer android.permission.READ_LOGS</pre>' +
+                '<input id="' + chkId + '" type="checkbox" />' +
+                '<label for="' + chkId + '">Don\'t show this message again</label>'
+            );
             tt.show();
+
+            $(document.getElementById(chkId)).on("click", function () {
+                self._options.setOptionValue("dontShowReadLogsTooltip", true);
+                tt.hide();
+            });
         }
+        else
+            console.log("Found a logcat entry for system_server, not showing the READ_LOGS warning.");
 
         self._hasReadLogHeuristicDone = true;
     },

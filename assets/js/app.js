@@ -108,6 +108,8 @@ $(document).ready(function () {
     options.initOption("filterInfo", true);
     options.initOption("filterDebug", true);
     options.initOption("filterVerbose", true);
+    options.initOption("dontShowReadLogsTooltip", false);
+    options.initOption("dontShowRunAsRootTooltip", false);
 
     $("#tabs").w2tabs({
         name: "tabs",

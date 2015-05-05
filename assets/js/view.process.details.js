@@ -227,7 +227,7 @@ var ProcessDetailsView = Backbone.View.extend({
     _rootTooltip: null,
 
     fetchProcessDetails: function(url, handler) {
-        var self = this;
+        var self = this, chkId = _.uniqueId("opentip");
 
         if (!self._rootTooltip) {
             self._rootTooltip = new Opentip(self.$el, {
@@ -240,7 +240,10 @@ var ProcessDetailsView = Backbone.View.extend({
             });
             self._rootTooltip.setContent(
                 '<p>You won\'t be able to see process informations unless you run Process Explorer' +
-                'as root.</p>');
+                'as root.</p>' +
+                '<input id="' + chkId + '" type="checkbox" />' +
+                '<label for="' + chkId + '">Don\'t show this message again</label>'
+            );
         }
 
         $.ajax({
@@ -250,15 +253,24 @@ var ProcessDetailsView = Backbone.View.extend({
                 handler.apply(self, [$('#processdetails_content'), data]);
             }
             else {
-                error_msg = "Unable to load process details for " + self._process.get("name") + " (" + self._process.get("pid") + ")\n";
+                error_msg = "Unable to load process details for " +
+                    self._process.get("name") + " (" + self._process.get("pid") + ")\n";
 
                 switch (data.error) {
                     case "EACCES":
                     {
                         error_msg += "You don't have the permission. (permission denied)";
 
-                        if (!self._hasWarnedAboutRunningAsRoot) {
+                        if (!self._hasWarnedAboutRunningAsRoot &&
+                            self._options.getOptionValue("dontShowRunAsRootTooltip") == false)
+                        {
                             self._rootTooltip.show();
+
+                            $(document.getElementById(chkId)).on("click", function () {
+                                self._options.setOptionValue("dontShowRunAsRootTooltip", true);
+                                self._rootTooltip.hide();
+                            });
+
                             self._hasWarnedAboutRunningAsRoot = true;
                         }
                         else self._rootTooltip.hide();
@@ -280,6 +292,7 @@ var ProcessDetailsView = Backbone.View.extend({
         var self = this;
 
         this._process = null;
+        self._options = opts.options;
 
         var pstyle = 'background-color: #F5F6F7; border: 1px solid #dfdfdf; padding: 5px;';
 
