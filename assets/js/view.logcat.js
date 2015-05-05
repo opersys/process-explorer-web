@@ -159,15 +159,13 @@ var LogCatView = Backbone.View.extend({
                 showOn: null
             });
             tt.setContent(
-                '<p>On Android versions after 4.4, applications needs to be granted ' +
-                'the READ_LOGS permission explicitly in the Android shell. </p>' +
-                '<p>Open an adb shell and type this ' +
-                'command to grant Process Explorer this permission and then restart ' +
-                'the application completely</p>'+
-                '<pre>pm grant com.opersys.processexplorer android.permission.READ_LOGS</pre>' +
+                "<p>Unless Process Explorer has the right to read logs, per-process " +
+                " logs will appear blank.</p>" +
+                "<p>Give Process Explorer the permission to read the logcat by running the following " +
+                "command your computer:</p> " +
+                "<pre>$ adb shell pm grant com.opersys.processexplorer android.permission.READ_LOGS</pre>" +
                 '<input id="' + chkId + '" type="checkbox" />' +
-                '<label for="' + chkId + '">Don\'t show this message again</label>'
-            );
+                '<label for="' + chkId + '">Don\'t show this message again</label>');
             tt.show();
 
             $(document.getElementById(chkId)).on("click", function () {

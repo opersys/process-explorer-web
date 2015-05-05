@@ -239,8 +239,12 @@ var ProcessDetailsView = Backbone.View.extend({
                 showOn: null
             });
             self._rootTooltip.setContent(
-                '<p>You won\'t be able to see process informations unless you run Process Explorer' +
-                'as root.</p>' +
+                "<p>Unless Process Explorer runs as root, you won't be able to view per-process " +
+                "detailed information. If you have one of the 'su' apps installed, enable the " +
+                "'Run as root' option above before starting the service.</p>" +
+                "<p>If you're using the AOSP emulator run the following on your computer and don't " +
+                "make use of the 'Start the service' button.</p>" +
+                "<pre>$ adb shell 'cd /data/user/0/com.opersys.processexplorer/files &amp;&amp; ./node ./app.js</pre>" +
                 '<input id="' + chkId + '" type="checkbox" />' +
                 '<label for="' + chkId + '">Don\'t show this message again</label>'
             );
