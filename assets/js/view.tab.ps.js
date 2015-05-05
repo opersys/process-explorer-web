@@ -289,6 +289,11 @@ var ProcessTab = Backbone.View.extend({
                     // Avoid resizing the main panel so that we can have an
                     // overlay panel on the right. Keep 40px for the scrollbar.
                     main_panel.width($(window).width() - 40);
+
+                    if (self.procView)
+                        self.procView.autoResize();
+                    if (self.logCatView)
+                        self.logCatView.autoResize();
                 };
             }
         });
