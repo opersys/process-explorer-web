@@ -89,10 +89,9 @@ $(document).ready(function () {
 
     Opentip.lastZIndex = 1000;
     Opentip.styles.warnPopup = {
-        // Make it look like the alert style. If you omit this, it will default to "standard"
         extends: "standard",
         background: "#FF680D",
-        //shadow: false,
+        shadow: false,
         hideTriggers: ["closeButton"]
     };
 
@@ -125,8 +124,6 @@ $(document).ready(function () {
         });
     });
 
-    options.activate();
-
     $(window).resize($.debounce(100, resizeWindow));
 
     // Reformat the window content.
@@ -135,4 +132,6 @@ $(document).ready(function () {
     // Activate and resize the first application.
     firstTab = w2ui["tabs"].tabs[0].id;
     activateApp(firstTab);
+
+    options.activate();
 });

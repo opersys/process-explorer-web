@@ -198,13 +198,13 @@ var ProcessTab = Backbone.View.extend({
                             if (ev.target == "btnCancelSort") {
                                 self.procView.treeSort();
                                 $("#txtSortType").text("No sorting");
-                                w2ui["ps_layout"].get("main").toolbar.disable("btnCancelSort");
+                                w2ui["ps_layout"].get("top").toolbar.disable("btnCancelSort");
                             }
 
-                            if (ev.target == "mnuDelay" && ev.subItem)
+                            if (ev.target.match(/mnuDelay*/) && ev.subItem)
                                 self.options.setOptionValue("delay", ev.subItem.id);
 
-                            if (ev.target == "mnuGraphDelay" && ev.subItem)
+                            if (ev.target.match(/mnuGraphDelay*/) && ev.subItem)
                                 self.options.setOptionValue("graphDelay", ev.subItem.id);
                         }
                     }
@@ -331,7 +331,7 @@ var ProcessTab = Backbone.View.extend({
 
         self.procView.on("sort", function (sortField, sortFieldText) {
             $("#txtSortType").text("Sorting by: " + sortFieldText);
-            w2ui["ps_layout"].get("main").toolbar.enable("btnCancelSort");
+            w2ui["ps_layout"].get("top").toolbar.enable("btnCancelSort");
         });
 
         self.procView.on("onProcessSelected", function (el) {
@@ -383,11 +383,11 @@ var ProcessTab = Backbone.View.extend({
             self.updateTimer.set({ time: v });
 
             // Update the toolbar text.
-            self.setButton(w2ui["ps_layout"].get("main").toolbar, "mnuDelay", {
+            self.setButton(w2ui["ps_layout"].get("top").toolbar, "mnuDelay", {
                 caption: (v / 1000) + "s"
             });
 
-            w2ui["ps_layout"].get("main").toolbar.refresh("mnuDelay");
+            w2ui["ps_layout"].get("top").toolbar.refresh("mnuDelay");
         });
 
         self.options.getOption("graphDelay").on("change", function () {
@@ -399,11 +399,11 @@ var ProcessTab = Backbone.View.extend({
             self.memChart.resetDelay(v);
 
             // Update the toolbar text.
-            self.setButton(w2ui["ps_layout"].get("main").toolbar, "mnuGraphDelay", {
+            self.setButton(w2ui["ps_layout"].get("top").toolbar, "mnuGraphDelay", {
                 caption: (v / 1000) + "s"
             });
 
-            w2ui["ps_layout"].get("main").toolbar.refresh("mnuGraphDelay");
+            w2ui["ps_layout"].get("top").toolbar.refresh("mnuGraphDelay");
         });
 
         self.options.getOption("minimizeLogcat").on("change", function () {

@@ -173,14 +173,14 @@ var ProcessView = Backbone.View.extend({
             }
             else if (data.status == "error") {
                 // An error occured
-                error_msg = data.error + " : "
+                error_msg = data.error + " : ";
 
                 switch (data.error) {
                     case "EPERM":
                         error_msg += "operation not permitted";
                         break;
                     case "ESRCH":
-                        error_msg += "no such process"
+                        error_msg += "no such process";
                         break;
                     default:
                         error_msg += "unknown error"
