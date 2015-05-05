@@ -178,30 +178,17 @@ li {
     max-width: 500px;
 }
 
-.overlayWarning {
-    padding: 10px;
-    background-color: #FF680D;
+.opentip .ot-content {
+    color: white;
+    text-shadow: none;
 }
 
-.overlayWarning .overlayTitle {
-    font-size: large;
+.opentip .ot-header {
+    color: white;
+    text-shadow: none;
 }
 
-.overlayWarning .overlayBody {
-    margin: 1em;
-}
-
-.overlayWarning .overlayCmds {
-    font-size: smaller;
-    text-align: right;
-}
-
-.overlayWarning .overlayBody p {
-    padding-top: 0.5em;
-    padding-bottom: 0.5em;
-}
-
-.overlayWarning .overlayBody pre {
+.opentip pre {
     font-family: monospace;
     padding: 1em;
 }
