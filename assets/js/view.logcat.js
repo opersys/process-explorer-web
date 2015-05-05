@@ -187,7 +187,7 @@ var LogCatView = Backbone.View.extend({
                     function () {
                         self._readLogsHeuristicCheck();
                     },
-                    4000);
+                    10000);
                 self._heuristicTimer.once();
             }
 
