@@ -265,17 +265,14 @@ var ProcessDetailsView = Backbone.View.extend({
                     {
                         error_msg += "You don't have the permission. (permission denied)";
 
-                        if (!self._hasWarnedAboutRunningAsRoot &&
-                            self._options.getOptionValue("dontShowRunAsRootTooltip") == false)
+                        if (!self._hasWarnedAboutRunningAsRoot)
                         {
                             self._rootTooltip.show();
 
                             $(document.getElementById(chkId)).on("click", function () {
-                                self._options.setOptionValue("dontShowRunAsRootTooltip", true);
                                 self._rootTooltip.hide();
+                                self._hasWarnedAboutRunningAsRoot = true;
                             });
-
-                            self._hasWarnedAboutRunningAsRoot = true;
                         }
                         else self._rootTooltip.hide();
                     }

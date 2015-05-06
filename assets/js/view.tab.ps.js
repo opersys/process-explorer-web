@@ -339,6 +339,8 @@ var ProcessTab = Backbone.View.extend({
             if (self.options.getOptionValue("pidFilterMode"))
                 self.logCatView.filterByPid(el.get("pid"));
 
+            self.logCatView.readLogsHeuristicCheck();
+
             self.procDetailsView.setProcess(el);
             self.procDetailsView.refresh();
         });

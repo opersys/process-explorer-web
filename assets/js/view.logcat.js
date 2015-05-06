@@ -123,34 +123,20 @@ var LogCatView = Backbone.View.extend({
         self.render();
     },
 
+    _readLogsTooltip: null,
+
     /**
      * This is meant as a best-effort heuristic to detect if the application was granted the
      * READ_LOGS permission, which needs to be done manually on Android versions after 4.4.
-     *
-     * @private
      */
-    _readLogsHeuristicCheck: function () {
+    readLogsHeuristicCheck: function () {
         var self = this;
         var ss;
 
-        if (self._hasReadLogHeuristicDone)
-            return;
-        if (self._options.getOptionValue("dontShowReadLogsTooltip")) {
-            console.log("Not showing READ_LOGS tooltip because the user doesn't want it.");
-            return;
-        }
+        if (!self._readLogsTooltip) {
+            var chkId = _.uniqueId("opentip");
 
-        // Get the PID of the system_server process.
-        ss = self._ps.findWhere({name: "system_server"});
-
-        // Not finding the system_server would be quite an odd situation but it could happen
-        // (I guess). So log it out and presume the user knows what it is doing.
-        if (!ss) {
-            console.log("Could not find system_server PID");
-        } else if (!self._logcat.findWhere({pid: ss.get("pid")})) {
-            var tt, chkId = _.uniqueId("opentip");
-
-            tt = new Opentip(this.$el, {
+            self._readLogsTooltip = new Opentip(this.$el, {
                 title: "Not much to see there isn't it?",
                 target: this.$el,
                 style: "warnPopup",
@@ -158,7 +144,7 @@ var LogCatView = Backbone.View.extend({
                 tipJoint: "bottom left",
                 showOn: null
             });
-            tt.setContent(
+            self._readLogsTooltip.setContent(
                 "<p>Unless Process Explorer has the right to read logs, per-process " +
                 " logs will appear blank.</p>" +
                 "<p>Give Process Explorer the permission to read the logcat by running the following " +
@@ -168,17 +154,26 @@ var LogCatView = Backbone.View.extend({
                 "<pre>$ adb shell pm grant com.opersys.processexplorer android.permission.READ_LOGS</pre>" +
                 '<input id="' + chkId + '" type="checkbox" />' +
                 '<label for="' + chkId + '">Don\'t show this message again</label>');
-            tt.show();
+        }
+
+        if (self._hasReadLogHeuristicDone)
+            return;
+
+        // Get the PID of the system_server process.
+        ss = self._ps.findWhere({name: "system_server"});
+
+        // Not finding the system_server would be quite an odd situation but it could happen
+        // (I guess). So log it out and presume the user knows what it is doing.
+        if (!ss) {
+            console.log("Could not find system_server PID");
+        } else if (!self._logcat.findWhere({pid: ss.get("pid")})) {
+            self._readLogsTooltip.show();
 
             $(document.getElementById(chkId)).on("click", function () {
-                self._options.setOptionValue("dontShowReadLogsTooltip", true);
-                tt.hide();
+                self._hasReadLogHeuristicDone = true;
+                self._readLogsTooltip.hide();
             });
         }
-        else
-            console.log("Found a logcat entry for system_server, not showing the READ_LOGS warning.");
-
-        self._hasReadLogHeuristicDone = true;
     },
 
     render: function () {
@@ -199,7 +194,7 @@ var LogCatView = Backbone.View.extend({
             if (!self._heuristicTimer && !self._hasReadLogHeuristicDone) {
                 self._heuristicTimer = $.timer(
                     function () {
-                        self._readLogsHeuristicCheck();
+                        self.readLogsHeuristicCheck();
                     },
                     10000);
                 self._heuristicTimer.once();
