@@ -244,7 +244,7 @@ var ProcessDetailsView = Backbone.View.extend({
                 "'Run as root' option above before starting the service.</p>" +
                 "<p>If you're using the AOSP emulator run the following on your computer and don't " +
                 "make use of the 'Start the service' button.</p>" +
-                "<pre>$ adb shell 'cd /data/user/0/com.opersys.processexplorer/files &amp;&amp; ./node ./app.js</pre>" +
+                "<pre>$ adb shell 'cd /data/user/0/com.opersys.processexplorer/files &amp;&amp; ./node ./app.js'</pre>" +
                 '<input id="' + chkId + '" type="checkbox" />' +
                 '<label for="' + chkId + '">Don\'t show this message again</label>'
             );

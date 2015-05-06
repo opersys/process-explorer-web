@@ -162,7 +162,9 @@ var LogCatView = Backbone.View.extend({
                 "<p>Unless Process Explorer has the right to read logs, per-process " +
                 " logs will appear blank.</p>" +
                 "<p>Give Process Explorer the permission to read the logcat by running the following " +
-                "command your computer:</p> " +
+                "command your computer. You\'ll then need to click on \"Quit the application\" in the " +
+                "Process Explorer app on the device and restart the app and the service for the change to " +
+                "take effect:</p> " +
                 "<pre>$ adb shell pm grant com.opersys.processexplorer android.permission.READ_LOGS</pre>" +
                 '<input id="' + chkId + '" type="checkbox" />' +
                 '<label for="' + chkId + '">Don\'t show this message again</label>');
