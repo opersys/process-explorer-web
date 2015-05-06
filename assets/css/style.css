@@ -178,16 +178,6 @@ li {
     max-width: 750px;
 }
 
-.opentip .ot-content {
-    color: white;
-    text-shadow: none;
-}
-
-.opentip .ot-header {
-    color: white;
-    text-shadow: none;
-}
-
 .opentip pre {
     font-family: monospace;
     padding: 1em;

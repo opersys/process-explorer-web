@@ -89,9 +89,7 @@ $(document).ready(function () {
 
     Opentip.lastZIndex = 1000;
     Opentip.styles.warnPopup = {
-        extends: "standard",
-        background: "#FF680D",
-        shadow: false,
+        extends: "dark",
         hideTriggers: ["closeButton"]
     };
 
