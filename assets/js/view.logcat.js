@@ -16,9 +16,6 @@
 
 var LogCatView = Backbone.View.extend({
 
-    _heuristicTimer: null,
-    _hasReadLogHeuristicDone: false,
-
     _gridColumns: [
         { id: "tag", name: "T", field: "tag", minWidth: 20, maxWidth: 20 },
         { id: "tim", name: "time", field: "tim", midWidth: 60, maxWidth: 90 },
@@ -124,6 +121,7 @@ var LogCatView = Backbone.View.extend({
     },
 
     _readLogsTooltip: null,
+    _hasReadLogHeuristicDone: false,
 
     /**
      * This is meant as a best-effort heuristic to detect if the application was granted the
@@ -166,9 +164,11 @@ var LogCatView = Backbone.View.extend({
         // (I guess). So log it out and presume the user knows what it is doing.
         if (!ss) {
             console.log("Could not find system_server PID");
-        } else if (!self._logcat.findWhere({pid: ss.get("pid")})) {
+        } else if (!_.find(self._logcat.getRawLines(), function (lc) {
+                return lc.get("pid") == ss.get("pid");
+            }))
+        {
             self._readLogsTooltip.show();
-
             $(document.getElementById(chkId)).on("click", function () {
                 self._hasReadLogHeuristicDone = true;
                 self._readLogsTooltip.hide();
@@ -190,15 +190,6 @@ var LogCatView = Backbone.View.extend({
         this._logcat.on("append", function () {
             self._grid.updateRowCount();
             self._grid.render();
-
-            if (!self._heuristicTimer && !self._hasReadLogHeuristicDone) {
-                self._heuristicTimer = $.timer(
-                    function () {
-                        self.readLogsHeuristicCheck();
-                    },
-                    10000);
-                self._heuristicTimer.once();
-            }
 
             // Options
             if (self._options.getOptionValue("rowColorMode"))

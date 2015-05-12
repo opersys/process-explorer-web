@@ -98,7 +98,7 @@ var LogCatLines = Backbone.Collection.extend({
         if (this.models)
             this.reset();
 
-        fitems = this.applyFilter(this._rawItems);
+        fitems = this.applyFilter(this._k);
 
         if (fitems && fitems.length > 0) {
             this.add(fitems);
@@ -130,6 +130,10 @@ var LogCatLines = Backbone.Collection.extend({
     clearAll: function () {
         this._rawItems = [];
         this.reset();
+    },
+
+    getRawLines: function () {
+        return this._rawItems;
     },
 
     constructor: function () {
